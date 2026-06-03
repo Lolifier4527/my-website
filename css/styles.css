@@ -434,6 +434,17 @@ ul {
 .why__item {
   text-align: center;
   padding: 1.5rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 6px;
+  box-shadow: 0 0 12px var(--glow-purple);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+
+.why__item:hover {
+  transform: translateY(-4px);
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 20px var(--glow-purple), 0 0 40px rgba(168, 85, 247, 0.15);
 }
 
 .why__stat {
