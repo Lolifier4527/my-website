@@ -20,17 +20,34 @@
 
   const form = document.querySelector(".contact__form form");
   if (form) {
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const btn = form.querySelector('button[type="submit"]');
-      const original = btn.textContent;
-      btn.textContent = "Message Sent!";
+      btn.textContent = "Sending…";
       btn.disabled = true;
-      form.reset();
-      setTimeout(() => {
-        btn.textContent = original;
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+          headers: { Accept: "application/json" }
+        });
+
+        if (response.ok) {
+          btn.textContent = "Message Sent!";
+          form.reset();
+          setTimeout(() => {
+            btn.textContent = "Send Message";
+            btn.disabled = false;
+          }, 4000);
+        } else {
+          throw new Error("Server error");
+        }
+      } catch {
+        btn.textContent = "Failed — Try Again";
         btn.disabled = false;
-      }, 3000);
+      }
     });
   }
 })();
