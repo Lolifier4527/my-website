@@ -16,7 +16,10 @@
 <body>
   <header class="navbar">
     <div class="navbar__inner">
-      <a href="#hero" class="navbar__logo">Patch<span>Lab</span></a>
+      <a href="#hero" class="navbar__logo">
+        <img src="assets/logo.png" alt="PatchLab logo" class="navbar__logo-img">
+        Patch<span>Lab</span>
+      </a>
       <button class="navbar__toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
         <span></span>
         <span></span>
@@ -35,8 +38,276 @@
       <div class="hero__scanlines" aria-hidden="true"></div>
       <div class="hero__content">
         <div class="hero__logo-wrap">
-          <img src="assets/logo.png" alt="PatchLab — Patching Problems, Building Solutions" width="640" height="640">
+          <div class="mascot-stage">
+            <div class="mascot-spotlight"></div>
+            <div class="mascot-video-wrap">
+              <video class="mascot-video" autoplay loop muted playsinline>
+                <source src="assets/chinchilla.mp4" type="video/mp4">
+              </video>
+              <div class="mascot-video-overlay"></div>
+            </div>
+            <div class="mascot-ground-glow"></div>
+          </div>
+          <!-- HIDDEN SVG (kept for reference, not displayed) -->
+          <svg style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 320">
+            <defs>
+              <!-- 3D body shading: lit from upper-left -->
+              <radialGradient id="gb" cx="35%" cy="28%" r="65%">
+                <stop offset="0%" stop-color="#d8d8ec"/>
+                <stop offset="45%" stop-color="#9595b2"/>
+                <stop offset="100%" stop-color="#36364e"/>
+              </radialGradient>
+              <!-- Head -->
+              <radialGradient id="gh" cx="38%" cy="30%" r="62%">
+                <stop offset="0%" stop-color="#dcdcf0"/>
+                <stop offset="48%" stop-color="#9a9ab8"/>
+                <stop offset="100%" stop-color="#38384e"/>
+              </radialGradient>
+              <!-- Ear outer -->
+              <radialGradient id="ge" cx="38%" cy="30%" r="60%">
+                <stop offset="0%" stop-color="#c8c8de"/>
+                <stop offset="100%" stop-color="#565672"/>
+              </radialGradient>
+              <!-- Tail -->
+              <radialGradient id="gt" cx="35%" cy="25%" r="65%">
+                <stop offset="0%" stop-color="#d0d0e4"/>
+                <stop offset="100%" stop-color="#505068"/>
+              </radialGradient>
+              <!-- PCB -->
+              <linearGradient id="gpcb" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1a3820"/>
+                <stop offset="100%" stop-color="#0c1c10"/>
+              </linearGradient>
+              <!-- Chip glow -->
+              <radialGradient id="gchip" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#33e8ff"/>
+                <stop offset="55%" stop-color="#0c4850"/>
+                <stop offset="100%" stop-color="#040e12"/>
+              </radialGradient>
+              <!-- PCB ambient under chin -->
+              <radialGradient id="gpcb-glow" cx="50%" cy="0%" r="80%">
+                <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+              </radialGradient>
+              <!-- drop shadow -->
+              <filter id="fsh" x="-15%" y="-15%" width="130%" height="130%">
+                <feDropShadow dx="1" dy="4" stdDeviation="5" flood-color="#000018" flood-opacity="0.55"/>
+              </filter>
+              <!-- glow cyan -->
+              <filter id="fgc" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <!-- glow soft -->
+              <filter id="fgs" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="2.5" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <!-- fur micro-texture -->
+              <filter id="ffur" x="0" y="0" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
+              </filter>
+            </defs>
+
+            <!-- ── PCB WORK SURFACE ── -->
+            <rect x="18" y="248" width="264" height="62" rx="8" fill="url(#gpcb)" stroke="#2a6a30" stroke-width="1.2"/>
+            <rect x="18" y="248" width="264" height="10" rx="8" fill="white" opacity="0.03"/>
+            <!-- PCB ambient glow from chip -->
+            <ellipse cx="150" cy="252" rx="100" ry="30" fill="url(#gpcb-glow)">
+              <animate attributeName="opacity" values="0.8;1;0.7;1;0.8" dur="2s" repeatCount="indefinite"/>
+            </ellipse>
+            <!-- Traces -->
+            <g stroke="#1a8828" stroke-width="1.2" fill="none" opacity="0.75">
+              <path d="M 28 262 L 70 262 L 70 272 L 118 272"/>
+              <path d="M 182 272 L 230 272 L 230 262 L 272 262"/>
+              <path d="M 28 278 L 55 278 L 55 288 L 95 288"/>
+              <path d="M 205 288 L 245 288 L 245 278 L 272 278"/>
+              <path d="M 110 262 L 136 262"/>
+              <path d="M 164 262 L 190 262"/>
+            </g>
+            <!-- Pads -->
+            <g fill="#2aaa35" opacity="0.85">
+              <circle cx="70" cy="262" r="2.5"/><circle cx="70" cy="272" r="2.5"/>
+              <circle cx="118" cy="272" r="2.5"/><circle cx="182" cy="272" r="2.5"/>
+              <circle cx="230" cy="272" r="2.5"/><circle cx="230" cy="262" r="2.5"/>
+              <circle cx="55" cy="278" r="2.5"/><circle cx="55" cy="288" r="2.5"/>
+              <circle cx="245" cy="288" r="2.5"/><circle cx="245" cy="278" r="2.5"/>
+            </g>
+            <!-- Animated trace pulses -->
+            <circle r="3" fill="#4ade80" filter="url(#fgc)">
+              <animateMotion dur="2.2s" repeatCount="indefinite" path="M 28 262 L 70 262 L 70 272 L 118 272"/>
+              <animate attributeName="opacity" values="0;1;1;0" dur="2.2s" repeatCount="indefinite"/>
+            </circle>
+            <circle r="3" fill="#22d3ee" filter="url(#fgc)">
+              <animateMotion dur="2.6s" begin="0.9s" repeatCount="indefinite" path="M 272 262 L 230 262 L 230 272 L 182 272"/>
+              <animate attributeName="opacity" values="0;1;1;0" dur="2.6s" begin="0.9s" repeatCount="indefinite"/>
+            </circle>
+            <circle r="2.5" fill="#a855f7" filter="url(#fgs)">
+              <animateMotion dur="1.9s" begin="1.4s" repeatCount="indefinite" path="M 28 278 L 55 278 L 55 288 L 95 288"/>
+              <animate attributeName="opacity" values="0;0.9;0.9;0" dur="1.9s" begin="1.4s" repeatCount="indefinite"/>
+            </circle>
+            <!-- Central chip -->
+            <rect x="126" y="250" width="48" height="46" rx="5" fill="url(#gchip)" stroke="#22d3ee" stroke-width="1.5" filter="url(#fgc)">
+              <animate attributeName="stroke-opacity" values="0.7;1;0.7" dur="1.4s" repeatCount="indefinite"/>
+            </rect>
+            <g stroke="#22d3ee" stroke-width="1" opacity="0.55">
+              <line x1="126" y1="257" x2="118" y2="257"/><line x1="126" y1="263" x2="118" y2="263"/>
+              <line x1="126" y1="269" x2="118" y2="269"/><line x1="126" y1="275" x2="118" y2="275"/>
+              <line x1="126" y1="281" x2="118" y2="281"/><line x1="126" y1="287" x2="118" y2="287"/>
+              <line x1="174" y1="257" x2="182" y2="257"/><line x1="174" y1="263" x2="182" y2="263"/>
+              <line x1="174" y1="269" x2="182" y2="269"/><line x1="174" y1="275" x2="182" y2="275"/>
+              <line x1="174" y1="281" x2="182" y2="281"/><line x1="174" y1="287" x2="182" y2="287"/>
+              <line x1="134" y1="250" x2="134" y2="242"/><line x1="142" y1="250" x2="142" y2="242"/>
+              <line x1="150" y1="250" x2="150" y2="242"/><line x1="158" y1="250" x2="158" y2="242"/>
+              <line x1="166" y1="250" x2="166" y2="242"/>
+            </g>
+            <rect x="126" y="250" width="48" height="46" rx="5" fill="#22d3ee" opacity="0">
+              <animate attributeName="opacity" values="0;0.1;0" dur="1.4s" repeatCount="indefinite"/>
+            </rect>
+
+            <!-- ── GROUND SHADOW ── -->
+            <ellipse cx="150" cy="312" rx="95" ry="10" fill="#000012" opacity="0.45"/>
+
+            <!-- ── TAIL (behind body, right side, fluffy) ── -->
+            <g class="chinchilla-tail">
+              <path d="M 228 258 Q 272 240 280 205 Q 288 172 265 155 Q 248 142 234 158 Q 222 174 232 198 Q 242 222 228 254Z" fill="url(#gt)" filter="url(#fsh)"/>
+              <!-- tail highlight -->
+              <path d="M 230 254 Q 268 235 274 203 Q 280 174 260 160 Q 247 150 236 163 Q 226 177 234 198Z" fill="#d8d8ee" opacity="0.3"/>
+              <!-- fluffy tip -->
+              <ellipse cx="268" cy="158" rx="19" ry="24" fill="#c8c8e0" transform="rotate(-18 268 158)" filter="url(#ffur)"/>
+              <ellipse cx="267" cy="155" rx="11" ry="15" fill="#e0e0f4" opacity="0.65" transform="rotate(-18 267 155)"/>
+            </g>
+
+            <!-- ── BODY ── -->
+            <ellipse cx="150" cy="228" rx="82" ry="78" fill="url(#gb)" filter="url(#fsh)" class="chinchilla-breathe"/>
+            <!-- body top highlight -->
+            <ellipse cx="118" cy="188" rx="36" ry="28" fill="white" opacity="0.09" transform="rotate(-18 118 188)"/>
+            <!-- belly lighter patch -->
+            <ellipse cx="150" cy="240" rx="44" ry="50" fill="#eaeaf6" opacity="0.28"/>
+            <!-- rim lighting (right edge, PCB bounce) -->
+            <path d="M 218 256 Q 232 238 228 212 Q 224 186 212 170" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.1"/>
+
+            <!-- ── LEFT ARM (resting on PCB) ── -->
+            <path d="M 138 280 Q 105 272 88 260" fill="none" stroke="#9595b0" stroke-width="20" stroke-linecap="round"/>
+            <path d="M 138 280 Q 105 272 88 260" fill="none" stroke="#c0c0d8" stroke-width="12" stroke-linecap="round"/>
+            <g class="paw-left">
+              <ellipse cx="82" cy="258" rx="18" ry="12" fill="#b0b0cc" transform="rotate(-10 82 258)"/>
+              <ellipse cx="76" cy="253" rx="7" ry="5" fill="#c8c8e0" opacity="0.5" transform="rotate(-10 76 253)"/>
+              <ellipse cx="68" cy="255" rx="7" ry="4" fill="#a0a0bc" transform="rotate(-25 68 255)"/>
+              <ellipse cx="77" cy="249" rx="7" ry="4" fill="#a0a0bc" transform="rotate(-10 77 249)"/>
+              <ellipse cx="87" cy="249" rx="7" ry="4" fill="#a0a0bc" transform="rotate(5 87 249)"/>
+              <ellipse cx="82" cy="263" rx="15" ry="5" fill="#4ade80" opacity="0" class="paw-glow-left"/>
+            </g>
+
+            <!-- ── RIGHT ARM (holding soldering stylus like logo) ── -->
+            <path d="M 162 280 Q 196 272 214 255" fill="none" stroke="#9595b0" stroke-width="20" stroke-linecap="round"/>
+            <path d="M 162 280 Q 196 272 214 255" fill="none" stroke="#c0c0d8" stroke-width="12" stroke-linecap="round"/>
+            <g class="paw-right">
+              <ellipse cx="220" cy="252" rx="18" ry="12" fill="#b0b0cc" transform="rotate(10 220 252)"/>
+              <ellipse cx="226" cy="247" rx="7" ry="5" fill="#c8c8e0" opacity="0.5" transform="rotate(10 226 247)"/>
+              <!-- Stylus tool -->
+              <rect x="228" y="218" width="6" height="38" rx="3" fill="#282840" transform="rotate(22 228 218)"/>
+              <rect x="229" y="219" width="4" height="8" rx="2" fill="#484868" transform="rotate(22 229 219)"/>
+              <rect x="230" y="224" width="4" height="3" rx="1" fill="#6060a0" transform="rotate(22 230 224)"/>
+              <!-- tool tip glow (like the logo) -->
+              <circle cx="246" cy="255" r="5" fill="#22d3ee" opacity="0.9" filter="url(#fgc)">
+                <animate attributeName="r" values="4;6;4" dur="0.9s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.8;1;0.6;1;0.8" dur="0.9s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="246" cy="255" r="2.5" fill="white" opacity="0.85">
+                <animate attributeName="opacity" values="0.85;1;0.5;1;0.85" dur="0.9s" repeatCount="indefinite"/>
+              </circle>
+              <!-- fingers gripping stylus -->
+              <ellipse cx="232" cy="244" rx="6" ry="3.5" fill="#a0a0bc" transform="rotate(22 232 244)"/>
+              <ellipse cx="226" cy="248" rx="6" ry="3.5" fill="#a0a0bc" transform="rotate(10 226 248)"/>
+            </g>
+
+            <!-- ── HEAD ── -->
+            <circle cx="150" cy="150" r="66" fill="url(#gh)" filter="url(#fsh)" class="chinchilla-breathe"/>
+            <!-- head top highlight -->
+            <ellipse cx="122" cy="114" rx="30" ry="22" fill="white" opacity="0.1" transform="rotate(-22 122 114)"/>
+            <!-- chin/jaw lighter -->
+            <ellipse cx="150" cy="196" rx="32" ry="14" fill="#dcdcf0" opacity="0.22"/>
+            <!-- PCB green light on face (subtle) -->
+            <ellipse cx="150" cy="168" rx="44" ry="38" fill="#22d3ee" opacity="0.05">
+              <animate attributeName="opacity" values="0.05;0.11;0.05" dur="2s" repeatCount="indefinite"/>
+            </ellipse>
+
+            <!-- ── EARS ── -->
+            <!-- Left ear -->
+            <ellipse cx="100" cy="103" rx="28" ry="36" fill="url(#ge)" transform="rotate(-14 100 103)" filter="url(#fsh)"/>
+            <ellipse cx="101" cy="107" rx="16" ry="23" fill="#e8a0a0" opacity="0.68" transform="rotate(-14 101 107)"/>
+            <ellipse cx="95" cy="99" rx="9" ry="13" fill="white" opacity="0.08" transform="rotate(-14 95 99)"/>
+            <!-- Right ear -->
+            <ellipse cx="200" cy="103" rx="28" ry="36" fill="url(#ge)" transform="rotate(14 200 103)" filter="url(#fsh)"/>
+            <ellipse cx="199" cy="107" rx="16" ry="23" fill="#e8a0a0" opacity="0.68" transform="rotate(14 199 107)"/>
+            <ellipse cx="194" cy="99" rx="9" ry="13" fill="white" opacity="0.08" transform="rotate(14 194 99)"/>
+
+            <!-- ── GOGGLES / GLASSES (like the logo) ── -->
+            <!-- Left lens frame -->
+            <circle cx="130" cy="155" r="23" fill="#0c1228" opacity="0.82" stroke="#807090" stroke-width="2.5"/>
+            <!-- Left lens inner dark glass -->
+            <circle cx="130" cy="155" r="19" fill="#060a14" opacity="0.9"/>
+            <!-- Left lens PCB green tint reflection -->
+            <circle cx="130" cy="155" r="19" fill="#22d3ee" opacity="0.04">
+              <animate attributeName="opacity" values="0.04;0.09;0.04" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <!-- Left lens highlight glint -->
+            <ellipse cx="122" cy="146" rx="8" ry="5" fill="white" opacity="0.13" transform="rotate(-25 122 146)"/>
+            <!-- Right lens frame -->
+            <circle cx="170" cy="155" r="23" fill="#0c1228" opacity="0.82" stroke="#807090" stroke-width="2.5"/>
+            <circle cx="170" cy="155" r="19" fill="#060a14" opacity="0.9"/>
+            <circle cx="170" cy="155" r="19" fill="#22d3ee" opacity="0.04">
+              <animate attributeName="opacity" values="0.04;0.09;0.04" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <ellipse cx="162" cy="146" rx="8" ry="5" fill="white" opacity="0.13" transform="rotate(-25 162 146)"/>
+            <!-- Bridge -->
+            <path d="M 153 155 L 147 155" stroke="#807090" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Glasses arms -->
+            <path d="M 107 150 Q 92 147 85 154" stroke="#707080" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M 193 150 Q 208 147 215 154" stroke="#707080" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- Lens glint animation -->
+            <ellipse cx="124" cy="147" rx="7" ry="4" fill="white" opacity="0" transform="rotate(-25 124 147)">
+              <animate attributeName="opacity" values="0;0;0.22;0;0" dur="5s" begin="2.5s" repeatCount="indefinite"/>
+            </ellipse>
+
+            <!-- ── EYES (behind lenses) ── -->
+            <circle cx="130" cy="155" r="13" fill="#0c1025"/>
+            <circle cx="130" cy="155" r="9" fill="#060810"/>
+            <circle cx="135" cy="149" r="4.5" fill="#22d3ee" opacity="0.88"/>
+            <circle cx="125" cy="161" r="2" fill="white" opacity="0.38"/>
+            <circle cx="170" cy="155" r="13" fill="#0c1025"/>
+            <circle cx="170" cy="155" r="9" fill="#060810"/>
+            <circle cx="175" cy="149" r="4.5" fill="#22d3ee" opacity="0.88"/>
+            <circle cx="165" cy="161" r="2" fill="white" opacity="0.38"/>
+            <!-- Blink -->
+            <ellipse cx="130" cy="155" rx="23" ry="1" fill="#9898b5">
+              <animate attributeName="ry" values="0;0;0;0;23;0;0;0" dur="6s" repeatCount="indefinite"/>
+            </ellipse>
+            <ellipse cx="170" cy="155" rx="23" ry="1" fill="#9898b5">
+              <animate attributeName="ry" values="0;0;0;0;23;0;0;0" dur="6s" repeatCount="indefinite"/>
+            </ellipse>
+
+            <!-- ── NOSE ── -->
+            <ellipse cx="150" cy="178" rx="8.5" ry="6" fill="#c07878"/>
+            <circle cx="146" cy="179" r="2.8" fill="#a05858"/>
+            <circle cx="154" cy="179" r="2.8" fill="#a05858"/>
+            <ellipse cx="149" cy="176" rx="3.5" ry="2" fill="white" opacity="0.18"/>
+
+            <!-- ── MOUTH ── -->
+            <path d="M 141 187 Q 150 195 159 187" fill="none" stroke="#907070" stroke-width="2" stroke-linecap="round"/>
+
+            <!-- ── WHISKERS ── -->
+            <line x1="72" y1="172" x2="136" y2="178" stroke="#e8e8f5" stroke-width="0.9" opacity="0.55"/>
+            <line x1="70" y1="179" x2="136" y2="179" stroke="#e8e8f5" stroke-width="0.9" opacity="0.55"/>
+            <line x1="72" y1="186" x2="136" y2="181" stroke="#e8e8f5" stroke-width="0.9" opacity="0.55"/>
+            <line x1="228" y1="172" x2="164" y2="178" stroke="#e8e8f5" stroke-width="0.9" opacity="0.55"/>
+            <line x1="230" y1="179" x2="164" y2="179" stroke="#e8e8f5" stroke-width="0.9" opacity="0.55"/>
+            <line x1="228" y1="186" x2="164" y2="181" stroke="#e8e8f5" stroke-width="0.9" opacity="0.55"/>
+          </svg>
         </div>
+
         <p class="hero__tagline">Patching Problems, Building Solutions</p>
         <div class="btn-group">
           <a href="#contact" class="btn">Get IT Support</a>
