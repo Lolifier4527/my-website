@@ -12,6 +12,7 @@
       nav.classList.toggle("is-open", !open);
     });
     navLinks.forEach((link) => {
+      if (link.classList.contains("navbar__dropdown-toggle")) return;
       link.addEventListener("click", () => {
         toggle.setAttribute("aria-expanded", "false");
         nav.classList.remove("is-open");
@@ -32,6 +33,14 @@
     document.addEventListener("click", () => {
       dropdownToggle.setAttribute("aria-expanded", "false");
       dropdownMenu.classList.remove("is-open");
+    });
+    dropdownMenu.querySelectorAll(".navbar__dropdown-item").forEach((item) => {
+      item.addEventListener("click", () => {
+        if (toggle && nav) {
+          toggle.setAttribute("aria-expanded", "false");
+          nav.classList.remove("is-open");
+        }
+      });
     });
   }
 
