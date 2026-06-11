@@ -19,6 +19,22 @@
     });
   }
 
+  /* ── Software dropdown ─────────────────────── */
+  const dropdownToggle = document.querySelector(".navbar__dropdown-toggle");
+  const dropdownMenu   = document.querySelector(".navbar__dropdown-menu");
+  if (dropdownToggle && dropdownMenu) {
+    dropdownToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = dropdownToggle.getAttribute("aria-expanded") === "true";
+      dropdownToggle.setAttribute("aria-expanded", String(!open));
+      dropdownMenu.classList.toggle("is-open", !open);
+    });
+    document.addEventListener("click", () => {
+      dropdownToggle.setAttribute("aria-expanded", "false");
+      dropdownMenu.classList.remove("is-open");
+    });
+  }
+
   /* ── Contact form ──────────────────────────── */
   const form = document.querySelector(".contact__form form");
   if (form) {

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PatchLab Rugby Score Capture — live real-time rugby scoreboard system for tournaments and matches.">
+  <title>Rugby Score Capture | PatchLab Software</title>
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="apple-touch-icon" href="../favicon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Page-specific overrides ── */
+    .page-hero {
+      padding: clamp(5rem, 12vw, 9rem) 0 clamp(3rem, 6vw, 5rem);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(176,110,243,0.12), transparent 65%),
+        radial-gradient(ellipse 50% 40% at 80% 60%, rgba(34,211,238,0.07), transparent 60%);
+      pointer-events: none;
+    }
+    .page-hero__eyebrow {
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--neon-purple);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .page-hero__title {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      color: #fff;
+      margin-bottom: 1.25rem;
+    }
+    .page-hero__title span { color: var(--neon-cyan); }
+    .page-hero__sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 2rem;
+      line-height: 1.7;
+    }
+    .tag-row {
+      display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; margin-bottom: 0;
+    }
+    .tag {
+      font-family: var(--font-heading);
+      font-size: 0.62rem; letter-spacing: 0.12em;
+      padding: 0.35rem 0.9rem; border-radius: 20px;
+      border: 1px solid; text-transform: uppercase;
+    }
+    .tag--purple { border-color: var(--border-purple); color: var(--neon-purple); background: rgba(176,110,243,0.08); }
+    .tag--cyan   { border-color: var(--border-cyan);   color: var(--neon-cyan);   background: rgba(34,211,238,0.08);  }
+    .tag--green  { border-color: rgba(74,222,128,0.3); color: var(--neon-green);  background: rgba(74,222,128,0.08);  }
+
+    /* ── Sections ── */
+    .info-section { padding: clamp(3rem, 7vw, 5rem) 0; }
+    .info-section + .info-section { border-top: 1px solid rgba(255,255,255,0.05); }
+
+    /* ── Two-col layout ── */
+    .two-col {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: clamp(2rem, 5vw, 4rem); align-items: center;
+    }
+    .two-col.reverse { direction: rtl; }
+    .two-col.reverse > * { direction: ltr; }
+    @media (max-width: 768px) {
+      .two-col, .two-col.reverse { grid-template-columns: 1fr; direction: ltr; }
+      .two-col.reverse > * { direction: ltr; }
+    }
+
+    /* ── Text blocks ── */
+    .block-eyebrow {
+      font-family: var(--font-heading); font-size: 0.65rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--neon-cyan); margin-bottom: 0.75rem;
+    }
+    .block-title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      font-weight: 700; color: #fff; line-height: 1.25;
+      margin-bottom: 1rem;
+    }
+    .block-body {
+      font-size: 0.95rem; color: var(--text-muted); line-height: 1.8;
+      margin-bottom: 1.25rem;
+    }
+    .feature-list { display: flex; flex-direction: column; gap: 0.65rem; }
+    .feature-item {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      font-size: 0.9rem; color: var(--text-body);
+    }
+    .feature-item::before {
+      content: '▸';
+      color: var(--neon-cyan); flex-shrink: 0; margin-top: 0.1rem;
+      font-size: 0.8rem;
+    }
+
+    /* ── Mock screens ── */
+    .screen-wrap {
+      position: relative; border-radius: 16px; overflow: hidden;
+      border: 1px solid rgba(176,110,243,0.2);
+      box-shadow:
+        0 0 0 1px rgba(176,110,243,0.08),
+        0 24px 60px rgba(0,0,0,0.6),
+        0 0 40px rgba(176,110,243,0.08);
+    }
+    .screen-wrap::before {
+      content: '';
+      position: absolute; inset: 0; z-index: 2;
+      background: linear-gradient(135deg, rgba(176,110,243,0.04) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .screen-bar {
+      background: rgba(14,14,22,0.98);
+      border-bottom: 1px solid rgba(245,166,35,0.3);
+      padding: 10px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .screen-bar-title {
+      font-family: 'Orbitron', sans-serif; font-size: 13px;
+      color: #F5A623; letter-spacing: 2px;
+    }
+    .screen-bar-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #E53935; animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .screen-body {
+      background: #1a0000;
+      padding: 20px;
+      min-height: 220px;
+    }
+
+    /* ── Capture mock ── */
+    .mock-field-row {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .mock-field-btn {
+      flex: 1; background: #2a0a0a; border: 1px solid rgba(245,166,35,0.2);
+      border-radius: 10px; padding: 14px 10px; text-align: center; cursor: default;
+    }
+    .mock-field-btn.active {
+      background: rgba(245,166,35,0.1); border-color: #F5A623;
+    }
+    .mock-field-letter {
+      font-family: 'Orbitron', sans-serif; font-size: 18px;
+      color: #F5A623; display: block;
+    }
+    .mock-field-sub { font-size: 10px; color: rgba(240,200,150,0.5); margin-top: 3px; }
+    .mock-score-row {
+      display: flex; align-items: center; justify-content: space-evenly;
+      background: linear-gradient(135deg,#1a0000,#3a0c0c);
+      border: 1px solid rgba(245,166,35,0.15); border-radius: 12px;
+      padding: 16px; margin-bottom: 12px;
+    }
+    .mock-score-num {
+      font-family: 'Orbitron', sans-serif; font-size: 40px;
+      color: #F5A623; line-height: 1;
+    }
+    .mock-score-vs {
+      font-family: 'Orbitron', sans-serif; font-size: 18px;
+      color: rgba(245,166,35,0.4);
+    }
+    .mock-score-label { font-size: 10px; color: rgba(240,200,150,0.5); margin-top: 4px; text-align: center; }
+    .mock-stepper-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid rgba(245,166,35,0.1);
+    }
+    .mock-stepper-row:last-child { border-bottom: none; }
+    .mock-stepper-label { font-size: 12px; color: rgba(240,200,150,0.6); }
+    .mock-stepper-ctrl { display: flex; align-items: center; gap: 10px; }
+    .mock-btn-minus {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: #3a1010; border: none; color: rgba(240,200,150,0.4);
+      font-size: 16px; display: flex; align-items: center; justify-content: center;
+    }
+    .mock-btn-plus-for {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: #E53935; border: none; color: #fff;
+      font-size: 16px; display: flex; align-items: center; justify-content: center;
+    }
+    .mock-val { font-family: 'Orbitron', sans-serif; font-size: 18px; color: #F5A623; min-width: 20px; text-align: center; }
+
+    /* ── Scoreboard mock ── */
+    .mock-sb-body {
+      background: #0a0000; min-height: 200px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px; gap: 4px;
+    }
+    .mock-sb-field {
+      font-family: 'Orbitron', sans-serif; font-size: 11px;
+      color: rgba(245,166,35,0.4); letter-spacing: 4px; margin-bottom: 4px;
+    }
+    .mock-sb-teams {
+      display: flex; width: 100%; justify-content: space-between;
+      font-family: 'Orbitron', sans-serif; font-size: 14px;
+      color: rgba(255,255,255,0.7); letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .mock-sb-score {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(48px, 10vw, 72px);
+      color: #F5A623; letter-spacing: 6px; line-height: 1;
+    }
+    .mock-sb-score span { color: rgba(255,255,255,0.2); }
+    .mock-sb-timer {
+      font-family: 'Orbitron', sans-serif; font-size: 22px;
+      color: rgba(245,166,35,0.5); letter-spacing: 4px; margin-top: 4px;
+    }
+    .mock-sb-stats {
+      display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center;
+    }
+    .mock-sb-pill {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(245,166,35,0.1);
+      border-radius: 6px; padding: 4px 10px; font-size: 11px; color: rgba(255,255,255,0.4);
+    }
+    .mock-sb-pill b { color: rgba(245,166,35,0.7); }
+
+    /* ── Half-time mock ── */
+    .mock-ht {
+      background: #000; min-height: 200px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px;
+    }
+    .mock-ht-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(24px, 6vw, 48px);
+      color: rgba(245,166,35,0.85); letter-spacing: 6px;
+      animation: htPulse 2s infinite;
+    }
+    @keyframes htPulse { 0%,100%{opacity:0.9} 50%{opacity:0.4} }
+    .mock-ht-sub {
+      font-family: 'Orbitron', sans-serif; font-size: 13px;
+      color: rgba(245,166,35,0.35); letter-spacing: 4px;
+    }
+
+    /* ── Feature grid ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .feature-card:hover {
+      border-color: var(--border-purple);
+      box-shadow: 0 0 24px rgba(176,110,243,0.08);
+    }
+    .feature-card__icon {
+      font-size: 2rem; margin-bottom: 1rem; display: block;
+    }
+    .feature-card__title {
+      font-family: var(--font-heading); font-size: 0.8rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: #fff; margin-bottom: 0.6rem;
+    }
+    .feature-card__body {
+      font-size: 0.875rem; color: var(--text-muted); line-height: 1.7;
+    }
+
+    /* ── How it works steps ── */
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+      padding: 1.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .step:last-child { border-bottom: none; }
+    .step__num {
+      width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(176,110,243,0.12); border: 1px solid var(--border-purple);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-heading); font-size: 0.85rem; color: var(--neon-purple);
+    }
+    .step__title {
+      font-family: var(--font-heading); font-size: 0.8rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: #fff; margin-bottom: 0.4rem;
+    }
+    .step__body { font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* ── CTA banner ── */
+    .cta-banner {
+      background: linear-gradient(135deg, rgba(176,110,243,0.1) 0%, rgba(34,211,238,0.06) 100%);
+      border: 1px solid var(--border-purple);
+      border-radius: var(--radius-lg);
+      padding: clamp(2rem, 5vw, 3.5rem);
+      text-align: center;
+      margin: clamp(3rem, 7vw, 5rem) 0;
+    }
+    .cta-banner__title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      color: #fff; margin-bottom: 0.75rem;
+    }
+    .cta-banner__body {
+      font-size: 0.95rem; color: var(--text-muted); max-width: 540px;
+      margin: 0 auto 1.75rem; line-height: 1.7;
+    }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.75rem; color: var(--text-subtle);
+      padding: calc(var(--nav-height) + 1.5rem) 0 0;
+      font-family: var(--font-heading); letter-spacing: 0.06em;
+    }
+    .breadcrumb a { color: var(--text-muted); transition: color var(--transition); }
+    .breadcrumb a:hover { color: var(--neon-cyan); }
+    .breadcrumb__sep { color: var(--text-subtle); }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ── -->
+  <header class="navbar">
+    <div class="navbar__inner">
+      <a href="../index.html" class="navbar__logo">
+        <img src="../assets/logo.png" alt="PatchLab logo" class="navbar__logo-img">
+        Patch<span>Lab</span>
+      </a>
+      <button class="navbar__toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="navbar__nav" aria-label="Main">
+        <a href="../index.html#services" class="navbar__link">Services</a>
+        <a href="../index.html#why" class="navbar__link">Why Us</a>
+        <div class="navbar__dropdown">
+          <button class="navbar__link navbar__dropdown-toggle" aria-expanded="false">
+            Software <span class="dropdown-arrow">▾</span>
+          </button>
+          <div class="navbar__dropdown-menu">
+            <a href="rugby-score-capture.html" class="navbar__dropdown-item is-active">Rugby Score Capture</a>
+          </div>
+        </div>
+        <a href="../index.html#contact" class="navbar__link">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── HERO ── -->
+    <section class="page-hero">
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="../index.html">Home</a>
+          <span class="breadcrumb__sep">›</span>
+          <a href="#">Software</a>
+          <span class="breadcrumb__sep">›</span>
+          <span style="color:var(--neon-cyan)">Rugby Score Capture</span>
+        </div>
+        <br>
+        <div class="page-hero__eyebrow">PatchLab Software</div>
+        <h1 class="page-hero__title">Rugby Score<br><span>Capture System</span></h1>
+        <p class="page-hero__sub">
+          A live, real-time scoring and scoreboard system built for rugby tournaments.
+          Capture scores from multiple fields simultaneously and display them on any screen — instantly.
+        </p>
+        <div class="tag-row">
+          <span class="tag tag--purple">Real-Time Sync</span>
+          <span class="tag tag--cyan">Multi-Field</span>
+          <span class="tag tag--green">Works on Any Device</span>
+          <span class="tag tag--purple">No App Install</span>
+          <span class="tag tag--cyan">Live Scoreboard</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── WHAT IT IS ── -->
+    <section class="info-section">
+      <div class="container">
+        <div class="two-col">
+          <div>
+            <div class="block-eyebrow">What It Is</div>
+            <h2 class="block-title">One system.<br>Seven fields.<br>Zero chaos.</h2>
+            <p class="block-body">
+              The PatchLab Rugby Score Capture system is a web-based tool that allows tournament organisers
+              to capture live scores from up to 7 fields simultaneously — with each score instantly displayed
+              on a dedicated scoreboard screen, no app installation required.
+            </p>
+            <p class="block-body">
+              Built for schools, clubs, and rugby unions running multi-field tournaments,
+              it replaces manual score sheets and delayed announcements with a clean,
+              professional digital experience.
+            </p>
+            <div class="feature-list">
+              <div class="feature-item">Separate score capture form per field (A through G)</div>
+              <div class="feature-item">Scoreboard auto-updates the moment a score is entered</div>
+              <div class="feature-item">Works on any phone, tablet, or laptop — no install needed</div>
+              <div class="feature-item">Full substitution tracking with jersey numbers and reasons</div>
+              <div class="feature-item">Built-in match timer per field</div>
+            </div>
+          </div>
+          <!-- Capture mock -->
+          <div class="screen-wrap">
+            <div class="screen-bar">
+              <span class="screen-bar-title">GLRU – FIELD A</span>
+              <span style="font-size:10px;color:rgba(245,166,35,0.5);font-family:'Orbitron',sans-serif;letter-spacing:1px">Score Capture</span>
+            </div>
+            <div class="screen-body" style="padding:16px;">
+              <div class="mock-score-row">
+                <div>
+                  <div class="mock-score-num">21</div>
+                  <div class="mock-score-label">GLRU</div>
+                </div>
+                <div class="mock-score-vs">VS</div>
+                <div>
+                  <div class="mock-score-num" style="color:rgba(240,200,150,0.35)">14</div>
+                  <div class="mock-score-label">PARKTOWN</div>
+                </div>
+              </div>
+              <div style="background:#2a0a0a;border:1px solid rgba(245,166,35,0.1);border-radius:10px;padding:12px;">
+                <div class="mock-stepper-row">
+                  <span class="mock-stepper-label">Tries (×5)</span>
+                  <div class="mock-stepper-ctrl">
+                    <div class="mock-btn-minus">−</div>
+                    <div class="mock-val">3</div>
+                    <div class="mock-btn-plus-for">+</div>
+                  </div>
+                </div>
+                <div class="mock-stepper-row">
+                  <span class="mock-stepper-label">Conversions (×2)</span>
+                  <div class="mock-stepper-ctrl">
+                    <div class="mock-btn-minus">−</div>
+                    <div class="mock-val">3</div>
+                    <div class="mock-btn-plus-for">+</div>
+                  </div>
+                </div>
+                <div class="mock-stepper-row" style="border-bottom:none">
+                  <span class="mock-stepper-label">Penalties (×3)</span>
+                  <div class="mock-stepper-ctrl">
+                    <div class="mock-btn-minus">−</div>
+                    <div class="mock-val">2</div>
+                    <div class="mock-btn-plus-for">+</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── LIVE SCOREBOARD ── -->
+    <section class="info-section">
+      <div class="container">
+        <div class="two-col reverse">
+          <div>
+            <div class="block-eyebrow">Live Scoreboard</div>
+            <h2 class="block-title">Built for the big screen.</h2>
+            <p class="block-body">
+              The scoreboard display is designed to be shown on a TV, projector, or large monitor
+              at your tournament venue. It automatically detects which fields are active and
+              displays up to two fields side by side in real time.
+            </p>
+            <div class="feature-list">
+              <div class="feature-item">Displays up to 2 fields at once — no smushing</div>
+              <div class="feature-item">Single active field is labelled <strong style="color:var(--neon-cyan)">MAIN FIELD</strong> for clarity</div>
+              <div class="feature-item">Scores, team names, age group and match timer all visible</div>
+              <div class="feature-item">Tries, Conversions, Penalties and Drop Kicks shown as a summary row</div>
+              <div class="feature-item">Responsive — scales beautifully from phone to 4K display</div>
+            </div>
+          </div>
+          <!-- Scoreboard mock -->
+          <div class="screen-wrap">
+            <div class="screen-bar">
+              <span class="screen-bar-title">GLRU RUGBY</span>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div class="screen-bar-dot"></div>
+                <span style="font-size:10px;color:#E53935;font-family:'Orbitron',sans-serif;letter-spacing:1px">LIVE</span>
+              </div>
+            </div>
+            <div class="mock-sb-body">
+              <div class="mock-sb-field">MAIN FIELD</div>
+              <div class="mock-sb-teams">
+                <span>GLRU</span>
+                <span>PARKTOWN</span>
+              </div>
+              <div class="mock-sb-score">21<span> – </span>14</div>
+              <div class="mock-sb-timer">32:18</div>
+              <div class="mock-sb-stats">
+                <div class="mock-sb-pill">T <b>3–2</b></div>
+                <div class="mock-sb-pill">C <b>3–2</b></div>
+                <div class="mock-sb-pill">P <b>2–1</b></div>
+                <div class="mock-sb-pill">DK <b>0–1</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── HALF TIME ── -->
+    <section class="info-section">
+      <div class="container">
+        <div class="two-col">
+          <div>
+            <div class="block-eyebrow">Half Time Control</div>
+            <h2 class="block-title">Blank the board.<br>Resume instantly.</h2>
+            <p class="block-body">
+              Each field's score operator has a dedicated <strong style="color:#fff">BLANK SCOREBOARD</strong> button.
+              During half time, one tap blacks out that field's display — showing a pulsing
+              "HALF TIME" message on the big screen. Tap again to resume instantly when play restarts.
+            </p>
+            <div class="feature-list">
+              <div class="feature-item">Per-field half-time control — other fields stay live</div>
+              <div class="feature-item">Full black-out with animated HALF TIME text on the scoreboard</div>
+              <div class="feature-item">One tap to unblank and resume the live score</div>
+            </div>
+          </div>
+          <!-- Half time mock -->
+          <div class="screen-wrap">
+            <div class="screen-bar">
+              <span class="screen-bar-title">GLRU RUGBY</span>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div class="screen-bar-dot"></div>
+                <span style="font-size:10px;color:#E53935;font-family:'Orbitron',sans-serif;letter-spacing:1px">LIVE</span>
+              </div>
+            </div>
+            <div class="mock-ht">
+              <div class="mock-ht-text">HALF TIME</div>
+              <div class="mock-ht-sub">MAIN FIELD</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FEATURE CARDS ── -->
+    <section class="info-section">
+      <div class="container">
+        <div style="text-align:center;margin-bottom:1rem">
+          <div class="block-eyebrow" style="justify-content:center;display:flex">Everything included</div>
+          <h2 class="block-title" style="font-size:clamp(1.4rem,3vw,2rem)">Everything you need. Nothing you don't.</h2>
+        </div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <span class="feature-card__icon">📱</span>
+            <div class="feature-card__title">Works on Any Device</div>
+            <p class="feature-card__body">No app to install. Open a link on any phone or tablet and you're capturing scores. Works on iOS, Android, and desktop browsers.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-card__icon">⚡</span>
+            <div class="feature-card__title">Real-Time Sync</div>
+            <p class="feature-card__body">Scores sync to the display screen in under a second using cloud messaging. The scoreboard updates the instant a try is tapped.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-card__icon">🏟️</span>
+            <div class="feature-card__title">Up to 7 Fields</div>
+            <p class="feature-card__body">Fields A through G can all be captured simultaneously. Each operator gets their own dedicated link — they only see their field.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-card__icon">🔄</span>
+            <div class="feature-card__title">Substitution Tracking</div>
+            <p class="feature-card__body">Record player substitutions with jersey numbers, match minute, and reason (injury, tactical, yellow card, red card, and more).</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-card__icon">⏱️</span>
+            <div class="feature-card__title">Match Timer</div>
+            <p class="feature-card__body">Each field has its own configurable countdown timer. Set the half duration, start, stop, and reset independently per field.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-card__icon">📊</span>
+            <div class="feature-card__title">Match History & CSV Export</div>
+            <p class="feature-card__body">Every match is saved locally. View the full history at any time and export all results as a CSV spreadsheet for your records.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-card__icon">📧</span>
+            <div class="feature-card__title">Email Results</div>
+            <p class="feature-card__body">After submitting a match, send a detailed results report directly to the sports administrator — including scores and full substitution log.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-card__icon">🔗</span>
+            <div class="feature-card__title">QR Code Ready</div>
+            <p class="feature-card__body">Share unique QR codes for each field's capture link and scoreboard. Operators scan and go — no typing long URLs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ── -->
+    <section class="info-section">
+      <div class="container">
+        <div style="max-width:640px;margin:0 auto">
+          <div class="block-eyebrow" style="text-align:center">How It Works</div>
+          <h2 class="block-title" style="text-align:center;font-size:clamp(1.4rem,3vw,2rem);margin-bottom:2rem">Set up in minutes.</h2>
+          <div class="steps">
+            <div class="step">
+              <div class="step__num">01</div>
+              <div>
+                <div class="step__title">Open the Score Capture App</div>
+                <p class="step__body">The tournament coordinator opens the landing page and selects a field — or shares a direct QR code link with each score operator. No logins, no passwords.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step__num">02</div>
+              <div>
+                <div class="step__title">Enter Team Names & Start the Timer</div>
+                <p class="step__body">The operator enters the home and away team names, selects the age group, and starts the match timer. The scoreboard comes alive immediately.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step__num">03</div>
+              <div>
+                <div class="step__title">Tap to Score</div>
+                <p class="step__body">Every try, conversion, penalty and drop kick is a single tap. Scores update on the big screen scoreboard in real time — no refreshing needed.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step__num">04</div>
+              <div>
+                <div class="step__title">Half Time & Full Time</div>
+                <p class="step__body">Tap the BLANK button at half time to black out the scoreboard. At full time, submit the match — the system prompts to email the result to the administrator.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step__num">05</div>
+              <div>
+                <div class="step__title">Review & Export</div>
+                <p class="step__body">All matches are saved in the History tab. Export the full tournament results as a CSV file for use in spreadsheets or official records.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA ── -->
+    <div class="container">
+      <div class="cta-banner">
+        <h2 class="cta-banner__title">Want this for your club or tournament?</h2>
+        <p class="cta-banner__body">
+          We can build and deploy a custom version of this system for your organisation — branded, configured, and ready to use.
+          Get in touch to discuss your requirements.
+        </p>
+        <a href="../index.html#contact" class="btn btn--purple">Get In Touch</a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer style="border-top:1px solid rgba(255,255,255,0.05);padding:2rem 0;text-align:center;">
+    <div class="container">
+      <p style="font-size:0.8rem;color:var(--text-subtle)">© 2025 PatchLab. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>
