@@ -12,7 +12,6 @@
       nav.classList.toggle("is-open", !open);
     });
     navLinks.forEach((link) => {
-      if (link.classList.contains("navbar__dropdown-toggle")) return;
       link.addEventListener("click", () => {
         toggle.setAttribute("aria-expanded", "false");
         nav.classList.remove("is-open");
@@ -20,19 +19,19 @@
     });
   }
 
-  /* ── Software dropdown ─────────────────────── */
-  const dropdownToggle = document.querySelector(".navbar__dropdown-toggle");
-  const dropdownMenu   = document.querySelector(".navbar__dropdown-menu");
-  if (dropdownToggle && dropdownMenu) {
-    dropdownToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const open = dropdownToggle.getAttribute("aria-expanded") === "true";
-      dropdownToggle.setAttribute("aria-expanded", String(!open));
-      dropdownMenu.classList.toggle("is-open", !open);
+  /* ── Software menu ─────────────────────────── */
+  const swMenu = document.querySelector(".sw-menu");
+  if (swMenu) {
+    const swBtn = swMenu.querySelector(".sw-menu__btn");
+    swBtn.addEventListener("click", () => {
+      const open = swMenu.classList.toggle("is-open");
+      swBtn.setAttribute("aria-expanded", String(open));
     });
-    document.addEventListener("click", () => {
-      dropdownToggle.setAttribute("aria-expanded", "false");
-      dropdownMenu.classList.remove("is-open");
+    document.addEventListener("click", (e) => {
+      if (!swMenu.contains(e.target)) {
+        swMenu.classList.remove("is-open");
+        swBtn.setAttribute("aria-expanded", "false");
+      }
     });
   }
 
