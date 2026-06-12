@@ -12,6 +12,7 @@
       nav.classList.toggle("is-open", !open);
     });
     navLinks.forEach((link) => {
+      if (link.classList.contains("navbar__dropdown-toggle")) return;
       link.addEventListener("click", () => {
         toggle.setAttribute("aria-expanded", "false");
         nav.classList.remove("is-open");
