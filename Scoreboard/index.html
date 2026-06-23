@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatchLab – Live Scoreboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent:  #b06ef3;
+  --cyan:    #22d3ee;
+  --green:   #4ade80;
+  --bg:      #07070a;
+  --surface: #0e0e14;
+  --border:  rgba(176,110,243,0.2);
+  --font-d:  'Orbitron', sans-serif;
+  --font-b:  'Inter', sans-serif;
+}
+
+html, body {
+  background: var(--bg);
+  color: #e2e2f0;
+  font-family: var(--font-b);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(34,211,238,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,211,238,0.025) 1px, transparent 1px),
+    linear-gradient(rgba(176,110,243,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(176,110,243,0.015) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px, 16px 16px, 16px 16px;
+}
+
+/* ── Top bar ── */
+.topbar {
+  background: rgba(14,14,20,0.97);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 58px;
+  position: relative; z-index: 10;
+  backdrop-filter: blur(10px);
+}
+.topbar-logo-wrap { display: flex; align-items: center; gap: 10px; }
+.topbar-wordmark { font-family: var(--font-d); font-size: 20px; color: var(--accent); letter-spacing: 3px; font-weight: 700; }
+.topbar-wordmark span { color: var(--cyan); }
+.topbar-center { text-align: center; }
+.topbar-title { font-family: var(--font-d); font-size: 20px; color: var(--accent); letter-spacing: 4px; line-height: 1; font-weight: 700; }
+.topbar-sub { font-size: 10px; color: rgba(176,110,243,0.5); letter-spacing: 3px; margin-top: 3px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.live-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; color: var(--green);
+  letter-spacing: 1px;
+}
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(74,222,128,0.8);
+  animation: pulse 1.4s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+
+/* ── Fields viewport ── */
+#fields-area {
+  display: flex;
+  height: calc(100vh - 58px);
+  width: 100%;
+  position: relative; z-index: 1;
+}
+
+/* ── Field panel ── */
+.field-panel {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  position: relative;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.field-panel:last-child { border-right: none; }
+.field-panel.active { display: flex; }
+
+/* Panel glow */
+.field-panel::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 30%, rgba(176,110,243,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(34,211,238,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Field header ── */
+.field-header {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 14px 20px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.field-label {
+  font-family: var(--font-d);
+  letter-spacing: 4px;
+  color: rgba(176,110,243,0.5);
+  font-weight: 600;
+}
+.age-group-label {
+  font-family: var(--font-d);
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.75);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+/* ── Score area ── */
+.score-area {
+  flex: 1; position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 0 12px;
+}
+.teams-row {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; gap: 8px; margin-bottom: 6px;
+}
+.team-block { flex: 1; text-align: center; }
+.team-name {
+  font-family: var(--font-d);
+  letter-spacing: 2px; line-height: 1.1;
+  color: rgba(255,255,255,0.85);
+  word-break: break-word;
+  font-weight: 600;
+}
+.score-row {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%;
+}
+.score-num {
+  font-family: var(--font-d);
+  line-height: 1; text-align: center;
+  transition: color 0.4s; flex: 1;
+  font-weight: 700;
+}
+.score-num.leader { color: var(--accent); text-shadow: 0 0 30px rgba(176,110,243,0.6); }
+.score-num.tied   { color: rgba(226,226,240,0.35); }
+.score-vs-label {
+  font-family: var(--font-d);
+  color: rgba(34,211,238,0.4);
+  flex: 0 0 auto; text-align: center;
+}
+
+/* ── Stats ── */
+.stats-row {
+  display: flex; gap: 6px; justify-content: center;
+  flex-wrap: wrap; padding: 4px 12px 10px;
+  position: relative; z-index: 2;
+}
+.stat-pill {
+  background: rgba(176,110,243,0.06);
+  border: 1px solid rgba(176,110,243,0.12);
+  border-radius: 8px; padding: 6px 14px;
+  font-size: clamp(11px, 1.8vw, 15px); color: rgba(226,226,240,0.4);
+  white-space: nowrap;
+}
+.stat-pill .sv { color: rgba(176,110,243,0.8); font-weight: 700; }
+
+/* ── Timer ── */
+.break-row {
+  position: relative; z-index: 2;
+  text-align: center; padding: 0 12px 12px;
+}
+.timer-readout {
+  font-family: var(--font-d);
+  color: rgba(34,211,238,0.5);
+  letter-spacing: 3px;
+  font-weight: 600;
+}
+
+/* ── Half time overlay ── */
+.halftime-overlay {
+  position: absolute; inset: 0; z-index: 50;
+  background: #07070a;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.45s;
+}
+.halftime-overlay.active { opacity: 1; pointer-events: all; }
+.halftime-text {
+  font-family: var(--font-d);
+  font-size: clamp(48px, 12vw, 120px);
+  color: rgba(176,110,243,0.9);
+  letter-spacing: 8px;
+  animation: htPulse 2s infinite;
+  font-weight: 700;
+  text-shadow: 0 0 40px rgba(176,110,243,0.5);
+}
+.halftime-sub {
+  font-family: var(--font-d);
+  font-size: clamp(16px, 3vw, 32px);
+  color: rgba(34,211,238,0.4);
+  letter-spacing: 6px;
+  margin-top: 8px;
+}
+@keyframes htPulse { 0%,100%{opacity:0.9} 50%{opacity:0.4} }
+
+/* ── Font sizes: single panel ── */
+#fields-area.solo .field-label     { font-size: clamp(14px, 1.6vw, 22px); }
+#fields-area.solo .age-group-label { font-size: clamp(24px, 4vw,  52px); }
+#fields-area.solo .team-name       { font-size: clamp(28px, 5vw,  72px); }
+#fields-area.solo .score-num       { font-size: clamp(110px,18vw,260px); }
+#fields-area.solo .score-vs-label  { font-size: clamp(32px, 5vw,  72px); }
+#fields-area.solo .timer-readout   { font-size: clamp(22px, 3vw,  44px); }
+
+/* ── Font sizes: dual panel ── */
+#fields-area.dual .field-label     { font-size: clamp(12px, 1.2vw, 18px); }
+#fields-area.dual .age-group-label { font-size: clamp(14px, 2vw,   30px); }
+#fields-area.dual .team-name       { font-size: clamp(14px, 2.2vw, 36px); }
+#fields-area.dual .score-num       { font-size: clamp(60px, 9vw,  130px); }
+#fields-area.dual .score-vs-label  { font-size: clamp(18px, 2.5vw, 38px); }
+#fields-area.dual .timer-readout   { font-size: clamp(14px, 1.8vw, 28px); }
+#fields-area.dual .stat-pill       { font-size: 11px; padding: 3px 8px; }
+
+/* dual divider */
+#fields-area.dual .field-panel.active + .field-panel.active {
+  border-left: 1px solid var(--border);
+}
+
+/* ── Waiting screen ── */
+#waiting {
+  position: fixed; inset: 0; z-index: 5;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px;
+}
+#waiting .wt { font-family: var(--font-d); font-size: 40px; color: var(--accent); letter-spacing: 4px; font-weight: 700; }
+#waiting .wt span { color: var(--cyan); }
+#waiting .ws { font-size: 13px; color: rgba(176,110,243,0.4); letter-spacing: 3px; }
+.spinner {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid rgba(176,110,243,0.15);
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Fullscreen button */
+#fs-btn {
+  background: none;
+  border: 1px solid rgba(176,110,243,0.25);
+  border-radius: 8px;
+  color: rgba(176,110,243,0.6);
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  transition: border-color 0.2s, color 0.2s;
+}
+#fs-btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo-wrap">
+    <div class="topbar-wordmark">Patch<span>Lab</span></div>
+  </div>
+  <div class="topbar-center">
+    <div class="topbar-title">LIVE SCOREBOARD</div>
+    <div class="topbar-sub" id="topbar-sub">WAITING FOR DATA</div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <button onclick="toggleFullscreen()" id="fs-btn" title="Fullscreen">⛶</button>
+  </div>
+</div>
+
+<!-- FIELD PANELS (built by JS) -->
+<div id="fields-area"></div>
+
+<!-- WAITING -->
+<div id="waiting">
+  <div class="spinner"></div>
+  <div class="wt">Patch<span>Lab</span></div>
+  <div class="ws">WAITING FOR LIVE SCORE DATA...</div>
+</div>
+
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+<script>
+const ABLY_API_KEY = '0TZ7SA.6wlyfQ:CSQeEsQNHUAtneNwaktRsK3R0uzmod0D0fvVK2-5qUM';
+const ABLY_CHANNEL = 'patchlab-scoreboard';
+const ALL_FIELDS   = ['1', '2'];
+const MAX_PANELS   = 2;
+
+const slotToField = [null, null];
+const fieldData   = {};
+
+function createSlotEl(idx) {
+  const sid = 'slot-' + idx;
+  const div = document.createElement('div');
+  div.className = 'field-panel';
+  div.id = sid;
+  div.innerHTML = `
+    <div class="field-header">
+      <div class="field-label" id="${sid}-label">–</div>
+      <div class="age-group-label" id="${sid}-age"></div>
+    </div>
+    <div class="score-area">
+      <div class="teams-row">
+        <div class="team-block"><div class="team-name" id="${sid}-home">HOME</div></div>
+        <div style="flex:0 0 24px"></div>
+        <div class="team-block"><div class="team-name" id="${sid}-away">AWAY</div></div>
+      </div>
+      <div class="score-row">
+        <div class="score-num tied" id="${sid}-sf">0</div>
+        <div class="score-vs-label" id="${sid}-vs">–</div>
+        <div class="score-num tied" id="${sid}-sa">0</div>
+      </div>
+    </div>
+    <div class="break-row">
+      <div class="timer-readout" id="${sid}-timer"></div>
+    </div>
+    <div class="stats-row" id="${sid}-stats"></div>
+    <div class="halftime-overlay" id="${sid}-ht">
+      <div class="halftime-text">HALF TIME</div>
+      <div class="halftime-sub" id="${sid}-ht-sub">–</div>
+    </div>
+  `;
+  return div;
+}
+
+const area = document.getElementById('fields-area');
+area.appendChild(createSlotEl(0));
+area.appendChild(createSlotEl(1));
+
+function fieldToSlot(fid) { return slotToField.indexOf(fid); }
+
+function assignSlot(fid) {
+  if (fieldToSlot(fid) !== -1) return fieldToSlot(fid);
+  const empty = slotToField.indexOf(null);
+  if (empty === -1) return -1;
+  slotToField[empty] = fid;
+  document.getElementById('slot-' + empty).classList.add('active');
+  applyAreaClass();
+  updateTopbar();
+  return empty;
+}
+
+function applyAreaClass() {
+  const count = slotToField.filter(Boolean).length;
+  area.classList.remove('solo','dual');
+  if (count === 1) area.classList.add('solo');
+  else if (count === 2) area.classList.add('dual');
+}
+
+function updateTopbar() {
+  const active = slotToField.filter(Boolean);
+  const el = document.getElementById('topbar-sub');
+  if (active.length === 0) { el.textContent = 'WAITING FOR DATA'; return; }
+  if (active.length === 1) el.textContent = 'FIELD ' + active[0];
+  else el.textContent = 'FIELD ' + active[0] + ' · FIELD ' + active[1];
+}
+
+function timerFmt(s) {
+  if (s == null) return '';
+  return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+}
+
+function renderSlot(idx) {
+  const fid  = slotToField[idx];
+  const data = fieldData[fid] || {};
+  const sid  = 'slot-' + idx;
+  const activeCnt = slotToField.filter(Boolean).length;
+
+  const labelEl = document.getElementById(sid + '-label');
+  if (labelEl) labelEl.textContent = 'FIELD ' + fid;
+
+  const htSubEl = document.getElementById(sid + '-ht-sub');
+  if (htSubEl) htSubEl.textContent = 'FIELD ' + fid;
+
+  const ageEl = document.getElementById(sid + '-age');
+  if (ageEl) ageEl.textContent = data.ageGroup || '';
+
+  const homeEl = document.getElementById(sid + '-home');
+  const awayEl = document.getElementById(sid + '-away');
+  if (homeEl) homeEl.textContent = (data.homeTeam || 'HOME').toUpperCase();
+  if (awayEl) awayEl.textContent = (data.opposingTeam || 'AWAY').toUpperCase();
+
+  const f = data.totalFor ?? 0, a = data.totalAgainst ?? 0;
+  const sfEl = document.getElementById(sid + '-sf');
+  const saEl = document.getElementById(sid + '-sa');
+  if (sfEl) { sfEl.textContent = f; sfEl.className = 'score-num ' + (f > a ? 'leader' : 'tied'); }
+  if (saEl) { saEl.textContent = a; saEl.className = 'score-num ' + (a > f ? 'leader' : 'tied'); }
+
+  const statsEl = document.getElementById(sid + '-stats');
+  if (statsEl) statsEl.innerHTML = `
+    <div class="stat-pill">T <span class="sv">${data.triesFor??0}–${data.triesAgainst??0}</span></div>
+    <div class="stat-pill">C <span class="sv">${data.conversionsFor??0}–${data.conversionsAgainst??0}</span></div>
+    <div class="stat-pill">P <span class="sv">${data.penaltiesFor??0}–${data.penaltiesAgainst??0}</span></div>
+    <div class="stat-pill">DK <span class="sv">${data.dropKicksFor??0}–${data.dropKicksAgainst??0}</span></div>
+  `;
+
+  const timerEl = document.getElementById(sid + '-timer');
+  if (timerEl) timerEl.textContent = timerFmt(data.timerSeconds);
+
+  const htEl = document.getElementById(sid + '-ht');
+  if (htEl) htEl.classList.toggle('active', !!data.blanked);
+}
+
+function renderAll() {
+  slotToField.forEach((fid, i) => { if (fid) renderSlot(i); });
+}
+
+function handleState(data) {
+  const fid = String(data.fieldId || '');
+  if (!ALL_FIELDS.includes(fid)) return;
+
+  const prevCount = slotToField.filter(Boolean).length;
+  fieldData[fid] = data;
+  assignSlot(fid);
+
+  const nowCount = slotToField.filter(Boolean).length;
+  if (nowCount !== prevCount) { renderAll(); }
+  else {
+    const idx = fieldToSlot(fid);
+    if (idx !== -1) renderSlot(idx);
+  }
+
+  document.getElementById('waiting').style.display = 'none';
+}
+
+function toggleFullscreen() {
+  const btn = document.getElementById('fs-btn');
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    if (btn) btn.textContent = '✕';
+  } else {
+    document.exitFullscreen().catch(() => {});
+    if (btn) btn.textContent = '⛶';
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  const btn = document.getElementById('fs-btn');
+  if (btn) btn.textContent = document.fullscreenElement ? '✕' : '⛶';
+});
+
+const ably = new Ably.Realtime({ key: ABLY_API_KEY, clientId: 'patchlab-scoreboard-display' });
+const ch   = ably.channels.get(ABLY_CHANNEL);
+
+ably.connection.on('connected', async () => {
+  try {
+    const page = await ch.history({ limit: 40 });
+    page.items.slice().reverse().forEach(msg => {
+      if (msg.name === 'state' && msg.data) handleState(msg.data);
+    });
+  } catch(e) { console.warn('History fetch failed', e); }
+});
+
+ch.subscribe('state', msg => {
+  if (msg.data) handleState(msg.data);
+});
+</script>
+</body>
+</html>

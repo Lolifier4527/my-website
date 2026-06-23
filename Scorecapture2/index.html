@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#07070a">
+<title>PatchLab – Score Capture 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --accent:     #22d3ee;
+  --accent-dim: rgba(34,211,238,0.12);
+  --purple:     #b06ef3;
+  --purple-dim: rgba(176,110,243,0.15);
+  --green:      #4ade80;
+  --red:        #f472b6;
+  --bg:         #07070a;
+  --surface:    #0e0e14;
+  --surface2:   #12121a;
+  --border:     rgba(34,211,238,0.22);
+  --border-p:   rgba(176,110,243,0.25);
+  --text:       #e2e2f0;
+  --text-muted: #7878a0;
+  --font-d: 'Orbitron', sans-serif;
+  --font-b: 'Inter', sans-serif;
+}
+html, body { background: var(--bg); color: var(--text); font-family: var(--font-b); min-height: 100vh; -webkit-tap-highlight-color: transparent; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+  backdrop-filter: blur(10px);
+}
+.topbar-brand { display: flex; flex-direction: column; }
+.topbar-title { font-family: var(--font-d); font-size: 18px; color: var(--accent); letter-spacing: 2px; font-weight: 700; }
+.topbar-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; letter-spacing: 1px; }
+.topbar-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 8px; border-radius: 8px; font-size: 20px; display: flex; align-items: center; transition: color 0.2s; }
+.topbar-btn:hover { color: var(--accent); }
+
+#app { max-width: 480px; margin: 0 auto; }
+.scroll-body { padding: 14px 16px 40px; display: flex; flex-direction: column; gap: 12px; }
+
+.score-banner {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 18px; display: flex; align-items: center; justify-content: space-evenly;
+  position: relative; overflow: hidden;
+}
+.score-banner::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(34,211,238,0.06), transparent 70%);
+  pointer-events: none;
+}
+.score-pill { text-align: center; position: relative; z-index: 1; }
+.score-pill-num { font-family: var(--font-d); font-size: 56px; line-height: 1; transition: color 0.3s; font-weight: 700; }
+.score-pill-num.leader { color: var(--accent); text-shadow: 0 0 20px rgba(34,211,238,0.5); }
+.score-pill-num.neutral { color: rgba(200,200,220,0.3); }
+.score-pill-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; max-width: 110px; line-height: 1.3; letter-spacing: 0.5px; }
+.score-vs { font-family: var(--font-d); font-size: 20px; color: var(--purple); opacity: 0.7; position: relative; z-index: 1; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.card-body { padding: 16px; }
+.section-header { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 16px; letter-spacing: 1.5px; text-transform: uppercase; }
+
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+.field input {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-family: var(--font-b);
+  font-size: 15px; padding: 12px 14px; outline: none; -webkit-appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(34,211,238,0.1); }
+.field.error input { border-color: var(--red); }
+.err-msg { font-size: 11px; color: var(--red); margin-top: 4px; display: none; }
+
+.age-group-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; }
+.age-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text-muted); font-family: var(--font-b);
+  font-size: 12px; font-weight: 600; padding: 10px 4px; cursor: pointer;
+  text-align: center; transition: all 0.15s;
+}
+.age-btn.selected { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.score-card-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.score-card-title { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; }
+.score-card-title.for { color: var(--accent); }
+.score-card-title.against { color: var(--purple); }
+.pts-badge { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.pts-badge.for     { background: var(--accent-dim); color: var(--accent); }
+.pts-badge.against { background: var(--purple-dim); color: var(--purple); }
+
+.stepper-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(34,211,238,0.08); }
+.stepper-row:last-child { border-bottom: none; }
+.stepper-label { font-size: 14px; color: var(--text); }
+.stepper-controls { display: flex; align-items: center; gap: 14px; }
+.stepper-val { font-family: var(--font-d); font-size: 22px; color: var(--accent); min-width: 28px; text-align: center; line-height: 1; font-weight: 600; }
+.stepper-btn { width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; flex-shrink: 0; transition: transform 0.1s; }
+.stepper-btn:active { transform: scale(0.88); }
+.stepper-btn.plus.for     { background: var(--accent); color: #07070a; box-shadow: 0 0 12px rgba(34,211,238,0.4); }
+.stepper-btn.plus.against { background: var(--purple); color: #fff; box-shadow: 0 0 12px rgba(176,110,243,0.4); }
+.stepper-btn.minus { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+.stepper-btn:disabled { opacity: 0.3; }
+
+.blank-btn {
+  width: 100%; background: var(--surface2); border: 2px solid rgba(34,211,238,0.2);
+  border-radius: 12px; color: var(--text-muted); font-family: var(--font-b);
+  font-size: 14px; font-weight: 700; padding: 14px; cursor: pointer; letter-spacing: 1px;
+  display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;
+}
+.blank-btn.blanked { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.timer-display { display: flex; align-items: center; justify-content: center; margin: 8px 0; }
+.timer-digits { font-family: var(--font-d); font-size: 52px; letter-spacing: 4px; color: var(--text-muted); line-height: 1; transition: color 0.3s; font-weight: 600; }
+.timer-digits.running { color: var(--accent); text-shadow: 0 0 20px rgba(34,211,238,0.4); }
+.timer-digits.expired { color: var(--red); animation: tf 0.8s infinite; }
+@keyframes tf { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.timer-set-row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
+.timer-set-row input { width: 56px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font-b); font-size: 16px; padding: 8px 10px; outline: none; text-align: center; -webkit-appearance: none; }
+.timer-set-row input:focus { border-color: var(--accent); }
+.timer-btn-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.timer-btn { border: none; border-radius: 10px; cursor: pointer; font-family: var(--font-b); font-size: 13px; font-weight: 700; padding: 13px 8px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.1s; }
+.timer-btn:active { transform: scale(0.94); }
+.timer-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.timer-btn.start { background: var(--green); color: #07070a; }
+.timer-btn.stop  { background: var(--red); color: #fff; }
+.timer-btn.reset { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+.sb-pill {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--border-p);
+  border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: border-color 0.2s;
+}
+.sb-pill:hover { border-color: var(--purple); }
+.sb-pill-left { display: flex; align-items: center; gap: 10px; }
+.sb-pill-label { font-size: 14px; font-weight: 600; color: var(--purple); }
+.sb-pill-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+.subs-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 16px; }
+.subs-title { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; }
+.subs-title.for { color: var(--accent); }
+.subs-title.against { color: var(--purple); }
+.subs-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.subs-badge.for     { background: var(--accent-dim); color: var(--accent); }
+.subs-badge.against { background: var(--purple-dim); color: var(--purple); }
+.subs-chevron { color: var(--text-muted); font-size: 18px; transition: transform 0.2s; }
+.subs-chevron.open { transform: rotate(180deg); }
+.subs-body { padding: 0 16px 16px; display: none; }
+.subs-body.open { display: block; }
+.sub-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.sub-row:last-of-type { border-bottom: none; }
+.sub-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.sub-num.for     { background: var(--accent-dim); color: var(--accent); }
+.sub-num.against { background: var(--purple-dim); color: var(--purple); }
+.sub-info { flex: 1; min-width: 0; }
+.sub-jerseys { display: flex; align-items: center; gap: 4px; font-size: 13px; margin-bottom: 2px; }
+.jersey-off { background: rgba(244,114,182,0.18); color: var(--red); padding: 1px 6px; border-radius: 4px; font-weight: 700; font-size: 12px; }
+.jersey-on  { background: rgba(74,222,128,0.18); color: var(--green); padding: 1px 6px; border-radius: 4px; font-weight: 700; font-size: 12px; }
+.jersey-arrow { color: var(--text-muted); font-size: 12px; }
+.sub-minute { color: var(--accent); font-size: 11px; font-weight: 700; margin-left: 4px; }
+.sub-reason { font-size: 11px; margin-top: 1px; }
+.sub-actions { display: flex; gap: 2px; flex-shrink: 0; }
+.sub-action-btn { background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px; font-size: 14px; color: var(--text-muted); }
+.sub-action-btn.del { color: var(--red); }
+.no-subs { font-size: 13px; color: var(--text-muted); padding: 4px 0 12px; }
+.add-sub-btn { width: 100%; margin-top: 10px; background: none; border: 1px dashed var(--border); border-radius: 8px; color: var(--text-muted); font-family: var(--font-b); font-size: 13px; font-weight: 600; padding: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.add-sub-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.submit-btn {
+  width: 100%; background: linear-gradient(135deg, var(--accent) 0%, #0891b2 100%);
+  border: none; border-radius: 12px; color: #07070a; font-family: var(--font-b);
+  font-size: 16px; font-weight: 700; padding: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: opacity 0.2s, transform 0.1s;
+  box-shadow: 0 4px 20px rgba(34,211,238,0.3);
+  letter-spacing: 0.5px;
+}
+.submit-btn:active { transform: scale(0.98); }
+
+.overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+.overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 20px 20px 40px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(.32,1,.23,1); max-height: 92vh; overflow-y: auto; border-top: 1px solid var(--border); }
+.overlay.open .modal { transform: translateY(0); }
+.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-family: var(--font-d); font-size: 22px; color: var(--accent); margin-bottom: 18px; letter-spacing: 2px; font-weight: 700; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.reason-list { display: flex; flex-direction: column; gap: 6px; }
+.reason-opt { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all 0.15s; }
+.reason-opt.selected { border-color: var(--reason-color,var(--accent)); background: color-mix(in srgb, var(--reason-color,var(--accent)) 12%, transparent); }
+.reason-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.reason-label { font-size: 14px; color: var(--text); flex: 1; }
+.reason-opt.selected .reason-label { font-weight: 600; color: var(--reason-color,var(--accent)); }
+.reason-check { font-size: 14px; color: var(--reason-color,var(--accent)); display: none; }
+.reason-opt.selected .reason-check { display: block; }
+.modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.btn-cancel { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font-b); font-size: 15px; font-weight: 600; padding: 14px; cursor: pointer; }
+.btn-confirm { background: var(--accent); border: none; border-radius: 8px; color: #07070a; font-family: var(--font-b); font-size: 15px; font-weight: 700; padding: 14px; cursor: pointer; }
+.confirm-overlay { position: fixed; inset: 0; z-index: 250; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.confirm-overlay.open { opacity: 1; pointer-events: all; }
+.confirm-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 100%; max-width: 340px; text-align: center; }
+.confirm-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.confirm-box p  { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+.confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.confirm-cancel { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font-b); font-size: 14px; font-weight: 600; padding: 12px; cursor: pointer; }
+.confirm-ok { background: var(--red); border: none; border-radius: 8px; color: #fff; font-family: var(--font-b); font-size: 14px; font-weight: 700; padding: 12px; cursor: pointer; }
+.email-overlay { position: fixed; inset: 0; z-index: 220; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+.email-overlay.open { opacity: 1; pointer-events: all; }
+.email-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 360px; text-align: center; }
+.email-icon { font-size: 48px; margin-bottom: 12px; }
+.email-box h3 { font-family: var(--font-d); font-size: 24px; color: var(--accent); margin-bottom: 8px; letter-spacing: 2px; }
+.email-box p  { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
+.email-actions { display: flex; flex-direction: column; gap: 10px; }
+.email-send-btn { background: var(--green); border: none; border-radius: 10px; color: #07070a; font-family: var(--font-b); font-size: 15px; font-weight: 700; padding: 16px; cursor: pointer; }
+.email-skip-btn { background: none; border: 1px solid var(--border); border-radius: 10px; color: var(--text-muted); font-family: var(--font-b); font-size: 14px; font-weight: 600; padding: 14px; cursor: pointer; }
+.history-match-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; }
+.history-match-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.history-match-title { font-size: 14px; font-weight: 700; }
+.history-match-date  { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.result-badge { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 6px; }
+.result-badge.WIN  { background: rgba(74,222,128,0.2); color: var(--green); }
+.result-badge.LOSS { background: rgba(244,114,182,0.2); color: var(--red); }
+.result-badge.DRAW { background: var(--accent-dim); color: var(--accent); }
+.history-score { font-family: var(--font-d); font-size: 42px; text-align: center; color: var(--accent); margin: 4px 0; font-weight: 700; }
+.history-score span { color: rgba(200,200,220,0.25); }
+.history-stats { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+.stat-chip { background: var(--surface2); border-radius: 6px; padding: 3px 10px; font-size: 11px; color: var(--text-muted); }
+.stat-chip b { color: var(--text); }
+.clear-btn { background: none; border: 1px solid rgba(244,114,182,0.3); border-radius: 8px; color: var(--red); font-family: var(--font-b); font-size: 13px; font-weight: 600; padding: 10px 16px; cursor: pointer; margin-bottom: 16px; width: 100%; }
+.empty-history { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 15px; }
+.empty-history .big-icon { font-size: 56px; margin-bottom: 12px; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; font-size: 14px; font-weight: 500; color: var(--text); z-index: 300; transition: transform 0.3s cubic-bezier(.32,1,.23,1); white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: var(--green); color: var(--green); }
+.toast.error   { border-color: var(--red); color: var(--red); }
+.page { display: none; }
+.page.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ═══ CAPTURE ═══ -->
+<div id="page-capture" class="page active">
+  <div id="app">
+    <div class="topbar">
+      <div class="topbar-brand">
+        <div class="topbar-title">SCORE CAPTURE 2</div>
+        <div class="topbar-sub">PATCHLAB · FIELD 2</div>
+      </div>
+      <button class="topbar-btn" onclick="showHistory()" title="Match History">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </button>
+    </div>
+    <div class="scroll-body">
+
+      <div class="sb-pill" onclick="window.open('https://patchlab.co.za/Scoreboard','_blank')">
+        <div class="sb-pill-left">
+          <span style="font-size:20px">📺</span>
+          <div>
+            <div class="sb-pill-label">Open Live Scoreboard</div>
+            <div class="sb-pill-sub">Opens in new tab</div>
+          </div>
+        </div>
+        <div style="color:var(--purple);opacity:0.6;font-size:18px">›</div>
+      </div>
+
+      <button class="blank-btn" id="blank-btn" onclick="toggleBlank()">⬛ BLANK SCOREBOARD – HALF TIME</button>
+
+      <div class="score-banner">
+        <div class="score-pill">
+          <div class="score-pill-num neutral" id="banner-for">0</div>
+          <div class="score-pill-label" id="banner-home-label">HOME</div>
+        </div>
+        <div class="score-vs">VS</div>
+        <div class="score-pill">
+          <div class="score-pill-num neutral" id="banner-against">0</div>
+          <div class="score-pill-label" id="banner-away-label">AWAY</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="section-header">⏱ MATCH TIMER</div>
+          <div class="timer-display"><div class="timer-digits" id="timer-digits">40:00</div></div>
+          <div class="timer-set-row">
+            <label>SET:</label>
+            <input type="number" id="timer-min" value="40" min="0" max="99" inputmode="numeric">
+            <span>:</span>
+            <input type="number" id="timer-sec" value="00" min="0" max="59" inputmode="numeric">
+            <button class="timer-btn reset" style="flex:1;margin-left:4px" onclick="timerApply()">Apply</button>
+          </div>
+          <div class="timer-btn-row">
+            <button class="timer-btn start" id="timer-start-btn" onclick="timerStart()">▶ Start</button>
+            <button class="timer-btn stop"  id="timer-stop-btn"  onclick="timerStop()"  disabled>⏸ Stop</button>
+            <button class="timer-btn reset"                       onclick="timerReset()">↺ Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="section-header">📋 MATCH INFO</div>
+          <div class="field" id="field-home">
+            <label>HOME TEAM NAME *</label>
+            <input type="text" id="home-team" placeholder="Home team" oninput="onInput()" autocomplete="off">
+            <div class="err-msg" id="err-home">Please enter the home team name</div>
+          </div>
+          <div class="field" id="field-opponent">
+            <label>AWAY TEAM NAME *</label>
+            <input type="text" id="opposing-team" placeholder="Away team" oninput="onInput()" autocomplete="off">
+            <div class="err-msg" id="err-opponent">Please enter the away team name</div>
+          </div>
+          <div class="field">
+            <label>AGE GROUP</label>
+            <div class="age-group-grid" id="age-group-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card"><div class="card-body">
+        <div class="score-card-title-row">
+          <div class="score-card-title for" id="for-title">HOME (FOR)</div>
+          <div class="pts-badge for" id="pts-for">0 pts</div>
+        </div>
+        <div class="stepper-row"><div class="stepper-label">Tries (×5)</div><div class="stepper-controls"><button class="stepper-btn minus" id="btn-triesFor-minus" onclick="delta('triesFor',-1)">−</button><div class="stepper-val" id="val-triesFor">0</div><button class="stepper-btn plus for" onclick="delta('triesFor',1)">+</button></div></div>
+        <div class="stepper-row"><div class="stepper-label">Conversions (×2)</div><div class="stepper-controls"><button class="stepper-btn minus" id="btn-conversionsFor-minus" onclick="delta('conversionsFor',-1)">−</button><div class="stepper-val" id="val-conversionsFor">0</div><button class="stepper-btn plus for" onclick="delta('conversionsFor',1)">+</button></div></div>
+        <div class="stepper-row"><div class="stepper-label">Penalties (×3)</div><div class="stepper-controls"><button class="stepper-btn minus" id="btn-penaltiesFor-minus" onclick="delta('penaltiesFor',-1)">−</button><div class="stepper-val" id="val-penaltiesFor">0</div><button class="stepper-btn plus for" onclick="delta('penaltiesFor',1)">+</button></div></div>
+        <div class="stepper-row"><div class="stepper-label">Drop Kicks (×3)</div><div class="stepper-controls"><button class="stepper-btn minus" id="btn-dropKicksFor-minus" onclick="delta('dropKicksFor',-1)">−</button><div class="stepper-val" id="val-dropKicksFor">0</div><button class="stepper-btn plus for" onclick="delta('dropKicksFor',1)">+</button></div></div>
+      </div></div>
+
+      <div class="card"><div class="card-body">
+        <div class="score-card-title-row">
+          <div class="score-card-title against" id="against-title">AWAY (AGAINST)</div>
+          <div class="pts-badge against" id="pts-against">0 pts</div>
+        </div>
+        <div class="stepper-row"><div class="stepper-label">Tries (×5)</div><div class="stepper-controls"><button class="stepper-btn minus" id="btn-triesAgainst-minus" onclick="delta('triesAgainst',-1)">−</button><div class="stepper-val" id="val-triesAgainst">0</div><button class="stepper-btn plus against" onclick="delta('triesAgainst',1)">+</button></div></div>
+        <div class="stepper-row"><div class="stepper-label">Conversions (×2)</div><div class="stepper-controls"><button class="stepper-btn minus" id="btn-conversionsAgainst-minus" onclick="delta('conversionsAgainst',-1)">−</button><div class="stepper-val" id="val-conversionsAgainst">0</div><button class="stepper-btn plus against" onclick="delta('conversionsAgainst',1)">+</button></div></div>
+        <div class="stepper-row"><div class="stepper-label">Penalties (×3)</div><div class="stepper-controls"><button class="stepper-btn minus" id="btn-penaltiesAgainst-minus" onclick="delta('penaltiesAgainst',-1)">−</button><div class="stepper-val" id="val-penaltiesAgainst">0</div><button class="stepper-btn plus against" onclick="delta('penaltiesAgainst',1)">+</button></div></div>
+        <div class="stepper-row"><div class="stepper-label">Drop Kicks (×3)</div><div class="stepper-controls"><button class="stepper-btn minus" id="btn-dropKicksAgainst-minus" onclick="delta('dropKicksAgainst',-1)">−</button><div class="stepper-val" id="val-dropKicksAgainst">0</div><button class="stepper-btn plus against" onclick="delta('dropKicksAgainst',1)">+</button></div></div>
+      </div></div>
+
+      <div class="card">
+        <div class="subs-header" onclick="toggleSubs('for')">
+          <span class="subs-title for" id="subs-for-title">Substitutions – Home</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="subs-badge for" id="subs-for-badge" style="display:none"></span>
+            <span class="subs-chevron open" id="subs-for-chevron">▾</span>
+          </div>
+        </div>
+        <div class="subs-body open" id="subs-for-body">
+          <div id="subs-for-list"></div>
+          <button class="add-sub-btn" id="add-sub-for-btn" onclick="openSubDialog('for',null)">+ Add Substitution (0/20)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="subs-header" onclick="toggleSubs('against')">
+          <span class="subs-title against" id="subs-against-title">Substitutions – Away</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="subs-badge against" id="subs-against-badge" style="display:none"></span>
+            <span class="subs-chevron open" id="subs-against-chevron">▾</span>
+          </div>
+        </div>
+        <div class="subs-body open" id="subs-against-body">
+          <div id="subs-against-list"></div>
+          <button class="add-sub-btn" id="add-sub-against-btn" onclick="openSubDialog('against',null)">+ Add Substitution (0/20)</button>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="submitResults()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Submit Results
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HISTORY ═══ -->
+<div id="page-history" class="page">
+  <div class="topbar">
+    <button class="topbar-btn" onclick="backFromHistory()" style="padding:8px 8px 8px 0">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div style="font-family:var(--font-d);font-size:18px;color:var(--accent);letter-spacing:2px;font-weight:700">MATCH HISTORY</div>
+    <div style="width:38px"></div>
+  </div>
+  <div class="scroll-body" id="history-body" style="max-width:480px;margin:0 auto;"></div>
+</div>
+
+<!-- SUB DIALOG -->
+<div class="overlay" id="sub-overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">ADD SUBSTITUTION</div>
+    <div class="row-2" style="margin-bottom:12px">
+      <div class="field"><label>🟥 PLAYER OFF (#)</label><input type="number" id="sub-off" placeholder="e.g. 1" min="1" max="99" inputmode="numeric"><div class="err-msg" id="err-sub-off">Required</div></div>
+      <div class="field"><label>🟩 PLAYER ON (#)</label><input type="number" id="sub-on" placeholder="e.g. 18" min="1" max="99" inputmode="numeric"><div class="err-msg" id="err-sub-on">Required</div></div>
+    </div>
+    <div class="field" style="margin-bottom:12px"><label>MINUTE (optional)</label><input type="number" id="sub-min" placeholder="e.g. 55" min="1" max="200" inputmode="numeric"></div>
+    <div class="field"><label>REASON</label><div class="reason-list" id="reason-list"></div></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeSubDialog()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmSub()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div style="font-size:32px;margin-bottom:10px">⚠️</div>
+    <h3 id="confirm-title">Clear All History?</h3>
+    <p id="confirm-msg">This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-ok" id="confirm-ok-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="email-overlay" id="email-overlay">
+  <div class="email-box">
+    <div class="email-icon">🏉</div>
+    <h3>RESULTS SAVED!</h3>
+    <p id="email-summary"></p>
+    <div class="email-actions">
+      <button class="email-send-btn" onclick="sendEmail()">📧 Email Results</button>
+      <button class="email-skip-btn" onclick="skipEmail()">Skip – Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+<script>
+const FIELD_ID     = '2';
+const AGE_GROUPS   = ['U/9','U/10','U/11','U/13','Open'];
+const MAX_SUBS     = 20;
+const RECIPIENT    = 'russell.pitchers@gmail.com';
+const ABLY_API_KEY = '0TZ7SA.6wlyfQ:CSQeEsQNHUAtneNwaktRsK3R0uzmod0D0fvVK2-5qUM';
+const ABLY_CHANNEL = 'patchlab-scoreboard';
+const HISTORY_KEY  = 'patchlab_history_field2';
+
+const REASONS = [
+  {key:'INJURY',label:'Injury',color:'#f472b6'},
+  {key:'TACTICAL',label:'Tactical',color:'#22d3ee'},
+  {key:'YELLOW_CARD',label:'Yellow Card',color:'#fbbf24'},
+  {key:'YELLOW_CARD_RETURN',label:'Yellow Card Return',color:'#4ade80'},
+  {key:'RED_CARD',label:'Red Card',color:'#ef4444'},
+];
+
+let dialogTeam='for',dialogEditIdx=null,dialogReason='TACTICAL',pendingMatch=null;
+function freshState(){return{homeTeam:'',opposingTeam:'',ageGroup:AGE_GROUPS[0],triesFor:0,conversionsFor:0,penaltiesFor:0,dropKicksFor:0,triesAgainst:0,conversionsAgainst:0,penaltiesAgainst:0,dropKicksAgainst:0,subsFor:[],subsAgainst:[],blanked:false};}
+let state=freshState();
+const timer={seconds:40*60,running:false,interval:null};
+
+function buildAgeGrid(){const grid=document.getElementById('age-group-grid');grid.innerHTML='';AGE_GROUPS.forEach(ag=>{const btn=document.createElement('button');btn.className='age-btn'+(ag===state.ageGroup?' selected':'');btn.textContent=ag;btn.onclick=()=>{state.ageGroup=ag;grid.querySelectorAll('.age-btn').forEach(b=>b.classList.toggle('selected',b.textContent===ag));broadcastState();};grid.appendChild(btn);});}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');}
+function showHistory(){renderHistory();showPage('history');}
+function backFromHistory(){showPage('capture');}
+function totalFor(){return state.triesFor*5+state.conversionsFor*2+state.penaltiesFor*3+state.dropKicksFor*3;}
+function totalAgainst(){return state.triesAgainst*5+state.conversionsAgainst*2+state.penaltiesAgainst*3+state.dropKicksAgainst*3;}
+function matchResult(f,a){return f>a?'WIN':f<a?'LOSS':'DRAW';}
+
+function render(){
+  const f=totalFor(),a=totalAgainst(),home=state.homeTeam.trim()||'HOME',away=state.opposingTeam.trim()||'AWAY';
+  document.getElementById('banner-for').textContent=f;document.getElementById('banner-against').textContent=a;
+  document.getElementById('banner-for').className='score-pill-num '+(f>=a&&f>0?'leader':'neutral');
+  document.getElementById('banner-against').className='score-pill-num '+(a>f?'leader':'neutral');
+  document.getElementById('banner-home-label').textContent=home.toUpperCase();document.getElementById('banner-away-label').textContent=away.toUpperCase();
+  document.getElementById('for-title').textContent=home.toUpperCase()+' (HOME)';document.getElementById('against-title').textContent=away.toUpperCase()+' (AWAY)';
+  document.getElementById('subs-for-title').textContent='Substitutions – '+home;document.getElementById('subs-against-title').textContent='Substitutions – '+away;
+  document.getElementById('pts-for').textContent=f+' pts';document.getElementById('pts-against').textContent=a+' pts';
+  ['triesFor','conversionsFor','penaltiesFor','dropKicksFor','triesAgainst','conversionsAgainst','penaltiesAgainst','dropKicksAgainst'].forEach(k=>{document.getElementById('val-'+k).textContent=state[k];const mb=document.getElementById('btn-'+k+'-minus');if(mb)mb.disabled=state[k]===0;});
+  renderSubsList('for');renderSubsList('against');broadcastState();
+}
+function renderSubsList(team){const subs=team==='for'?state.subsFor:state.subsAgainst,listEl=document.getElementById('subs-'+team+'-list'),badgeEl=document.getElementById('subs-'+team+'-badge'),addBtn=document.getElementById('add-sub-'+team+'-btn');if(subs.length===0){listEl.innerHTML='<div class="no-subs">No substitutions yet.</div>';}else{listEl.innerHTML=subs.map((sub,i)=>{const r=REASONS.find(r=>r.key===sub.reason)||REASONS[1];return`<div class="sub-row"><div class="sub-num ${team}">${i+1}</div><div class="sub-info"><div class="sub-jerseys"><span class="jersey-off">#${sub.playerOff}</span><span class="jersey-arrow">→</span><span class="jersey-on">#${sub.playerOn}</span>${sub.minute?`<span class="sub-minute">${sub.minute}'</span>`:''}</div><div class="sub-reason" style="color:${r.color}">${r.label}</div></div><div class="sub-actions"><button class="sub-action-btn" onclick="openSubDialog('${team}',${i})">✏️</button><button class="sub-action-btn del" onclick="removeSub('${team}',${i})">🗑️</button></div></div>`;}).join('');}if(badgeEl){badgeEl.style.display=subs.length>0?'':'none';if(subs.length>0)badgeEl.textContent=subs.length;}if(addBtn){addBtn.disabled=subs.length>=MAX_SUBS;addBtn.textContent=subs.length<MAX_SUBS?`+ Add Substitution (${subs.length}/${MAX_SUBS})`:`Maximum ${MAX_SUBS} reached`;}}
+function delta(key,d){state[key]=Math.max(0,state[key]+d);render();}
+function onInput(){state.homeTeam=document.getElementById('home-team').value;state.opposingTeam=document.getElementById('opposing-team').value;document.getElementById('field-home').classList.remove('error');document.getElementById('field-opponent').classList.remove('error');document.getElementById('err-home').style.display='none';document.getElementById('err-opponent').style.display='none';render();}
+function toggleSubs(t){const b=document.getElementById('subs-'+t+'-body'),c=document.getElementById('subs-'+t+'-chevron');b.classList.toggle('open');c.classList.toggle('open',b.classList.contains('open'));}
+function removeSub(t,i){if(t==='for')state.subsFor.splice(i,1);else state.subsAgainst.splice(i,1);render();}
+function toggleBlank(){state.blanked=!state.blanked;const btn=document.getElementById('blank-btn');btn.textContent=state.blanked?'▶ UNBLANK SCOREBOARD – RESUME':'⬛ BLANK SCOREBOARD – HALF TIME';btn.classList.toggle('blanked',state.blanked);broadcastState();}
+function openSubDialog(team,editIdx){dialogTeam=team;dialogEditIdx=editIdx;const existing=editIdx!==null?(team==='for'?state.subsFor[editIdx]:state.subsAgainst[editIdx]):null;document.getElementById('modal-title').textContent=(existing?'EDIT':'ADD')+' SUBSTITUTION';document.getElementById('sub-off').value=existing?existing.playerOff:'';document.getElementById('sub-on').value=existing?existing.playerOn:'';document.getElementById('sub-min').value=existing&&existing.minute?existing.minute:'';document.getElementById('err-sub-off').style.display='none';document.getElementById('err-sub-on').style.display='none';dialogReason=existing?existing.reason:'TACTICAL';renderReasonList();document.getElementById('sub-overlay').classList.add('open');}
+function renderReasonList(){document.getElementById('reason-list').innerHTML=REASONS.map(r=>`<div class="reason-opt ${r.key===dialogReason?'selected':''}" style="--reason-color:${r.color}" onclick="selectReason('${r.key}')"><div class="reason-dot" style="background:${r.color}"></div><span class="reason-label">${r.label}</span><span class="reason-check">✓</span></div>`).join('');}
+function selectReason(k){dialogReason=k;renderReasonList();}
+function closeSubDialog(){document.getElementById('sub-overlay').classList.remove('open');}
+function overlayClick(e){if(e.target===document.getElementById('sub-overlay'))closeSubDialog();}
+function confirmSub(){const off=parseInt(document.getElementById('sub-off').value),on=parseInt(document.getElementById('sub-on').value);let ok=true;if(!off||off<1||off>99){document.getElementById('err-sub-off').style.display='';ok=false;}if(!on||on<1||on>99){document.getElementById('err-sub-on').style.display='';ok=false;}if(!ok)return;const min=parseInt(document.getElementById('sub-min').value);const sub={playerOff:off,playerOn:on,reason:dialogReason,minute:isNaN(min)?null:min};if(dialogTeam==='for'){if(dialogEditIdx!==null)state.subsFor[dialogEditIdx]=sub;else if(state.subsFor.length<MAX_SUBS)state.subsFor.push(sub);}else{if(dialogEditIdx!==null)state.subsAgainst[dialogEditIdx]=sub;else if(state.subsAgainst.length<MAX_SUBS)state.subsAgainst.push(sub);}closeSubDialog();render();}
+function submitResults(){if(!state.homeTeam.trim()){document.getElementById('field-home').classList.add('error');document.getElementById('err-home').style.display='';document.getElementById('home-team').scrollIntoView({behavior:'smooth',block:'center'});return;}if(!state.opposingTeam.trim()){document.getElementById('field-opponent').classList.add('error');document.getElementById('err-opponent').style.display='';document.getElementById('opposing-team').scrollIntoView({behavior:'smooth',block:'center'});return;}const f=totalFor(),a=totalAgainst();pendingMatch={id:Date.now(),fieldId:FIELD_ID,homeTeam:state.homeTeam.trim(),opposingTeam:state.opposingTeam.trim(),ageGroup:state.ageGroup,triesFor:state.triesFor,conversionsFor:state.conversionsFor,penaltiesFor:state.penaltiesFor,dropKicksFor:state.dropKicksFor,triesAgainst:state.triesAgainst,conversionsAgainst:state.conversionsAgainst,penaltiesAgainst:state.penaltiesAgainst,dropKicksAgainst:state.dropKicksAgainst,subsFor:[...state.subsFor],subsAgainst:[...state.subsAgainst],totalFor:f,totalAgainst:a,result:matchResult(f,a),capturedAt:Date.now(),emailSent:false};saveMatch(pendingMatch);const res={WIN:'✅ WIN',LOSS:'❌ LOSS',DRAW:'🤝 DRAW'}[pendingMatch.result];document.getElementById('email-summary').innerHTML=`<strong>${state.homeTeam.trim()} ${f} – ${a} ${state.opposingTeam.trim()}</strong><br>${state.ageGroup} · Field ${FIELD_ID} · ${res}<br><br>Send results to admin?`;document.getElementById('email-overlay').classList.add('open');}
+function buildEmailBody(m){const d=new Date(m.capturedAt);const ds=d.toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});const ts=d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});const res={WIN:'✅ WIN',LOSS:'❌ LOSS',DRAW:'🤝 DRAW'}[m.result];return`Match result captured on ${ds} at ${ts}.\n\nField: ${m.fieldId} | Age Group: ${m.ageGroup}\nHome: ${m.homeTeam} | Away: ${m.opposingTeam}\n\nFINAL SCORE: ${m.homeTeam} ${m.totalFor} – ${m.totalAgainst} ${m.opposingTeam}\nRESULT: ${res}\n\nTries: ${m.triesFor}–${m.triesAgainst} | Conversions: ${m.conversionsFor}–${m.conversionsAgainst} | Penalties: ${m.penaltiesFor}–${m.penaltiesAgainst} | Drop Kicks: ${m.dropKicksFor}–${m.dropKicksAgainst}\n\nSubmitted via PatchLab Score Capture.`;}
+function sendEmail(){if(!pendingMatch)return;const subject=encodeURIComponent(`Results – Field ${pendingMatch.fieldId} – ${pendingMatch.ageGroup} – ${pendingMatch.homeTeam} vs ${pendingMatch.opposingTeam}`);const body=encodeURIComponent(buildEmailBody(pendingMatch));const a=document.createElement('a');a.href=`mailto:${RECIPIENT}?subject=${subject}&body=${body}`;a.target='_blank';document.body.appendChild(a);a.click();setTimeout(()=>document.body.removeChild(a),200);document.getElementById('email-overlay').classList.remove('open');pendingMatch=null;resetForm();showToast('Email app opened! ✅','success');}
+function skipEmail(){document.getElementById('email-overlay').classList.remove('open');pendingMatch=null;resetForm();showToast('Results saved.','success');}
+function resetForm(){state=freshState();document.getElementById('home-team').value='';document.getElementById('opposing-team').value='';buildAgeGrid();render();}
+function loadHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]')}catch{return[]}}
+function saveHistory(h){try{localStorage.setItem(HISTORY_KEY,JSON.stringify(h))}catch{}}
+function saveMatch(m){const h=loadHistory();h.unshift(m);saveHistory(h);}
+function clearHistory(){saveHistory([]);closeConfirm();renderHistory();showToast('History cleared.','success');}
+function renderHistory(){const ms=loadHistory(),body=document.getElementById('history-body');if(!ms.length){body.innerHTML=`<div class="empty-history"><div class="big-icon">🏉</div>No matches recorded yet</div>`;return;}const fmt=ts=>{const d=new Date(ts);return d.toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});};body.innerHTML=`<button class="clear-btn" onclick="confirmClear()">🗑️ Clear History</button>`+ms.map(m=>`<div class="history-match-card"><div class="history-match-header"><div><div class="history-match-title">${esc(m.ageGroup)} · ${esc(m.homeTeam)} vs ${esc(m.opposingTeam)}</div><div class="history-match-date">${fmt(m.capturedAt)}</div></div><div class="result-badge ${m.result}">${m.result}</div></div><div class="history-score">${m.totalFor}<span> – </span>${m.totalAgainst}</div><div class="history-stats"><div class="stat-chip">T <b>${m.triesFor}–${m.triesAgainst}</b></div><div class="stat-chip">C <b>${m.conversionsFor}–${m.conversionsAgainst}</b></div><div class="stat-chip">P <b>${m.penaltiesFor}–${m.penaltiesAgainst}</b></div><div class="stat-chip">DK <b>${m.dropKicksFor}–${m.dropKicksAgainst}</b></div></div></div>`).join('');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function confirmClear(){const c=loadHistory().length;document.getElementById('confirm-title').textContent='Clear All History?';document.getElementById('confirm-msg').textContent=`Permanently delete all ${c} match${c!==1?'es':''}.`;document.getElementById('confirm-ok-btn').onclick=clearHistory;document.getElementById('confirm-overlay').classList.add('open');}
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');}
+function timerFmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function timerUpdateDisplay(){const el=document.getElementById('timer-digits');if(!el)return;el.textContent=timerFmt(timer.seconds);el.className='timer-digits'+(timer.running?' running':'')+(timer.seconds===0&&!timer.running?' expired':'');}
+function timerStart(){if(timer.running||timer.seconds<=0)return;timer.running=true;document.getElementById('timer-start-btn').disabled=true;document.getElementById('timer-stop-btn').disabled=false;timerUpdateDisplay();timer.interval=setInterval(()=>{if(timer.seconds>0){timer.seconds--;timerUpdateDisplay();broadcastState();}if(timer.seconds===0){clearInterval(timer.interval);timer.running=false;document.getElementById('timer-start-btn').disabled=true;document.getElementById('timer-stop-btn').disabled=true;timerUpdateDisplay();showToast('⏱️ Time is up!','error');}},1000);}
+function timerStop(){if(!timer.running)return;clearInterval(timer.interval);timer.running=false;document.getElementById('timer-start-btn').disabled=false;document.getElementById('timer-stop-btn').disabled=true;timerUpdateDisplay();}
+function timerReset(){timerStop();const m=parseInt(document.getElementById('timer-min')?.value)||40,s=parseInt(document.getElementById('timer-sec')?.value)||0;timer.seconds=Math.max(0,m*60+s);const sb=document.getElementById('timer-start-btn'),st=document.getElementById('timer-stop-btn');if(sb)sb.disabled=false;if(st)st.disabled=true;timerUpdateDisplay();}
+function timerApply(){timerStop();const m=parseInt(document.getElementById('timer-min').value)||0,s=parseInt(document.getElementById('timer-sec').value)||0;timer.seconds=Math.max(0,m*60+s);document.getElementById('timer-start-btn').disabled=false;document.getElementById('timer-stop-btn').disabled=true;timerUpdateDisplay();showToast('Timer set to '+timerFmt(timer.seconds),'success');}
+let _tt;
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');void t.offsetWidth;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2800);}
+let _ablyChannel=null;const _deb={};
+function getAblyChannel(){if(_ablyChannel)return Promise.resolve(_ablyChannel);return new Promise(resolve=>{if(!window.Ably){resolve(null);return;}const c=new Ably.Realtime({key:ABLY_API_KEY,clientId:'capture-field2'});c.connection.once('connected',()=>{_ablyChannel=c.channels.get(ABLY_CHANNEL);resolve(_ablyChannel);});c.connection.on('failed',()=>resolve(null));});}
+function broadcastState(){clearTimeout(_deb.b);_deb.b=setTimeout(async()=>{const payload={fieldId:FIELD_ID,homeTeam:state.homeTeam||'',opposingTeam:state.opposingTeam,ageGroup:state.ageGroup,triesFor:state.triesFor,conversionsFor:state.conversionsFor,penaltiesFor:state.penaltiesFor,dropKicksFor:state.dropKicksFor,triesAgainst:state.triesAgainst,conversionsAgainst:state.conversionsAgainst,penaltiesAgainst:state.penaltiesAgainst,dropKicksAgainst:state.dropKicksAgainst,subsFor:state.subsFor,subsAgainst:state.subsAgainst,totalFor:totalFor(),totalAgainst:totalAgainst(),timerSeconds:timer.seconds,timerRunning:timer.running,blanked:state.blanked||false};const ch=await getAblyChannel();if(ch)ch.publish('state',payload).catch(()=>{});},300);}
+document.addEventListener('DOMContentLoaded',()=>{buildAgeGrid();render();timerUpdateDisplay();});
+</script>
+</body>
+</html>
