@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monnas Rugby Supporter Scoreboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold:   #D9B23C;
+  --gold-grad: linear-gradient(180deg, #fff6d8 0%, #f0d789 18%, #c99a2e 42%, #8a6414 58%, #eccd7c 76%, #b98a24 100%);
+  --bg:     #000000;
+  --panel:  #0a0a0a;
+  --border: rgba(217,178,60,0.22);
+  --font-d: 'Bebas Neue', sans-serif;
+  --font-b: 'DM Sans', sans-serif;
+}
+
+html, body {
+  background: radial-gradient(ellipse 120% 65% at 50% -10%, #1a1a1a 0%, var(--bg) 55%);
+  color: #fff;
+  font-family: var(--font-b);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Top bar ── */
+.topbar {
+  background: rgba(13,28,58,0.97);
+  border-bottom: 2px solid var(--gold);
+  padding: 16px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 104px;
+  position: relative; z-index: 10;
+}
+.topbar-logo { height: 66px; width: 66px; object-fit: contain; background: #fff; border-radius: 50%; padding: 5px; }
+.topbar-center { text-align: center; }
+.topbar-title { font-family: var(--font-d); font-size: clamp(36px, 3.6vw, 54px); letter-spacing: 8px; line-height: 1; background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4)); }
+.topbar-sub { font-size: clamp(14px, 1.5vw, 20px); color: rgba(217,178,60,0.65); letter-spacing: 2px; margin-top: 3px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+/* ── Fields viewport ── */
+#fields-area {
+  display: flex;
+  height: calc(100vh - 104px - 48px);
+  width: 100%;
+}
+
+/* ── Footer ── */
+.footer-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 48px;
+  background: #000000;
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, #a855f7, #22d3ee) 1;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font-b);
+  font-size: clamp(12px, 1.4vw, 16px);
+  color: rgba(34,211,238,0.85);
+  text-shadow: 0 0 8px rgba(34,211,238,0.35);
+  letter-spacing: 0.5px;
+  z-index: 20;
+}
+.footer-bar b {
+  background: linear-gradient(90deg, #a855f7, #22d3ee);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-weight: 700;
+}
+.footer-phone {
+  color: #c084fc;
+  text-shadow: 0 0 8px rgba(192,132,252,0.45);
+  font-weight: 600;
+}
+
+/* ── Field panel ── */
+.field-panel {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  position: relative;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.field-panel:last-child { border-right: none; }
+.field-panel.active { display: flex; }
+
+/* ── Background glow ── */
+.field-panel::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(30,30,30,0.5) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(217,178,60,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Field header ── */
+.field-header {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.field-label {
+  font-family: var(--font-d);
+  letter-spacing: 4px;
+  color: rgba(217,178,60,0.5);
+}
+.age-group-label {
+  font-family: var(--font-d);
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.75);
+  margin-top: 2px;
+}
+
+/* ── Score area ── */
+.score-area {
+  flex: 1; position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center; justify-items: center;
+  row-gap: 16px;
+  padding: 0 12px;
+}
+.team-name {
+  grid-row: 1;
+  font-family: var(--font-d);
+  letter-spacing: 2px; line-height: 1.1;
+  color: rgba(255,255,255,0.85);
+  word-break: break-word;
+  text-align: center;
+}
+.score-num {
+  grid-row: 2;
+  font-family: var(--font-d);
+  line-height: 1; text-align: center;
+  transition: color 0.4s;
+}
+.score-num.leader { background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5)); }
+.score-num.tied   { color: rgba(255,255,255,0.6); }
+.score-vs-label {
+  grid-row: 2;
+  font-family: var(--font-d);
+  color: rgba(217,178,60,0.4);
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(8px, 1.4vw, 16px);
+}
+.score-divider {
+  width: clamp(24px, 3vw, 44px); height: 5px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 3px;
+}
+.half-label {
+  font-family: var(--font-d);
+  font-size: clamp(72px, 9.5vw, 120px);
+  letter-spacing: 2px;
+  color: #fff;
+}
+
+/* ── Timer ── */
+.timer-readout {
+  flex: 0 0 auto;
+  font-family: var(--font-d);
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 3px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+/* ── Half time overlay ── */
+.halftime-overlay {
+  position: absolute; inset: 0; z-index: 50;
+  background: linear-gradient(160deg,#000000 0%,#0a0a0a 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.45s;
+  gap: 18px;
+}
+.halftime-overlay.active { opacity: 1; pointer-events: all; }
+.halftime-logo { height: clamp(60px, 11vw, 150px); width: clamp(60px, 11vw, 150px); object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)); }
+.halftime-text {
+  font-family: var(--font-d);
+  font-size: clamp(50px, 11.5vw, 150px);
+  letter-spacing: 8px;
+  animation: htPulse 2s infinite;
+  background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+}
+.halftime-score-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(20px, 5vw, 60px);
+}
+.halftime-team { text-align: center; }
+.halftime-team-name {
+  font-family: var(--font-d);
+  font-size: clamp(22px, 3.8vw, 54px);
+  color: rgba(255,255,255,0.8);
+  letter-spacing: 2px;
+}
+.halftime-team-score {
+  font-family: var(--font-d);
+  font-size: clamp(80px, 16vw, 220px);
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 3px 6px rgba(0,0,0,0.5);
+}
+.halftime-vs {
+  font-family: var(--font-d);
+  font-size: clamp(30px, 5.2vw, 64px);
+  color: rgba(217,178,60,0.6);
+}
+@keyframes htPulse { 0%,100%{opacity:0.9} 50%{opacity:0.5} }
+
+/* ── Font sizes: single panel (tuned to fill a 1280×720 screen) ── */
+#fields-area .field-label     { font-size: clamp(16px, 2vw,   28px); }
+#fields-area .age-group-label { font-size: clamp(30px, 6vw,   84px); }
+#fields-area .team-name       { font-size: clamp(30px, 8.19vw, 122px); }
+#fields-area .score-num       { font-size: clamp(140px,26vw,  360px); }
+#fields-area .timer-readout   { font-size: clamp(60px, 10vw, 150px); }
+
+/* ── Waiting screen ── */
+#waiting {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 48px; z-index: 5;
+  background: radial-gradient(ellipse 120% 65% at 50% -10%, #1a1a1a 0%, var(--bg) 55%);
+  display: flex; align-items: center; justify-content: center;
+}
+.waiting-logo {
+  width: min(42vw, 42vh, 420px); height: min(42vw, 42vh, 420px);
+  object-fit: contain;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.5));
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div style="width:66px"></div>
+  <div class="topbar-center">
+    <div class="topbar-title">MONNAS RUGBY</div>
+  </div>
+  <div class="topbar-right">
+    <button onclick="toggleFullscreen()" id="fs-btn" title="Fullscreen" style="background:none;border:1px solid rgba(217,178,60,0.3);border-radius:8px;color:rgba(217,178,60,0.7);padding:8px 12px;cursor:pointer;font-size:22px;line-height:1;">⛶</button>
+  </div>
+</div>
+
+<!-- FIELD PANEL (built by JS) -->
+<div id="fields-area"></div>
+
+<!-- WAITING -->
+<div id="waiting">
+  <img src="monnas_logo.png" alt="Monnas" class="waiting-logo" onerror="this.style.display='none'">
+</div>
+
+<!-- FOOTER -->
+<div class="footer-bar">Powered by <b>Patchlab</b> &nbsp;<span class="footer-phone">(061 875 5258)</span></div>
+
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════════
+const ABLY_API_KEY = 'SJFVyA.6xbCgA:eC0ANlFJXsRkukat8SN8RMo1ephqll_ij7XAYgC1Q38';
+const ABLY_CHANNEL = 'glru-scoreboard';
+
+// ═══════════════════════════════════════════════════════════════
+//  BUILD DOM — single panel
+// ═══════════════════════════════════════════════════════════════
+const area = document.getElementById('fields-area');
+area.classList.add('solo');
+area.innerHTML = `
+  <div class="field-panel active" id="panel">
+    <div class="field-header">
+      <div class="age-group-label" id="panel-age"></div>
+    </div>
+    <div class="score-area">
+      <div class="team-name" id="panel-home" style="grid-column:1">HOME</div>
+      <div class="team-name" id="panel-away" style="grid-column:3">AWAY</div>
+      <div class="score-num tied" id="panel-sf" style="grid-column:1">0</div>
+      <div class="score-vs-label" id="panel-vs" style="grid-column:2"><div class="timer-readout" id="panel-timer"></div><div class="score-divider"></div><div class="half-label" id="panel-half"></div></div>
+      <div class="score-num tied" id="panel-sa" style="grid-column:3">0</div>
+    </div>
+    <div class="halftime-overlay" id="panel-ht">
+      <img src="monnas_logo.png" alt="Monnas" class="halftime-logo" onerror="this.style.display='none'">
+      <div class="halftime-text">HALF TIME</div>
+      <div class="halftime-score-row">
+        <div class="halftime-team">
+          <div class="halftime-team-name" id="panel-ht-home">HOME</div>
+          <div class="halftime-team-score" id="panel-ht-sf">0</div>
+        </div>
+        <div class="halftime-vs">–</div>
+        <div class="halftime-team">
+          <div class="halftime-team-name" id="panel-ht-away">AWAY</div>
+          <div class="halftime-team-score" id="panel-ht-sa">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════════
+function timerFmt(s) {
+  if (s == null) return '';
+  return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+}
+
+let latestData = {};
+
+function render() {
+  const data = latestData;
+
+  // Age
+  document.getElementById('panel-age').textContent = data.ageGroup || '';
+
+  // Teams
+  const home = (data.homeTeam || 'HOME').toUpperCase();
+  const away = (data.opposingTeam || 'AWAY').toUpperCase();
+  document.getElementById('panel-home').textContent = home;
+  document.getElementById('panel-away').textContent = away;
+  document.getElementById('panel-ht-home').textContent = home;
+  document.getElementById('panel-ht-away').textContent = away;
+
+  // Scores
+  const f = data.totalFor ?? 0, a = data.totalAgainst ?? 0;
+  const sfEl = document.getElementById('panel-sf');
+  const saEl = document.getElementById('panel-sa');
+  sfEl.textContent = f; sfEl.className = 'score-num ' + (f > a ? 'leader' : 'tied');
+  saEl.textContent = a; saEl.className = 'score-num ' + (a > f ? 'leader' : 'tied');
+  document.getElementById('panel-ht-sf').textContent = f;
+  document.getElementById('panel-ht-sa').textContent = a;
+
+  // Half
+  document.getElementById('panel-half').textContent = (data.half === 2) ? '2ND HALF' : '1ST HALF';
+
+  // Timer
+  renderTimer();
+
+  // Blank / half time
+  document.getElementById('panel-ht').classList.toggle('active', !!data.blanked);
+}
+
+// The timer is anchored to a wall-clock timestamp (timerEndsAt) sent by
+// the capture app, not a per-second tick stream. This local interval
+// recomputes the remaining time from that anchor every second, so the
+// countdown keeps running here even if the capture device closes or
+// goes offline - no further messages are needed until the value changes.
+function renderTimer() {
+  const data = latestData;
+  const el = document.getElementById('panel-timer');
+  if (!el) return;
+  let s = data.timerSeconds;
+  if (data.timerRunning && data.timerEndsAt) {
+    s = Math.max(0, Math.round((data.timerEndsAt - Date.now()) / 1000));
+  }
+  el.textContent = timerFmt(s);
+}
+setInterval(renderTimer, 1000);
+
+// ═══════════════════════════════════════════════════════════════
+//  HANDLE INCOMING STATE
+// ═══════════════════════════════════════════════════════════════
+function handleState(data) {
+  latestData = data;
+  render();
+  document.getElementById('waiting').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ABLY
+// ═══════════════════════════════════════════════════════════════
+// ── Fullscreen ────────────────────────────────────────────────
+function toggleFullscreen() {
+  const btn = document.getElementById('fs-btn');
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    if (btn) btn.textContent = '✕';
+  } else {
+    document.exitFullscreen().catch(() => {});
+    if (btn) btn.textContent = '⛶';
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  const btn = document.getElementById('fs-btn');
+  if (btn) btn.textContent = document.fullscreenElement ? '✕' : '⛶';
+});
+
+const ably = new Ably.Realtime({ key: ABLY_API_KEY, clientId: 'scoreboard-display' });
+const ch   = ably.channels.get(ABLY_CHANNEL);
+
+ably.connection.on('connected', async () => {
+  try {
+    const page = await ch.history({ limit: 40 });
+    page.items.slice().reverse().forEach(msg => {
+      if (msg.name === 'state' && msg.data) handleState(msg.data);
+    });
+  } catch(e) { console.warn('History fetch failed', e); }
+});
+
+ch.subscribe('state', msg => {
+  if (msg.data) handleState(msg.data);
+});
+
+</script>
+</body>
+</html>
