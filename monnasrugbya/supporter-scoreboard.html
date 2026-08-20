@@ -72,6 +72,47 @@ html, body {
   text-shadow: 0 0 8px rgba(192,132,252,0.45);
   font-weight: 600;
 }
+.footer-glitch {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 8px;
+  animation: footerGlitchJitter 6s infinite;
+}
+.footer-glitch::before,
+.footer-glitch::after {
+  content: 'Powered by Patchlab (061 875 5258)';
+  position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  opacity: 0;
+}
+.footer-glitch::before {
+  color: #22d3ee;
+  animation: footerGlitchSliceA 6s infinite;
+}
+.footer-glitch::after {
+  color: #a855f7;
+  animation: footerGlitchSliceB 6s infinite;
+}
+@keyframes footerGlitchJitter {
+  0%, 92%, 100% { transform: translate(0, 0); }
+  92.5% { transform: translate(-2px, 1px); }
+  93%   { transform: translate(2px, -1px); }
+  93.5% { transform: translate(-1px, 0); }
+  94%   { transform: translate(1px, 1px); }
+  94.5% { transform: translate(0, 0); }
+}
+@keyframes footerGlitchSliceA {
+  0%, 92%, 100% { opacity: 0; }
+  92.5% { opacity: 0.8; clip-path: inset(10% 0 70% 0); transform: translate(-3px, 0); }
+  93.3% { opacity: 0.8; clip-path: inset(60% 0 15% 0); transform: translate(3px, 0); }
+  94.1% { opacity: 0; }
+}
+@keyframes footerGlitchSliceB {
+  0%, 92%, 100% { opacity: 0; }
+  92.7% { opacity: 0.8; clip-path: inset(70% 0 5% 0); transform: translate(3px, 0); }
+  93.5% { opacity: 0.8; clip-path: inset(5% 0 80% 0); transform: translate(-3px, 0); }
+  94.3% { opacity: 0; }
+}
 
 /* ── Field panel ── */
 .field-panel {
@@ -255,7 +296,7 @@ html, body {
 </div>
 
 <!-- FOOTER -->
-<div class="footer-bar">Powered by <b>Patchlab</b> &nbsp;<span class="footer-phone">(061 875 5258)</span></div>
+<div class="footer-bar"><span class="footer-glitch">Powered by <b>Patchlab</b> &nbsp;<span class="footer-phone">(061 875 5258)</span></span></div>
 
 <script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
 <script>
