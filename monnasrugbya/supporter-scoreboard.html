@@ -52,24 +52,22 @@ html, body {
 .footer-bar {
   position: fixed; left: 0; right: 0; bottom: 0; height: 48px;
   background: #000000;
-  border-top: 2px solid transparent;
-  border-image: linear-gradient(90deg, #a855f7, #22d3ee) 1;
+  border-top: 2px solid var(--gold);
   display: flex; align-items: center; justify-content: center; gap: 8px;
   font-family: var(--font-b);
   font-size: clamp(12px, 1.4vw, 16px);
-  color: rgba(34,211,238,0.85);
-  text-shadow: 0 0 8px rgba(34,211,238,0.35);
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(217,178,60,0.35);
   letter-spacing: 0.5px;
   z-index: 20;
 }
 .footer-bar b {
-  background: linear-gradient(90deg, #a855f7, #22d3ee);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  color: var(--gold);
   font-weight: 700;
 }
 .footer-phone {
-  color: #c084fc;
-  text-shadow: 0 0 8px rgba(192,132,252,0.45);
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(217,178,60,0.35);
   font-weight: 600;
 }
 .footer-glitch {
@@ -86,11 +84,11 @@ html, body {
   opacity: 0;
 }
 .footer-glitch::before {
-  color: #22d3ee;
+  color: #fff6d8;
   animation: footerGlitchSliceA 6s infinite;
 }
 .footer-glitch::after {
-  color: #a855f7;
+  color: var(--gold);
   animation: footerGlitchSliceB 6s infinite;
 }
 @keyframes footerGlitchJitter {
@@ -163,6 +161,7 @@ html, body {
   align-items: center; justify-items: center;
   row-gap: 16px;
   padding: 0 12px;
+  perspective: 800px;
 }
 .team-name {
   grid-row: 1;
@@ -177,9 +176,19 @@ html, body {
   font-family: var(--font-d);
   line-height: 1; text-align: center;
   transition: color 0.4s;
+  display: inline-block;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 .score-num.leader { background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5)); }
 .score-num.tied   { color: rgba(255,255,255,0.6); }
+.score-num.flap { animation: scoreFlap 0.45s cubic-bezier(.4,0,.2,1); }
+@keyframes scoreFlap {
+  0%   { transform: rotateX(0deg); }
+  48%  { transform: rotateX(-90deg); }
+  52%  { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
 .score-vs-label {
   grid-row: 2;
   font-family: var(--font-d);
@@ -350,6 +359,18 @@ function timerFmt(s) {
 }
 
 let latestData = {};
+let prevFor = null, prevAgainst = null;
+
+// Trigger the split-flap "card flip" animation on a score digit, but
+// only when its value actually changed - not on every render() call
+// (which also fires for unrelated state updates like timer heartbeats).
+function flapIfChanged(el, newVal, prevVal) {
+  if (prevVal !== null && newVal !== prevVal) {
+    el.classList.remove('flap');
+    void el.offsetWidth; // force reflow so the animation can retrigger
+    el.classList.add('flap');
+  }
+}
 
 function render() {
   const data = latestData;
@@ -369,8 +390,11 @@ function render() {
   const f = data.totalFor ?? 0, a = data.totalAgainst ?? 0;
   const sfEl = document.getElementById('panel-sf');
   const saEl = document.getElementById('panel-sa');
-  sfEl.textContent = f; sfEl.className = 'score-num ' + (f > a ? 'leader' : 'tied');
-  saEl.textContent = a; saEl.className = 'score-num ' + (a > f ? 'leader' : 'tied');
+  sfEl.textContent = f; sfEl.classList.remove('leader','tied'); sfEl.classList.add(f > a ? 'leader' : 'tied');
+  saEl.textContent = a; saEl.classList.remove('leader','tied'); saEl.classList.add(a > f ? 'leader' : 'tied');
+  flapIfChanged(sfEl, f, prevFor);
+  flapIfChanged(saEl, a, prevAgainst);
+  prevFor = f; prevAgainst = a;
   document.getElementById('panel-ht-sf').textContent = f;
   document.getElementById('panel-ht-sa').textContent = a;
 
