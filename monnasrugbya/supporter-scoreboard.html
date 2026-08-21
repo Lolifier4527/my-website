@@ -16,6 +16,11 @@
   --border: rgba(217,178,60,0.22);
   --font-d: 'Bebas Neue', sans-serif;
   --font-b: 'DM Sans', sans-serif;
+  --topbar-h: 104px;
+  --footer-h: 48px;
+}
+@media (max-width: 600px) {
+  :root { --topbar-h: 64px; --footer-h: 40px; }
 }
 
 html, body {
@@ -30,27 +35,27 @@ html, body {
 .topbar {
   background: rgba(13,28,58,0.97);
   border-bottom: 2px solid var(--gold);
-  padding: 16px 32px;
+  padding: 0 clamp(14px, 4vw, 32px);
   display: flex; align-items: center; justify-content: space-between;
-  height: 104px;
+  height: var(--topbar-h);
   position: relative; z-index: 10;
 }
-.topbar-logo { height: 66px; width: 66px; object-fit: contain; background: #fff; border-radius: 50%; padding: 5px; }
+.topbar-logo { height: clamp(38px, 8vw, 66px); width: clamp(38px, 8vw, 66px); object-fit: contain; background: #fff; border-radius: 50%; padding: 5px; }
 .topbar-center { text-align: center; }
-.topbar-title { font-family: var(--font-d); font-size: clamp(36px, 3.6vw, 54px); letter-spacing: 8px; line-height: 1; background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4)); }
+.topbar-title { font-family: var(--font-d); font-size: clamp(20px, 4.5vw, 54px); letter-spacing: clamp(3px, 1vw, 8px); line-height: 1; background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4)); }
 .topbar-sub { font-size: clamp(14px, 1.5vw, 20px); color: rgba(217,178,60,0.65); letter-spacing: 2px; margin-top: 3px; }
 .topbar-right { display: flex; align-items: center; gap: 10px; }
 
 /* ── Fields viewport ── */
 #fields-area {
   display: flex;
-  height: calc(100vh - 104px - 48px);
+  height: calc(100vh - var(--topbar-h) - var(--footer-h));
   width: 100%;
 }
 
 /* ── Footer ── */
 .footer-bar {
-  position: fixed; left: 0; right: 0; bottom: 0; height: 48px;
+  position: fixed; left: 0; right: 0; bottom: 0; height: var(--footer-h);
   background: #000000;
   border-top: 2px solid var(--gold);
   display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -204,7 +209,7 @@ html, body {
 }
 .half-label {
   font-family: var(--font-d);
-  font-size: clamp(72px, 9.5vw, 120px);
+  font-size: clamp(18px, 9.5vw, 120px);
   letter-spacing: 2px;
   color: #fff;
 }
@@ -229,10 +234,10 @@ html, body {
   gap: 18px;
 }
 .halftime-overlay.active { opacity: 1; pointer-events: all; }
-.halftime-logo { height: clamp(60px, 11vw, 150px); width: clamp(60px, 11vw, 150px); object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)); }
+.halftime-logo { height: clamp(36px, 11vw, 150px); width: clamp(36px, 11vw, 150px); object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)); }
 .halftime-text {
   font-family: var(--font-d);
-  font-size: clamp(50px, 11.5vw, 150px);
+  font-size: clamp(26px, 11.5vw, 150px);
   letter-spacing: 8px;
   animation: htPulse 2s infinite;
   background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -240,39 +245,39 @@ html, body {
 }
 .halftime-score-row {
   display: flex; align-items: center; justify-content: center;
-  gap: clamp(20px, 5vw, 60px);
+  gap: clamp(12px, 5vw, 60px);
 }
 .halftime-team { text-align: center; }
 .halftime-team-name {
   font-family: var(--font-d);
-  font-size: clamp(22px, 3.8vw, 54px);
+  font-size: clamp(13px, 3.8vw, 54px);
   color: rgba(255,255,255,0.8);
   letter-spacing: 2px;
 }
 .halftime-team-score {
   font-family: var(--font-d);
-  font-size: clamp(80px, 16vw, 220px);
+  font-size: clamp(40px, 16vw, 220px);
   color: #fff;
   line-height: 1;
   text-shadow: 0 3px 6px rgba(0,0,0,0.5);
 }
 .halftime-vs {
   font-family: var(--font-d);
-  font-size: clamp(30px, 5.2vw, 64px);
+  font-size: clamp(16px, 5.2vw, 64px);
   color: rgba(217,178,60,0.6);
 }
 @keyframes htPulse { 0%,100%{opacity:0.9} 50%{opacity:0.5} }
 
-/* ── Font sizes: single panel (tuned to fill a 1280×720 screen) ── */
-#fields-area .field-label     { font-size: clamp(16px, 2vw,   28px); }
-#fields-area .age-group-label { font-size: clamp(30px, 6vw,   84px); }
-#fields-area .team-name       { font-size: clamp(30px, 8.19vw, 122px); }
-#fields-area .score-num       { font-size: clamp(140px,26vw,  360px); }
-#fields-area .timer-readout   { font-size: clamp(60px, 10vw, 150px); }
+/* ── Font sizes: scales from phone up through a 1280×720 screen ── */
+#fields-area .field-label     { font-size: clamp(11px, 2vw,   28px); }
+#fields-area .age-group-label { font-size: clamp(16px, 6vw,   84px); }
+#fields-area .team-name       { font-size: clamp(18px, 8.19vw, 122px); }
+#fields-area .score-num       { font-size: clamp(56px, 26vw,  360px); }
+#fields-area .timer-readout   { font-size: clamp(22px, 10vw, 150px); }
 
 /* ── Waiting screen ── */
 #waiting {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 48px; z-index: 5;
+  position: fixed; top: 0; left: 0; right: 0; bottom: var(--footer-h); z-index: 5;
   background: radial-gradient(ellipse 120% 65% at 50% -10%, #1a1a1a 0%, var(--bg) 55%);
   display: flex; align-items: center; justify-content: center;
 }
@@ -287,12 +292,12 @@ html, body {
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div style="width:66px"></div>
+  <div style="width:clamp(28px,6vw,44px)"></div>
   <div class="topbar-center">
     <div class="topbar-title">MONNAS RUGBY</div>
   </div>
   <div class="topbar-right">
-    <button onclick="toggleFullscreen()" id="fs-btn" title="Fullscreen" style="background:none;border:1px solid rgba(217,178,60,0.3);border-radius:8px;color:rgba(217,178,60,0.7);padding:8px 12px;cursor:pointer;font-size:22px;line-height:1;">⛶</button>
+    <button onclick="toggleFullscreen()" id="fs-btn" title="Fullscreen" style="background:none;border:1px solid rgba(217,178,60,0.3);border-radius:8px;color:rgba(217,178,60,0.7);padding:clamp(4px,1.5vw,8px) clamp(6px,2vw,12px);cursor:pointer;font-size:clamp(14px,3.5vw,22px);line-height:1;">⛶</button>
   </div>
 </div>
 
