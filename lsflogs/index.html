@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fairland Patch Log</title>
+<meta name="description" content="Incident and fix-history log for Laerskool Fairland IT — record what broke, how it was fixed, and who was called, so the next repeat doesn't start from zero.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%B0</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #EEF2EA;
+    --surface: #FFFFFF;
+    --surface-raised: #F6F8F3;
+    --surface-stripe: #E9EFE5;
+    --border: #D2DBC9;
+    --border-soft: #E2E9DA;
+    --ink: #17241A;
+    --ink-muted: #52624E;
+    --ink-faint: #85937E;
+    --green: #145C3D;
+    --green-strong: #0E4A30;
+    --green-soft: #DCEBDF;
+    --orange: #DA7A28;
+    --orange-soft: #FAE4CC;
+    --sage: #7C9C86;
+    --sage-soft: #E6EEE3;
+    --danger: #AE3B2C;
+    --danger-soft: #F5DDD8;
+    --warning: #9C6A16;
+    --warning-soft: #F2E2C2;
+    --ok: #2C7A4C;
+    --ok-soft: #DBEEE1;
+    --shadow: 0 1px 2px rgba(23,36,26,0.06), 0 6px 20px -8px rgba(23,36,26,0.18);
+    --focus: #14603F;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1712;
+      --surface: #16211A;
+      --surface-raised: #1B281F;
+      --surface-stripe: #202E24;
+      --border: #2C3B30;
+      --border-soft: #263429;
+      --ink: #E9EFE6;
+      --ink-muted: #A9BCA5;
+      --ink-faint: #758A72;
+      --green: #58BF8B;
+      --green-strong: #79D6A6;
+      --green-soft: rgba(88,191,139,0.16);
+      --orange: #F0964C;
+      --orange-soft: rgba(240,150,76,0.16);
+      --sage: #93B69D;
+      --sage-soft: rgba(147,182,157,0.14);
+      --danger: #E58076;
+      --danger-soft: rgba(229,128,118,0.16);
+      --warning: #DDAE5C;
+      --warning-soft: rgba(221,174,92,0.16);
+      --ok: #6BCE97;
+      --ok-soft: rgba(107,206,151,0.16);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 28px -10px rgba(0,0,0,0.55);
+      --focus: #79D6A6;
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0E1712;
+    --surface: #16211A;
+    --surface-raised: #1B281F;
+    --surface-stripe: #202E24;
+    --border: #2C3B30;
+    --border-soft: #263429;
+    --ink: #E9EFE6;
+    --ink-muted: #A9BCA5;
+    --ink-faint: #758A72;
+    --green: #58BF8B;
+    --green-strong: #79D6A6;
+    --green-soft: rgba(88,191,139,0.16);
+    --orange: #F0964C;
+    --orange-soft: rgba(240,150,76,0.16);
+    --sage: #93B69D;
+    --sage-soft: rgba(147,182,157,0.14);
+    --danger: #E58076;
+    --danger-soft: rgba(229,128,118,0.16);
+    --warning: #DDAE5C;
+    --warning-soft: rgba(221,174,92,0.16);
+    --ok: #6BCE97;
+    --ok-soft: rgba(107,206,151,0.16);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 28px -10px rgba(0,0,0,0.55);
+    --focus: #79D6A6;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--green-soft); }
+
+  .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace; font-variant-numeric: tabular-nums; }
+
+  a { color: var(--green); }
+
+  button { font-family: inherit; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .app { max-width: 1080px; margin: 0 auto; padding: 28px 24px 64px; }
+
+  /* ---------- Header ---------- */
+  .masthead {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .crest {
+    width: 44px; height: 48px;
+    flex: none;
+  }
+  .titles h1 {
+    margin: 0;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.55rem;
+    letter-spacing: -0.01em;
+    color: var(--green-strong);
+    text-wrap: balance;
+  }
+  .titles p {
+    margin: 2px 0 0;
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+  }
+  .conn-note {
+    margin-left: auto;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex: none; }
+  .conn-dot.off { background: var(--warning); }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .search {
+    position: relative;
+    flex: 1 1 240px;
+    min-width: 180px;
+  }
+  .search input {
+    width: 100%;
+    padding: 9px 12px 9px 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.9rem;
+  }
+  .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--ink-faint); }
+
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-muted);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .chip[aria-pressed="true"] {
+    background: var(--green-soft);
+    border-color: var(--green);
+    color: var(--green-strong);
+  }
+
+  select.cat-filter {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 0.82rem;
+  }
+
+  .spacer { flex: 1 1 auto; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--ink-faint); }
+  .btn-primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--green-strong); border-color: var(--green-strong); }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--ink-muted); padding: 6px 8px; }
+  .btn-ghost:hover { color: var(--ink); background: var(--surface-stripe); }
+  .btn-danger-text { color: var(--danger); }
+
+  .export-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- New entry form ---------- */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .panel h2 {
+    margin: 0 0 14px;
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--green-strong);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 16px;
+  }
+  .grid .full { grid-column: 1 / -1; }
+  label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  .req::after { content: " *"; color: var(--orange); }
+  input[type="text"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-raised);
+    color: var(--ink);
+    font-size: 0.88rem;
+    font-family: inherit;
+  }
+  textarea { resize: vertical; min-height: 64px; line-height: 1.45; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+  /* ---------- List ---------- */
+  .count-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+    color: var(--ink-faint);
+    font-size: 0.78rem;
+  }
+
+  .entries { display: flex; flex-direction: column; gap: 8px; }
+
+  .entry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--ink-faint);
+    border-radius: 9px;
+    overflow: hidden;
+  }
+  .entry.sev-High { border-left-color: var(--danger); }
+  .entry.sev-Medium { border-left-color: var(--warning); }
+  .entry.sev-Low { border-left-color: var(--sage); }
+
+  .entry-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+  }
+  .entry-main { min-width: 0; }
+  .entry-device {
+    font-weight: 600;
+    font-size: 0.94rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .entry-sub {
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+  .tag-pill {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--sage-soft);
+    color: var(--green-strong);
+    white-space: nowrap;
+  }
+  .status-pill {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-Open { background: var(--danger-soft); color: var(--danger); }
+  .status-Monitoring { background: var(--warning-soft); color: var(--warning); }
+  .status-Resolved { background: var(--ok-soft); color: var(--ok); }
+
+  .entry-date { font-size: 0.78rem; color: var(--ink-faint); white-space: nowrap; }
+  .chevron { width: 16px; height: 16px; color: var(--ink-faint); transition: transform .15s ease; flex: none; }
+  .entry[data-open="true"] .chevron { transform: rotate(90deg); }
+
+  .entry-detail {
+    display: none;
+    padding: 4px 16px 18px 18px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .entry[data-open="true"] .entry-detail { display: block; }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 20px;
+    margin: 14px 0 6px;
+  }
+  .detail-field .k {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .detail-field .v {
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    line-height: 1.55;
+  }
+  .detail-field .v.empty { color: var(--ink-faint); font-style: italic; }
+  .detail-actions { display: flex; gap: 8px; margin-top: 14px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 56px 20px;
+    color: var(--ink-faint);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+  .empty-state svg { width: 34px; height: 34px; margin-bottom: 10px; opacity: 0.6; }
+  .empty-state p { margin: 0; font-size: 0.9rem; }
+
+  .toast {
+    position: fixed;
+    bottom: 18px; left: 50%;
+    transform: translateX(-50%) translateY(0);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .entry-row { grid-template-columns: 1fr auto; }
+    .entry-row .status-pill, .entry-row .tag-pill, .entry-row .entry-date { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  /* ---------- Print / documentation export ---------- */
+  #print-sheet { display: none; }
+  @media print {
+    body * { visibility: hidden; }
+    .app, .masthead, .toolbar, .panel, .entries, .entry { display: none !important; }
+    #print-sheet, #print-sheet * { visibility: visible; }
+    #print-sheet {
+      display: block !important;
+      position: absolute; top: 0; left: 0; width: 100%;
+      background: #fff; color: #16241A;
+      font-family: "IBM Plex Sans", sans-serif;
+      padding: 20px 6px;
+    }
+    #print-sheet .ps-head {
+      display: flex; align-items: center; gap: 14px;
+      border-bottom: 3px solid #14603D;
+      padding-bottom: 12px; margin-bottom: 16px;
+    }
+    #print-sheet .ps-head h1 {
+      font-family: "Fraunces", serif;
+      font-size: 20px; margin: 0; color: #14603D;
+    }
+    #print-sheet .ps-head p { margin: 2px 0 0; font-size: 11px; color: #52624E; }
+    #print-sheet .ps-meta { font-size: 10.5px; color: #52624E; margin-bottom: 18px; }
+    #print-sheet .ps-entry { border: 1px solid #D2DBC9; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; break-inside: avoid; }
+    #print-sheet .ps-entry-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+    #print-sheet .ps-entry-top strong { font-size: 13px; }
+    #print-sheet .ps-badge { font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; padding: 2px 7px; border-radius: 999px; border: 1px solid #999; }
+    #print-sheet .ps-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; font-size: 10.5px; }
+    #print-sheet .ps-fields div b { display: block; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.04em; color: #7C8B76; margin-bottom: 1px; }
+    #print-sheet .ps-fields .full { grid-column: 1 / -1; white-space: pre-wrap; }
+    @page { margin: 16mm 14mm; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="masthead">
+    <svg class="crest" viewBox="0 0 44 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M22 1 L41 8 V24 C41 36 33 44 22 47 C11 44 3 36 3 24 V8 Z" fill="var(--orange)" stroke="var(--green)" stroke-width="2.5"/>
+      <rect x="9" y="22" width="26" height="8" fill="var(--sage)" opacity="0.85"/>
+      <path d="M22 6 L30 30 M22 6 L14 30" stroke="var(--green)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div class="titles">
+      <h1>Fairland Patch Log</h1>
+      <p>IT incident &amp; fix history — Laerskool Fairland</p>
+    </div>
+    <div class="conn-note" id="connNote"><span class="conn-dot" id="connDot"></span><span id="connText">Connecting…</span></div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="6.2" stroke="currentColor" stroke-width="1.6"/><path d="M17 17L13.5 13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input type="text" id="searchInput" placeholder="Search device, room, problem, fix, tag…" autocomplete="off">
+    </div>
+    <select class="cat-filter" id="catFilter">
+      <option value="">All categories</option>
+    </select>
+    <div class="chip-row" id="statusChips"></div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" id="newEntryBtn">+ New entry</button>
+    <div class="export-group">
+      <button class="btn" id="exportPrintBtn" title="Print or save a formatted PDF of the entries currently shown">Export documentation</button>
+      <button class="btn" id="exportCsvBtn" title="Download the entries currently shown as a spreadsheet">Download CSV</button>
+      <button class="btn" id="backupBtn" title="Save a full JSON backup of every entry">Backup</button>
+      <button class="btn" id="restoreBtn" title="Load entries from a JSON backup file">Restore</button>
+      <input type="file" id="restoreInput" accept="application/json" style="display:none;">
+    </div>
+  </div>
+
+  <section class="panel" id="formPanel" style="display:none;">
+    <h2 id="formTitle">New log entry</h2>
+    <form id="entryForm">
+      <div class="grid">
+        <div>
+          <label class="req" for="f-device">Device / system / software</label>
+          <input type="text" id="f-device" placeholder="e.g. Front office HP LaserJet M404" required>
+        </div>
+        <div>
+          <label for="f-category">Category</label>
+          <select id="f-category">
+            <option>Hardware</option>
+            <option>Software</option>
+            <option>Network</option>
+            <option>Printer / AV</option>
+            <option>Account / Access</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="req" for="f-location">Location</label>
+          <input type="text" id="f-location" placeholder="e.g. Grade 4 classroom, Admin block" required>
+        </div>
+        <div>
+          <label for="f-loggedby">Logged by</label>
+          <input type="text" id="f-loggedby" placeholder="Your name">
+        </div>
+        <div>
+          <label for="f-status">Status</label>
+          <select id="f-status">
+            <option>Open</option>
+            <option>Monitoring</option>
+            <option selected>Resolved</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-severity">Severity</label>
+          <select id="f-severity">
+            <option>Low</option>
+            <option selected>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+        <div>
+          <label class="req" for="f-datelogged">Date logged</label>
+          <input type="date" id="f-datelogged" required>
+        </div>
+        <div>
+          <label for="f-dateresolved">Date resolved</label>
+          <input type="date" id="f-dateresolved">
+        </div>
+        <div class="full">
+          <label class="req" for="f-problem">What went wrong</label>
+          <textarea id="f-problem" placeholder="Symptoms, error messages, when it started…" required></textarea>
+        </div>
+        <div class="full">
+          <label for="f-resolution">How it was fixed</label>
+          <textarea id="f-resolution" placeholder="Exact steps taken, settings changed, parts replaced…"></textarea>
+        </div>
+        <div>
+          <label for="f-contact">Contacted (person / company)</label>
+          <input type="text" id="f-contact" placeholder="e.g. Sizwe — Xerox support">
+        </div>
+        <div>
+          <label for="f-contactinfo">Contact details</label>
+          <input type="text" id="f-contactinfo" placeholder="Phone, email, ticket ref">
+        </div>
+        <div class="full">
+          <label for="f-tags">Tags</label>
+          <input type="text" id="f-tags" placeholder="comma, separated, keywords — e.g. paper jam, driver, recurring">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn" id="cancelFormBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="saveEntryBtn">Save entry</button>
+      </div>
+    </form>
+  </section>
+
+  <div class="count-row">
+    <span id="countLabel">0 entries</span>
+    <span id="lastUpdatedLabel"></span>
+  </div>
+
+  <div class="entries" id="entriesList"></div>
+
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="1.4"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <p id="emptyStateText">No entries yet. Log the next fix so future-you doesn't have to solve it twice.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="print-sheet">
+  <div class="ps-head">
+    <div>
+      <h1>Laerskool Fairland — IT Maintenance Log</h1>
+      <p>Fairland Patch Log &middot; Nooit Terug</p>
+    </div>
+  </div>
+  <div class="ps-meta" id="psMeta"></div>
+  <div id="psEntries"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CATEGORIES = ["Hardware", "Software", "Network", "Printer / AV", "Account / Access", "Other"];
+  var STATUSES = ["Open", "Monitoring", "Resolved"];
+
+  var catFilterEl = document.getElementById("catFilter");
+  CATEGORIES.forEach(function (c) {
+    var o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    catFilterEl.appendChild(o);
+  });
+
+  var statusChipsEl = document.getElementById("statusChips");
+  var activeStatus = "";
+  function renderChips() {
+    statusChipsEl.innerHTML = "";
+    var all = ["All"].concat(STATUSES);
+    all.forEach(function (s) {
+      var val = s === "All" ? "" : s;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip";
+      btn.textContent = s;
+      btn.setAttribute("aria-pressed", String(activeStatus === val));
+      btn.addEventListener("click", function () {
+        activeStatus = val;
+        renderChips();
+        renderList();
+      });
+      statusChipsEl.appendChild(btn);
+    });
+  }
+  renderChips();
+
+  var entries = [];        // full local mirror of the store
+  var openIds = {};         // which rows are expanded
+  var editingId = null;     // doc id currently being edited, or null for "new"
+  var db = null;
+
+  var connDot = document.getElementById("connDot");
+  var connText = document.getElementById("connText");
+  function setConn(state, label) {
+    connDot.classList.toggle("off", state !== "ok");
+    connText.textContent = label;
+  }
+
+  function todayISO() {
+    var d = new Date();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return "";
+    var parts = iso.split("-");
+    if (parts.length !== 3) return iso;
+    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return parts[2] + " " + months[parseInt(parts[1], 10) - 1] + " " + parts[0];
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(showToast._h);
+    showToast._h = setTimeout(function () { t.classList.remove("show"); }, 2200);
+  }
+
+  // ---------- Filtering ----------
+  function getFiltered() {
+    var q = document.getElementById("searchInput").value.trim().toLowerCase();
+    var cat = catFilterEl.value;
+    return entries.filter(function (e) {
+      if (activeStatus && e.status !== activeStatus) return false;
+      if (cat && e.category !== cat) return false;
+      if (q) {
+        var hay = [e.device, e.location, e.problem, e.resolution, e.tags, e.contactedWho, e.category]
+          .join(" ").toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    }).sort(function (a, b) {
+      return (b.dateLogged || "").localeCompare(a.dateLogged || "") || (b.createdAt || 0) - (a.createdAt || 0);
+    });
+  }
+
+  // ---------- List rendering ----------
+  var listEl = document.getElementById("entriesList");
+  var emptyEl = document.getElementById("emptyState");
+  var emptyText = document.getElementById("emptyStateText");
+  var countLabel = document.getElementById("countLabel");
+  var lastUpdatedLabel = document.getElementById("lastUpdatedLabel");
+
+  function renderList() {
+    var filtered = getFiltered();
+    countLabel.textContent = filtered.length + " " + (filtered.length === 1 ? "entry" : "entries") +
+      (filtered.length !== entries.length ? " (of " + entries.length + ")" : "");
+
+    if (entries.length === 0) {
+      emptyText.textContent = "No entries yet. Log the next fix so future-you doesn't have to solve it twice.";
+      emptyEl.style.display = "block";
+      listEl.innerHTML = "";
+      return;
+    }
+    if (filtered.length === 0) {
+      emptyText.textContent = "Nothing matches those filters.";
+      emptyEl.style.display = "block";
+      listEl.innerHTML = "";
+      return;
+    }
+    emptyEl.style.display = "none";
+
+    listEl.innerHTML = filtered.map(function (e) {
+      var open = !!openIds[e.id];
+      return (
+        '<article class="entry sev-' + escapeHtml(e.severity || "Medium") + '" data-open="' + open + '" data-id="' + e.id + '">' +
+          '<div class="entry-row" data-toggle="' + e.id + '">' +
+            '<div class="entry-main">' +
+              '<div class="entry-device">' + escapeHtml(e.device || "Untitled") + '</div>' +
+              '<div class="entry-sub">' + escapeHtml(e.location || "—") + " · " + escapeHtml(e.problem || "").slice(0, 90) +
+                (e.problem && e.problem.length > 90 ? "…" : "") + '</div>' +
+            '</div>' +
+            '<span class="tag-pill">' + escapeHtml(e.category || "Other") + '</span>' +
+            '<span class="status-pill status-' + escapeHtml(e.status || "Open") + '">' + escapeHtml(e.status || "Open") + '</span>' +
+            '<span class="entry-date mono">' + fmtDate(e.dateLogged) + '</span>' +
+            '<svg class="chevron" viewBox="0 0 20 20" fill="none"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</div>' +
+          '<div class="entry-detail">' +
+            '<div class="detail-grid">' +
+              detailField("What went wrong", e.problem) +
+              detailField("How it was fixed", e.resolution) +
+              detailField("Contacted", e.contactedWho) +
+              detailField("Contact details", e.contactInfo) +
+              detailField("Date resolved", fmtDate(e.dateResolved)) +
+              detailField("Logged by", e.loggedBy) +
+              detailField("Tags", e.tags) +
+              detailField("Severity", e.severity) +
+            '</div>' +
+            '<div class="detail-actions">' +
+              '<button class="btn btn-ghost" data-edit="' + e.id + '">Edit</button>' +
+              '<button class="btn btn-ghost btn-danger-text" data-delete="' + e.id + '">Delete</button>' +
+            '</div>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join("");
+  }
+
+  function detailField(label, value, full) {
+    var v = value ? escapeHtml(value) : "";
+    return '<div class="detail-field' + (full ? " full" : "") + '"><div class="k">' + escapeHtml(label) + '</div>' +
+      '<div class="v' + (v ? "" : " empty") + '">' + (v || "Not recorded") + '</div></div>';
+  }
+
+  listEl.addEventListener("click", function (ev) {
+    var toggle = ev.target.closest("[data-toggle]");
+    var editBtn = ev.target.closest("[data-edit]");
+    var delBtn = ev.target.closest("[data-delete]");
+    if (editBtn) {
+      startEdit(editBtn.getAttribute("data-edit"));
+      return;
+    }
+    if (delBtn) {
+      var id = delBtn.getAttribute("data-delete");
+      if (confirm("Delete this log entry? This can't be undone.")) {
+        removeEntry(id);
+      }
+      return;
+    }
+    if (toggle) {
+      var tid = toggle.getAttribute("data-toggle");
+      openIds[tid] = !openIds[tid];
+      renderList();
+    }
+  });
+
+  document.getElementById("searchInput").addEventListener("input", renderList);
+  catFilterEl.addEventListener("change", renderList);
+
+  // ---------- Form ----------
+  var formPanel = document.getElementById("formPanel");
+  var formTitle = document.getElementById("formTitle");
+  var form = document.getElementById("entryForm");
+  var newEntryBtn = document.getElementById("newEntryBtn");
+  var cancelFormBtn = document.getElementById("cancelFormBtn");
+
+  function openForm(entry) {
+    editingId = entry ? entry.id : null;
+    formTitle.textContent = entry ? "Edit log entry" : "New log entry";
+    document.getElementById("f-device").value = entry ? entry.device || "" : "";
+    document.getElementById("f-category").value = entry ? entry.category || "Hardware" : "Hardware";
+    document.getElementById("f-location").value = entry ? entry.location || "" : "";
+    document.getElementById("f-loggedby").value = entry ? entry.loggedBy || "" : (window.__lastLoggedBy || "");
+    document.getElementById("f-status").value = entry ? entry.status || "Open" : "Resolved";
+    document.getElementById("f-severity").value = entry ? entry.severity || "Medium" : "Medium";
+    document.getElementById("f-datelogged").value = entry ? entry.dateLogged || todayISO() : todayISO();
+    document.getElementById("f-dateresolved").value = entry ? entry.dateResolved || "" : "";
+    document.getElementById("f-problem").value = entry ? entry.problem || "" : "";
+    document.getElementById("f-resolution").value = entry ? entry.resolution || "" : "";
+    document.getElementById("f-contact").value = entry ? entry.contactedWho || "" : "";
+    document.getElementById("f-contactinfo").value = entry ? entry.contactInfo || "" : "";
+    document.getElementById("f-tags").value = entry ? entry.tags || "" : "";
+    formPanel.style.display = "block";
+    formPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("f-device").focus();
+  }
+  function closeForm() {
+    formPanel.style.display = "none";
+    editingId = null;
+    form.reset();
+  }
+
+  newEntryBtn.addEventListener("click", function () { openForm(null); });
+  cancelFormBtn.addEventListener("click", closeForm);
+
+  function startEdit(id) {
+    var e = entries.find(function (x) { return x.id === id; });
+    if (e) openForm(e);
+  }
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var device = document.getElementById("f-device").value.trim();
+    var location = document.getElementById("f-location").value.trim();
+    var problem = document.getElementById("f-problem").value.trim();
+    var dateLogged = document.getElementById("f-datelogged").value || todayISO();
+    if (!device || !location || !problem) return;
+
+    var loggedBy = document.getElementById("f-loggedby").value.trim();
+    window.__lastLoggedBy = loggedBy;
+
+    var payload = {
+      device: device,
+      category: document.getElementById("f-category").value,
+      location: location,
+      loggedBy: loggedBy,
+      status: document.getElementById("f-status").value,
+      severity: document.getElementById("f-severity").value,
+      dateLogged: dateLogged,
+      dateResolved: document.getElementById("f-dateresolved").value || "",
+      problem: problem,
+      resolution: document.getElementById("f-resolution").value.trim(),
+      contactedWho: document.getElementById("f-contact").value.trim(),
+      contactInfo: document.getElementById("f-contactinfo").value.trim(),
+      tags: document.getElementById("f-tags").value.trim(),
+      updatedAt: Date.now()
+    };
+
+    if (editingId) {
+      updateEntry(editingId, payload);
+    } else {
+      payload.createdAt = Date.now();
+      createEntry(payload);
+    }
+    closeForm();
+  });
+
+  // ---------- Storage layer (db capability, with local fallback) ----------
+  function localSave() {
+    try { localStorage.setItem("fairland-patch-log-fallback", JSON.stringify(entries)); } catch (e) {}
+  }
+  function localLoad() {
+    try {
+      var raw = localStorage.getItem("fairland-patch-log-fallback");
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  function createEntry(payload) {
+    if (db) {
+      db.collection("entries").add(payload).catch(function (err) {
+        showToast("Couldn't save: " + (err && err.message ? err.message : "unknown error"));
+      });
+    } else {
+      payload.id = "local-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+      entries.push(payload);
+      localSave();
+      renderList();
+      showToast("Saved");
+    }
+  }
+  function updateEntry(id, payload) {
+    if (db) {
+      db.doc("entries/" + id).update(payload).catch(function (err) {
+        showToast("Couldn't update: " + (err && err.message ? err.message : "unknown error"));
+      });
+    } else {
+      var idx = entries.findIndex(function (x) { return x.id === id; });
+      if (idx > -1) entries[idx] = Object.assign({}, entries[idx], payload);
+      localSave();
+      renderList();
+      showToast("Updated");
+    }
+  }
+  function removeEntry(id) {
+    if (db) {
+      db.doc("entries/" + id).delete().catch(function (err) {
+        showToast("Couldn't delete: " + (err && err.message ? err.message : "unknown error"));
+      });
+    } else {
+      entries = entries.filter(function (x) { return x.id !== id; });
+      localSave();
+      renderList();
+      showToast("Deleted");
+    }
+  }
+
+  // ---------- Export: printable documentation ----------
+  document.getElementById("exportPrintBtn").addEventListener("click", function () {
+    var filtered = getFiltered();
+    var psMeta = document.getElementById("psMeta");
+    var psEntries = document.getElementById("psEntries");
+    var now = new Date();
+    psMeta.textContent = "Generated " + now.toLocaleDateString() + " · " + filtered.length +
+      (filtered.length === 1 ? " entry" : " entries") +
+      (activeStatus ? " · status: " + activeStatus : "") +
+      (catFilterEl.value ? " · category: " + catFilterEl.value : "");
+
+    var sevColor = { High: "#AE3B2C", Medium: "#9C6A16", Low: "#7C9C86" };
+    psEntries.innerHTML = filtered.map(function (e) {
+      return (
+        '<div class="ps-entry">' +
+          '<div class="ps-entry-top">' +
+            '<strong>' + escapeHtml(e.device) + '</strong>' +
+            '<span class="ps-badge" style="border-color:' + (sevColor[e.severity] || "#999") + ';color:' + (sevColor[e.severity] || "#999") + '">' + escapeHtml(e.severity || "") + '</span>' +
+          '</div>' +
+          '<div class="ps-fields">' +
+            '<div><b>Location</b>' + escapeHtml(e.location || "—") + '</div>' +
+            '<div><b>Category</b>' + escapeHtml(e.category || "—") + '</div>' +
+            '<div><b>Status</b>' + escapeHtml(e.status || "—") + '</div>' +
+            '<div><b>Date logged</b>' + fmtDate(e.dateLogged) + '</div>' +
+            '<div><b>Date resolved</b>' + fmtDate(e.dateResolved) + '</div>' +
+            '<div><b>Logged by</b>' + escapeHtml(e.loggedBy || "—") + '</div>' +
+            '<div class="full"><b>What went wrong</b>' + escapeHtml(e.problem || "—") + '</div>' +
+            '<div class="full"><b>How it was fixed</b>' + escapeHtml(e.resolution || "Not recorded") + '</div>' +
+            '<div><b>Contacted</b>' + escapeHtml(e.contactedWho || "—") + '</div>' +
+            '<div><b>Contact details</b>' + escapeHtml(e.contactInfo || "—") + '</div>' +
+            '<div class="full"><b>Tags</b>' + escapeHtml(e.tags || "—") + '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join("");
+
+    window.print();
+  });
+
+  // ---------- Generic save-a-file helper ----------
+  function saveFile(filename, data, mime) {
+    var blob = new Blob([data], { type: mime });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ---------- Export: CSV ----------
+  function csvCell(v) {
+    var s = String(v == null ? "" : v);
+    if (/[",\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  document.getElementById("exportCsvBtn").addEventListener("click", function () {
+    var filtered = getFiltered();
+    var cols = ["device","category","location","status","severity","dateLogged","dateResolved","problem","resolution","contactedWho","contactInfo","tags","loggedBy"];
+    var header = ["Device/System","Category","Location","Status","Severity","Date logged","Date resolved","Problem","Resolution","Contacted","Contact details","Tags","Logged by"];
+    var rows = [header.join(",")].concat(filtered.map(function (e) {
+      return cols.map(function (c) { return csvCell(e[c]); }).join(",");
+    }));
+    var csv = rows.join("\r\n");
+    saveFile("fairland-patch-log-" + todayISO() + ".csv", csv, "text/csv");
+    showToast("CSV downloaded");
+  });
+
+  // ---------- Backup / Restore (JSON) ----------
+  document.getElementById("backupBtn").addEventListener("click", function () {
+    var json = JSON.stringify({ exportedAt: new Date().toISOString(), entries: entries }, null, 2);
+    saveFile("fairland-patch-log-backup-" + todayISO() + ".json", json, "application/json");
+    showToast("Backup saved — keep it somewhere safe");
+  });
+
+  var restoreInput = document.getElementById("restoreInput");
+  document.getElementById("restoreBtn").addEventListener("click", function () { restoreInput.click(); });
+  restoreInput.addEventListener("change", function () {
+    var file = restoreInput.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var incoming;
+      try {
+        var parsed = JSON.parse(reader.result);
+        incoming = Array.isArray(parsed) ? parsed : parsed.entries;
+        if (!Array.isArray(incoming)) throw new Error("not a backup file");
+      } catch (e) {
+        showToast("That doesn't look like a valid backup file");
+        restoreInput.value = "";
+        return;
+      }
+      var mode = confirm(
+        "Restoring " + incoming.length + " entries from this backup.\n\n" +
+        "OK = merge with what's already here (recommended)\n" +
+        "Cancel = replace everything currently stored"
+      );
+      var existingIds = {};
+      entries.forEach(function (e) { existingIds[e.id] = true; });
+
+      if (mode) {
+        incoming.forEach(function (e) {
+          if (!e.id) e.id = "restored-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+          if (!existingIds[e.id]) entries.push(e);
+        });
+      } else {
+        entries = incoming.map(function (e) {
+          if (!e.id) e.id = "restored-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+          return e;
+        });
+      }
+
+      localSave();
+      renderList();
+      showToast("Restored — " + entries.length + " entries in the log now");
+      restoreInput.value = "";
+    };
+    reader.readAsText(file);
+  });
+
+  // ---------- Boot ----------
+  function boot() {
+    entries = localLoad();
+    renderList();
+    setConn("off", "Saved to this browser — use Backup regularly");
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
