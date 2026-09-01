@@ -4,602 +4,771 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fairland Patch Log</title>
-<meta name="description" content="Incident and fix-history log for Laerskool Fairland IT — record what broke, how it was fixed, and who was called, so the next repeat doesn't start from zero.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%B0</text></svg>">
+<meta name="description" content="IT incident and fix-history log for Laerskool Fairland — what broke, how it was fixed, and who was called.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
+  /* ============ Tokens ============ */
   :root {
-    --bg: #EEF2EA;
-    --surface: #FFFFFF;
-    --surface-raised: #F6F8F3;
-    --surface-stripe: #E9EFE5;
-    --border: #D2DBC9;
-    --border-soft: #E2E9DA;
-    --ink: #17241A;
-    --ink-muted: #52624E;
-    --ink-faint: #85937E;
-    --green: #145C3D;
-    --green-strong: #0E4A30;
-    --green-soft: #DCEBDF;
-    --orange: #DA7A28;
-    --orange-soft: #FAE4CC;
-    --sage: #7C9C86;
-    --sage-soft: #E6EEE3;
-    --danger: #AE3B2C;
-    --danger-soft: #F5DDD8;
-    --warning: #9C6A16;
-    --warning-soft: #F2E2C2;
-    --ok: #2C7A4C;
-    --ok-soft: #DBEEE1;
-    --shadow: 0 1px 2px rgba(23,36,26,0.06), 0 6px 20px -8px rgba(23,36,26,0.18);
-    --focus: #14603F;
+    --bg:            #F4F5F3;
+    --surface:       #FFFFFF;
+    --surface-2:     #FAFBF9;
+    --surface-3:     #F0F2EE;
+    --line:          #E1E4DE;
+    --line-strong:   #CBD1C7;
+
+    --text:          #14181A;
+    --text-2:        #5A6560;
+    --text-3:        #8A938C;
+
+    --accent:        #12603F;
+    --accent-hover:  #0D4C31;
+    --accent-quiet:  #E8F1EB;
+    --accent-line:   #B9D3C4;
+    --on-accent:     #FFFFFF;
+
+    --amber:         #B26A11;
+    --amber-quiet:   #FBF0DC;
+    --red:           #A93325;
+    --red-quiet:     #FAE5E1;
+    --green:         #1F7346;
+    --green-quiet:   #E4F1E9;
+
+    --shadow-sm: 0 1px 2px rgba(20,24,26,.05);
+    --shadow-md: 0 2px 4px rgba(20,24,26,.05), 0 8px 24px -12px rgba(20,24,26,.18);
+    --shadow-lg: 0 8px 16px -6px rgba(20,24,26,.12), 0 24px 60px -20px rgba(20,24,26,.32);
+
+    --r-sm: 5px;
+    --r-md: 7px;
+    --r-lg: 11px;
+
     color-scheme: light;
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #0E1712;
-      --surface: #16211A;
-      --surface-raised: #1B281F;
-      --surface-stripe: #202E24;
-      --border: #2C3B30;
-      --border-soft: #263429;
-      --ink: #E9EFE6;
-      --ink-muted: #A9BCA5;
-      --ink-faint: #758A72;
-      --green: #58BF8B;
-      --green-strong: #79D6A6;
-      --green-soft: rgba(88,191,139,0.16);
-      --orange: #F0964C;
-      --orange-soft: rgba(240,150,76,0.16);
-      --sage: #93B69D;
-      --sage-soft: rgba(147,182,157,0.14);
-      --danger: #E58076;
-      --danger-soft: rgba(229,128,118,0.16);
-      --warning: #DDAE5C;
-      --warning-soft: rgba(221,174,92,0.16);
-      --ok: #6BCE97;
-      --ok-soft: rgba(107,206,151,0.16);
-      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 28px -10px rgba(0,0,0,0.55);
-      --focus: #79D6A6;
+      --bg:            #0D0F0E;
+      --surface:       #141816;
+      --surface-2:     #171C19;
+      --surface-3:     #1D231F;
+      --line:          #262D28;
+      --line-strong:   #38423A;
+
+      --text:          #E8EBE7;
+      --text-2:        #9EA9A1;
+      --text-3:        #6C7770;
+
+      --accent:        #4FB483;
+      --accent-hover:  #6BC998;
+      --accent-quiet:  rgba(79,180,131,.13);
+      --accent-line:   rgba(79,180,131,.32);
+      --on-accent:     #0B1410;
+
+      --amber:         #D9A245;
+      --amber-quiet:   rgba(217,162,69,.14);
+      --red:           #DE7C6D;
+      --red-quiet:     rgba(222,124,109,.14);
+      --green:         #58C08D;
+      --green-quiet:   rgba(88,192,141,.14);
+
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+      --shadow-md: 0 2px 4px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.7);
+      --shadow-lg: 0 8px 16px -6px rgba(0,0,0,.5), 0 24px 60px -20px rgba(0,0,0,.8);
+
       color-scheme: dark;
     }
   }
-
   :root[data-theme="dark"] {
-    --bg: #0E1712;
-    --surface: #16211A;
-    --surface-raised: #1B281F;
-    --surface-stripe: #202E24;
-    --border: #2C3B30;
-    --border-soft: #263429;
-    --ink: #E9EFE6;
-    --ink-muted: #A9BCA5;
-    --ink-faint: #758A72;
-    --green: #58BF8B;
-    --green-strong: #79D6A6;
-    --green-soft: rgba(88,191,139,0.16);
-    --orange: #F0964C;
-    --orange-soft: rgba(240,150,76,0.16);
-    --sage: #93B69D;
-    --sage-soft: rgba(147,182,157,0.14);
-    --danger: #E58076;
-    --danger-soft: rgba(229,128,118,0.16);
-    --warning: #DDAE5C;
-    --warning-soft: rgba(221,174,92,0.16);
-    --ok: #6BCE97;
-    --ok-soft: rgba(107,206,151,0.16);
-    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 28px -10px rgba(0,0,0,0.55);
-    --focus: #79D6A6;
+    --bg:#0D0F0E; --surface:#141816; --surface-2:#171C19; --surface-3:#1D231F;
+    --line:#262D28; --line-strong:#38423A;
+    --text:#E8EBE7; --text-2:#9EA9A1; --text-3:#6C7770;
+    --accent:#4FB483; --accent-hover:#6BC998; --accent-quiet:rgba(79,180,131,.13); --accent-line:rgba(79,180,131,.32);
+    --on-accent:#0B1410;
+    --amber:#D9A245; --amber-quiet:rgba(217,162,69,.14);
+    --red:#DE7C6D; --red-quiet:rgba(222,124,109,.14);
+    --green:#58C08D; --green-quiet:rgba(88,192,141,.14);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+    --shadow-md:0 2px 4px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.7);
+    --shadow-lg:0 8px 16px -6px rgba(0,0,0,.5), 0 24px 60px -20px rgba(0,0,0,.8);
     color-scheme: dark;
   }
 
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
   body {
     background: var(--bg);
-    color: var(--ink);
-    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-    font-size: 15px;
+    color: var(--text);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  ::selection { background: var(--green-soft); }
+  .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
 
-  .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace; font-variant-numeric: tabular-nums; }
-
-  a { color: var(--green); }
-
-  button { font-family: inherit; }
-  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
-    outline: 2px solid var(--focus);
+  :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  .sr-only {
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
   }
 
-  .app { max-width: 1080px; margin: 0 auto; padding: 28px 24px 64px; }
+  /* ============ Shell ============ */
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px 80px; }
 
-  /* ---------- Header ---------- */
-  .masthead {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding-bottom: 20px;
-    margin-bottom: 22px;
-    border-bottom: 1px solid var(--border);
+  /* ============ Topbar ============ */
+  .topbar {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 30;
   }
-  .crest {
-    width: 44px; height: 48px;
-    flex: none;
+  .topbar-inner {
+    max-width: 1180px; margin: 0 auto;
+    padding: 0 28px;
+    height: 60px;
+    display: flex; align-items: center; gap: 14px;
   }
-  .titles h1 {
-    margin: 0;
-    font-family: "Fraunces", Georgia, serif;
-    font-weight: 600;
-    font-size: 1.55rem;
-    letter-spacing: -0.01em;
-    color: var(--green-strong);
-    text-wrap: balance;
+  .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .mark { width: 30px; height: 30px; flex: none; display:block; }
+  .brand-text { min-width: 0; }
+  .brand-name {
+    font-size: 14.5px; font-weight: 600; letter-spacing: -.006em;
+    line-height: 1.15; white-space: nowrap;
   }
-  .titles p {
-    margin: 2px 0 0;
-    font-size: 0.85rem;
-    color: var(--ink-muted);
+  .brand-sub {
+    font-size: 11.5px; color: var(--text-3); line-height: 1.25;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .conn-note {
-    margin-left: auto;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--ink-faint);
-    display: flex;
-    align-items: center;
-    gap: 6px;
+
+  .topbar-spacer { flex: 1 1 auto; }
+
+  .storage-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text-3);
+    padding: 4px 9px; border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
     white-space: nowrap;
   }
-  .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex: none; }
-  .conn-dot.off { background: var(--warning); }
+  .storage-badge .dot { width:6px; height:6px; border-radius:50%; background: var(--amber); flex:none; }
 
-  /* ---------- Toolbar ---------- */
-  .toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 18px;
+  /* ============ Stats ============ */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    margin: 26px 0 22px;
   }
-  .search {
-    position: relative;
-    flex: 1 1 240px;
-    min-width: 180px;
+  .stat { background: var(--surface); padding: 14px 16px; }
+  .stat-k {
+    font-size: 10.5px; font-weight: 600; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--text-3); margin-bottom: 5px;
   }
-  .search input {
-    width: 100%;
-    padding: 9px 12px 9px 34px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--ink);
-    font-size: 0.9rem;
-  }
-  .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--ink-faint); }
+  .stat-v { font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
+  .stat-v.is-red   { color: var(--red); }
+  .stat-v.is-amber { color: var(--amber); }
 
-  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
-  .chip {
-    border: 1px solid var(--border);
+  /* ============ Controls ============ */
+  .controls {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .field-search { position: relative; flex: 1 1 260px; min-width: 200px; }
+  .field-search svg {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    width: 15px; height: 15px; color: var(--text-3); pointer-events: none;
+  }
+  .field-search input {
+    width: 100%; height: 34px;
+    padding: 0 10px 0 32px;
+    font: inherit; font-size: 13px;
+    color: var(--text);
     background: var(--surface);
-    color: var(--ink-muted);
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 0.78rem;
-    font-weight: 500;
-    cursor: pointer;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    transition: border-color .15s ease;
+  }
+  .field-search input:hover { border-color: var(--line-strong); }
+  .field-search input::placeholder { color: var(--text-3); }
+
+  /* segmented status filter */
+  .segmented {
+    display: inline-flex; padding: 2px;
+    background: var(--surface-3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+  }
+  .segmented button {
+    border: 0; background: transparent;
+    padding: 0 11px; height: 28px;
+    font-size: 12.5px; font-weight: 500;
+    color: var(--text-2);
+    border-radius: var(--r-sm);
+    transition: background .15s ease, color .15s ease;
     white-space: nowrap;
   }
-  .chip[aria-pressed="true"] {
-    background: var(--green-soft);
-    border-color: var(--green);
-    color: var(--green-strong);
-  }
-
-  select.cat-filter {
-    border: 1px solid var(--border);
+  .segmented button:hover { color: var(--text); }
+  .segmented button[aria-pressed="true"] {
     background: var(--surface);
-    color: var(--ink);
-    border-radius: 8px;
-    padding: 7px 10px;
-    font-size: 0.82rem;
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
   }
 
-  .spacer { flex: 1 1 auto; }
+  select.select {
+    height: 34px; padding: 0 28px 0 10px;
+    font: inherit; font-size: 13px; color: var(--text);
+    background: var(--surface) no-repeat right 9px center/13px 13px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238A938C' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+    border: 1px solid var(--line); border-radius: var(--r-md);
+    appearance: none; -webkit-appearance: none;
+    transition: border-color .15s ease;
+  }
+  select.select:hover { border-color: var(--line-strong); }
+
+  .controls-spacer { flex: 1 1 auto; }
 
   .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    border-radius: 8px;
-    padding: 9px 14px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: 1px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 34px; padding: 0 13px;
+    font-size: 13px; font-weight: 500;
+    border: 1px solid var(--line);
     background: var(--surface);
-    color: var(--ink);
-    cursor: pointer;
+    color: var(--text);
+    border-radius: var(--r-md);
+    white-space: nowrap;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
   }
-  .btn:hover { border-color: var(--ink-faint); }
+  .btn:hover { background: var(--surface-3); border-color: var(--line-strong); }
+  .btn svg { width: 15px; height: 15px; flex: none; }
+
   .btn-primary {
-    background: var(--green);
-    border-color: var(--green);
-    color: #fff;
+    background: var(--accent); border-color: var(--accent);
+    color: var(--on-accent); font-weight: 600;
   }
-  .btn-primary:hover { background: var(--green-strong); border-color: var(--green-strong); }
-  .btn-ghost { background: transparent; border-color: transparent; color: var(--ink-muted); padding: 6px 8px; }
-  .btn-ghost:hover { color: var(--ink); background: var(--surface-stripe); }
-  .btn-danger-text { color: var(--danger); }
+  .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 
-  .export-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-sm { height: 28px; padding: 0 10px; font-size: 12.5px; }
+  .btn-quiet { border-color: transparent; background: transparent; color: var(--text-2); }
+  .btn-quiet:hover { background: var(--surface-3); color: var(--text); border-color: transparent; }
+  .btn-quiet.is-danger:hover { color: var(--red); background: var(--red-quiet); }
 
-  /* ---------- New entry form ---------- */
-  .panel {
+  /* export dropdown */
+  .menu-wrap { position: relative; }
+  .menu {
+    position: absolute; right: 0; top: calc(100% + 5px);
+    min-width: 210px; padding: 5px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    padding: 20px;
-    margin-bottom: 22px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
   }
-  .panel h2 {
-    margin: 0 0 14px;
-    font-family: "Fraunces", Georgia, serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--green-strong);
+  .menu[hidden] { display: none; }
+  .menu button {
+    display: flex; align-items: flex-start; gap: 9px;
+    width: 100%; padding: 7px 9px;
+    border: 0; background: transparent; text-align: left;
+    border-radius: var(--r-sm);
+    transition: background .12s ease;
   }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 16px;
-  }
-  .grid .full { grid-column: 1 / -1; }
-  label {
-    display: block;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--ink-faint);
-    margin-bottom: 5px;
-    font-weight: 600;
-  }
-  .req::after { content: " *"; color: var(--orange); }
-  input[type="text"], input[type="date"], select, textarea {
-    width: 100%;
-    padding: 9px 10px;
-    border-radius: 7px;
-    border: 1px solid var(--border);
-    background: var(--surface-raised);
-    color: var(--ink);
-    font-size: 0.88rem;
-    font-family: inherit;
-  }
-  textarea { resize: vertical; min-height: 64px; line-height: 1.45; }
-  .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+  .menu button:hover { background: var(--surface-3); }
+  .menu svg { width: 15px; height: 15px; margin-top: 1.5px; flex: none; color: var(--text-3); }
+  .menu .mi-t { font-size: 13px; font-weight: 500; line-height: 1.3; }
+  .menu .mi-d { font-size: 11.5px; color: var(--text-3); line-height: 1.35; margin-top: 1px; }
+  .menu-sep { height: 1px; background: var(--line); margin: 5px 0; }
 
-  /* ---------- List ---------- */
-  .count-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 10px;
-    color: var(--ink-faint);
-    font-size: 0.78rem;
-  }
-
-  .entries { display: flex; flex-direction: column; gap: 8px; }
-
-  .entry {
+  /* ============ Table ============ */
+  .table-card {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--ink-faint);
-    border-radius: 9px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
   }
-  .entry.sev-High { border-left-color: var(--danger); }
-  .entry.sev-Medium { border-left-color: var(--warning); }
-  .entry.sev-Low { border-left-color: var(--sage); }
-
-  .entry-row {
+  .table-head {
     display: grid;
-    grid-template-columns: 1fr auto auto auto auto;
-    align-items: center;
+    grid-template-columns: 1fr 132px 116px 104px 34px;
     gap: 14px;
-    padding: 12px 14px;
-    cursor: pointer;
-  }
-  .entry-main { min-width: 0; }
-  .entry-device {
-    font-weight: 600;
-    font-size: 0.94rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .entry-sub {
-    font-size: 0.78rem;
-    color: var(--ink-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 1px;
-  }
-  .tag-pill {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: var(--sage-soft);
-    color: var(--green-strong);
-    white-space: nowrap;
-  }
-  .status-pill {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 999px;
-    white-space: nowrap;
-  }
-  .status-Open { background: var(--danger-soft); color: var(--danger); }
-  .status-Monitoring { background: var(--warning-soft); color: var(--warning); }
-  .status-Resolved { background: var(--ok-soft); color: var(--ok); }
-
-  .entry-date { font-size: 0.78rem; color: var(--ink-faint); white-space: nowrap; }
-  .chevron { width: 16px; height: 16px; color: var(--ink-faint); transition: transform .15s ease; flex: none; }
-  .entry[data-open="true"] .chevron { transform: rotate(90deg); }
-
-  .entry-detail {
-    display: none;
-    padding: 4px 16px 18px 18px;
-    border-top: 1px solid var(--border-soft);
-  }
-  .entry[data-open="true"] .entry-detail { display: block; }
-
-  .detail-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 20px;
-    margin: 14px 0 6px;
-  }
-  .detail-field .k {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--ink-faint);
-    font-weight: 600;
-    margin-bottom: 3px;
-  }
-  .detail-field .v {
-    font-size: 0.88rem;
-    white-space: pre-wrap;
-    line-height: 1.55;
-  }
-  .detail-field .v.empty { color: var(--ink-faint); font-style: italic; }
-  .detail-actions { display: flex; gap: 8px; margin-top: 14px; }
-
-  .empty-state {
-    text-align: center;
-    padding: 56px 20px;
-    color: var(--ink-faint);
-    border: 1px dashed var(--border);
-    border-radius: 12px;
-  }
-  .empty-state svg { width: 34px; height: 34px; margin-bottom: 10px; opacity: 0.6; }
-  .empty-state p { margin: 0; font-size: 0.9rem; }
-
-  .toast {
-    position: fixed;
-    bottom: 18px; left: 50%;
-    transform: translateX(-50%) translateY(0);
-    background: var(--ink);
-    color: var(--bg);
+    align-items: center;
     padding: 9px 16px;
-    border-radius: 8px;
-    font-size: 0.82rem;
-    box-shadow: var(--shadow);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s ease, transform .2s ease;
-    z-index: 50;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: .07em; text-transform: uppercase;
+    color: var(--text-3);
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
 
-  @media (max-width: 640px) {
-    .grid { grid-template-columns: 1fr; }
+  .row-group { border-bottom: 1px solid var(--line); }
+  .row-group:last-child { border-bottom: 0; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 132px 116px 104px 34px;
+    gap: 14px; align-items: center;
+    padding: 11px 16px;
+    width: 100%;
+    border: 0; background: transparent; text-align: left;
+    border-left: 2px solid transparent;
+    transition: background .12s ease;
+  }
+  .row:hover { background: var(--surface-2); }
+  .row.sev-High   { border-left-color: var(--red); }
+  .row.sev-Medium { border-left-color: var(--amber); }
+  .row.sev-Low    { border-left-color: var(--line-strong); }
+
+  .cell-main { min-width: 0; display: block; }
+  .row-title {
+    display: block;
+    font-size: 13.5px; font-weight: 600; letter-spacing: -.004em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .row-meta {
+    display: block;
+    font-size: 12px; color: var(--text-3); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .cell-cat, .cell-status, .cell-date { display: block; min-width: 0; }
+  .row-meta .sep { opacity: .5; margin: 0 5px; }
+  .row-meta .m-status { display: none; margin-right: 8px; font-size: 11.5px; }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px; font-weight: 500;
+    padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface-3);
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  .status {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 500; white-space: nowrap;
+  }
+  .status::before { content:""; width:6px; height:6px; border-radius:50%; flex:none; }
+  .status-Open       { color: var(--red); }
+  .status-Open::before { background: var(--red); }
+  .status-Monitoring { color: var(--amber); }
+  .status-Monitoring::before { background: var(--amber); }
+  .status-Resolved   { color: var(--green); }
+  .status-Resolved::before { background: var(--green); }
+
+  .cell-date { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+  .chev {
+    width: 16px; height: 16px; color: var(--text-3);
+    transition: transform .18s ease; justify-self: end;
+  }
+  .row-group[data-open="true"] .chev { transform: rotate(90deg); }
+
+  .detail { display: none; padding: 2px 16px 18px 18px; background: var(--surface-2); }
+  .row-group[data-open="true"] .detail { display: block; }
+  .detail-grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 15px 28px; padding-top: 14px;
+  }
+  .df.span2 { grid-column: 1 / -1; }
+  .df dt {
+    font-size: 10.5px; font-weight: 600; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--text-3); margin-bottom: 4px;
+  }
+  .df dd {
+    margin: 0; font-size: 13px; line-height: 1.6;
+    white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .df dd.none { color: var(--text-3); }
+  .detail-actions {
+    display: flex; gap: 6px; margin-top: 16px;
+    padding-top: 13px; border-top: 1px solid var(--line);
+  }
+
+  /* ============ Empty ============ */
+  .empty { padding: 68px 24px; text-align: center; }
+  .empty svg { width: 26px; height: 26px; color: var(--text-3); margin-bottom: 12px; }
+  .empty h3 { margin: 0 0 5px; font-size: 14px; font-weight: 600; }
+  .empty p { margin: 0 auto; font-size: 13px; color: var(--text-3); max-width: 340px; line-height: 1.55; }
+
+  .list-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin: 14px 2px 0; font-size: 12px; color: var(--text-3);
+  }
+
+  /* ============ Modal ============ */
+  .backdrop {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(12,16,14,.5);
+    backdrop-filter: blur(2px);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .backdrop[hidden] { display: none; }
+  .modal {
+    width: 100%; max-width: 660px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 15px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal-head h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.008em; }
+  .icon-btn {
+    width: 28px; height: 28px; display: grid; place-items: center;
+    border: 0; background: transparent; color: var(--text-3);
+    border-radius: var(--r-sm); transition: background .12s ease, color .12s ease;
+  }
+  .icon-btn:hover { background: var(--surface-3); color: var(--text); }
+  .icon-btn svg { width: 16px; height: 16px; }
+
+  .modal-body { padding: 18px; }
+  .fgrid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px 16px; }
+  .fgrid .span2 { grid-column: 1 / -1; }
+
+  .fieldset { border: 0; padding: 0; margin: 0 0 18px; }
+  .fieldset:last-of-type { margin-bottom: 0; }
+  .fieldset > legend {
+    padding: 0; margin-bottom: 11px;
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: .07em; text-transform: uppercase;
+    color: var(--text-3);
+    width: 100%; border-bottom: 1px solid var(--line); padding-bottom: 7px;
+  }
+
+  .f label {
+    display: block; font-size: 12px; font-weight: 500;
+    color: var(--text-2); margin-bottom: 5px;
+  }
+  .f label .req { color: var(--amber); margin-left: 1px; }
+  .f input[type="text"], .f input[type="date"], .f select, .f textarea {
+    width: 100%; font: inherit; font-size: 13px; color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .f input[type="text"], .f input[type="date"], .f select { height: 34px; padding: 0 10px; }
+  .f select {
+    appearance: none; -webkit-appearance: none; padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238A938C' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center; background-size: 13px 13px;
+  }
+  .f textarea { padding: 9px 10px; min-height: 76px; resize: vertical; line-height: 1.55; }
+  .f input:hover, .f select:hover, .f textarea:hover { border-color: var(--line-strong); }
+  .f input:focus, .f select:focus, .f textarea:focus { background: var(--surface); }
+  .f input::placeholder, .f textarea::placeholder { color: var(--text-3); }
+  .f .hint { font-size: 11.5px; color: var(--text-3); margin-top: 5px; line-height: 1.4; }
+
+  .modal-foot {
+    display: flex; justify-content: flex-end; gap: 8px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+
+  /* ============ Toast ============ */
+  .toast {
+    position: fixed; left: 50%; bottom: 22px;
+    transform: translateX(-50%) translateY(8px);
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 14px;
+    background: var(--text); color: var(--bg);
+    font-size: 12.5px; font-weight: 500;
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-lg);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 60;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ============ Responsive ============ */
+  @media (max-width: 900px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .table-head { display: none; }
+    .row { grid-template-columns: 1fr 24px; gap: 10px; }
+    .row .cell-cat, .row .cell-status, .row .cell-date { display: none; }
+    .row-meta .m-extra { display: none; }
+    .row-meta .m-status { display: inline-flex; }
+  }
+  @media (max-width: 620px) {
+    .wrap, .topbar-inner { padding-left: 16px; padding-right: 16px; }
+    .fgrid { grid-template-columns: 1fr; }
     .detail-grid { grid-template-columns: 1fr; }
-    .entry-row { grid-template-columns: 1fr auto; }
-    .entry-row .status-pill, .entry-row .tag-pill, .entry-row .entry-date { display: none; }
+    .brand-sub { display: none; }
+    .storage-badge .sb-text { display: none; }
+    .backdrop { padding: 0; }
+    .modal { max-width: none; min-height: 100%; border-radius: 0; border: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
   }
 
-  /* ---------- Print / documentation export ---------- */
-  #print-sheet { display: none; }
+  /* ============ Print ============ */
+  #sheet { display: none; }
   @media print {
-    body * { visibility: hidden; }
-    .app, .masthead, .toolbar, .panel, .entries, .entry { display: none !important; }
-    #print-sheet, #print-sheet * { visibility: visible; }
-    #print-sheet {
-      display: block !important;
-      position: absolute; top: 0; left: 0; width: 100%;
-      background: #fff; color: #16241A;
-      font-family: "IBM Plex Sans", sans-serif;
-      padding: 20px 6px;
+    body { background: #fff; }
+    body > *:not(#sheet) { display: none !important; }
+    #sheet { display: block; color: #14181A; font-family: "IBM Plex Sans", sans-serif; }
+    #sheet .sh {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      border-bottom: 2px solid #12603F; padding-bottom: 10px; margin-bottom: 6px;
     }
-    #print-sheet .ps-head {
-      display: flex; align-items: center; gap: 14px;
-      border-bottom: 3px solid #14603D;
-      padding-bottom: 12px; margin-bottom: 16px;
-    }
-    #print-sheet .ps-head h1 {
-      font-family: "Fraunces", serif;
-      font-size: 20px; margin: 0; color: #14603D;
-    }
-    #print-sheet .ps-head p { margin: 2px 0 0; font-size: 11px; color: #52624E; }
-    #print-sheet .ps-meta { font-size: 10.5px; color: #52624E; margin-bottom: 18px; }
-    #print-sheet .ps-entry { border: 1px solid #D2DBC9; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; break-inside: avoid; }
-    #print-sheet .ps-entry-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
-    #print-sheet .ps-entry-top strong { font-size: 13px; }
-    #print-sheet .ps-badge { font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; padding: 2px 7px; border-radius: 999px; border: 1px solid #999; }
-    #print-sheet .ps-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; font-size: 10.5px; }
-    #print-sheet .ps-fields div b { display: block; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.04em; color: #7C8B76; margin-bottom: 1px; }
-    #print-sheet .ps-fields .full { grid-column: 1 / -1; white-space: pre-wrap; }
-    @page { margin: 16mm 14mm; }
+    #sheet .sh h1 { margin: 0; font-size: 16pt; font-weight: 600; color: #12603F; letter-spacing: -.01em; }
+    #sheet .sh p { margin: 3px 0 0; font-size: 8.5pt; color: #5A6560; }
+    #sheet .sh .sh-r { font-size: 8pt; color: #5A6560; text-align: right; }
+    #sheet .rec { border: 1px solid #D8DCD5; border-radius: 4px; padding: 9px 11px; margin-top: 9px; break-inside: avoid; }
+    #sheet .rec-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; border-bottom: 1px solid #EAEDE7; padding-bottom: 5px; margin-bottom: 7px; }
+    #sheet .rec-h strong { font-size: 10.5pt; font-weight: 600; }
+    #sheet .rec-h span { font-size: 7.5pt; color: #5A6560; white-space: nowrap; }
+    #sheet .kv { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; }
+    #sheet .kv > div.w { grid-column: 1 / -1; }
+    #sheet .kv b { display: block; font-size: 6.8pt; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #8A938C; margin-bottom: 1px; }
+    #sheet .kv span { font-size: 8.5pt; line-height: 1.45; white-space: pre-wrap; }
+    #sheet .foot { margin-top: 14px; padding-top: 7px; border-top: 1px solid #D8DCD5; font-size: 7pt; color: #8A938C; }
+    @page { margin: 15mm 13mm; }
   }
 </style>
 </head>
 <body>
-<div class="app" id="app">
 
-  <header class="masthead">
-    <svg class="crest" viewBox="0 0 44 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M22 1 L41 8 V24 C41 36 33 44 22 47 C11 44 3 36 3 24 V8 Z" fill="var(--orange)" stroke="var(--green)" stroke-width="2.5"/>
-      <rect x="9" y="22" width="26" height="8" fill="var(--sage)" opacity="0.85"/>
-      <path d="M22 6 L30 30 M22 6 L14 30" stroke="var(--green)" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-    <div class="titles">
-      <h1>Fairland Patch Log</h1>
-      <p>IT incident &amp; fix history — Laerskool Fairland</p>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="var(--accent)"/>
+        <path d="M16 7.5 L23.5 10.2 V16.4 C23.5 20.6 20.4 23.6 16 24.9 C11.6 23.6 8.5 20.6 8.5 16.4 V10.2 Z"
+              fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round" opacity=".95"/>
+        <path d="M12.4 16.1 L15 18.6 L19.8 13.6" fill="none" stroke="#fff" stroke-width="1.9"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="brand-text">
+        <div class="brand-name">Fairland Patch Log</div>
+        <div class="brand-sub">Laerskool Fairland &middot; IT maintenance record</div>
+      </div>
     </div>
-    <div class="conn-note" id="connNote"><span class="conn-dot" id="connDot"></span><span id="connText">Connecting…</span></div>
-  </header>
-
-  <div class="toolbar">
-    <div class="search">
-      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="6.2" stroke="currentColor" stroke-width="1.6"/><path d="M17 17L13.5 13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <input type="text" id="searchInput" placeholder="Search device, room, problem, fix, tag…" autocomplete="off">
-    </div>
-    <select class="cat-filter" id="catFilter">
-      <option value="">All categories</option>
-    </select>
-    <div class="chip-row" id="statusChips"></div>
-    <div class="spacer"></div>
-    <button class="btn btn-primary" id="newEntryBtn">+ New entry</button>
-    <div class="export-group">
-      <button class="btn" id="exportPrintBtn" title="Print or save a formatted PDF of the entries currently shown">Export documentation</button>
-      <button class="btn" id="exportCsvBtn" title="Download the entries currently shown as a spreadsheet">Download CSV</button>
-      <button class="btn" id="backupBtn" title="Save a full JSON backup of every entry">Backup</button>
-      <button class="btn" id="restoreBtn" title="Load entries from a JSON backup file">Restore</button>
-      <input type="file" id="restoreInput" accept="application/json" style="display:none;">
-    </div>
+    <div class="topbar-spacer"></div>
+    <span class="storage-badge" id="storageBadge">
+      <span class="dot"></span><span class="sb-text">Stored on this device</span>
+    </span>
   </div>
+</header>
 
-  <section class="panel" id="formPanel" style="display:none;">
-    <h2 id="formTitle">New log entry</h2>
-    <form id="entryForm">
-      <div class="grid">
-        <div>
-          <label class="req" for="f-device">Device / system / software</label>
-          <input type="text" id="f-device" placeholder="e.g. Front office HP LaserJet M404" required>
-        </div>
-        <div>
-          <label for="f-category">Category</label>
-          <select id="f-category">
-            <option>Hardware</option>
-            <option>Software</option>
-            <option>Network</option>
-            <option>Printer / AV</option>
-            <option>Account / Access</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div>
-          <label class="req" for="f-location">Location</label>
-          <input type="text" id="f-location" placeholder="e.g. Grade 4 classroom, Admin block" required>
-        </div>
-        <div>
-          <label for="f-loggedby">Logged by</label>
-          <input type="text" id="f-loggedby" placeholder="Your name">
-        </div>
-        <div>
-          <label for="f-status">Status</label>
-          <select id="f-status">
-            <option>Open</option>
-            <option>Monitoring</option>
-            <option selected>Resolved</option>
-          </select>
-        </div>
-        <div>
-          <label for="f-severity">Severity</label>
-          <select id="f-severity">
-            <option>Low</option>
-            <option selected>Medium</option>
-            <option>High</option>
-          </select>
-        </div>
-        <div>
-          <label class="req" for="f-datelogged">Date logged</label>
-          <input type="date" id="f-datelogged" required>
-        </div>
-        <div>
-          <label for="f-dateresolved">Date resolved</label>
-          <input type="date" id="f-dateresolved">
-        </div>
-        <div class="full">
-          <label class="req" for="f-problem">What went wrong</label>
-          <textarea id="f-problem" placeholder="Symptoms, error messages, when it started…" required></textarea>
-        </div>
-        <div class="full">
-          <label for="f-resolution">How it was fixed</label>
-          <textarea id="f-resolution" placeholder="Exact steps taken, settings changed, parts replaced…"></textarea>
-        </div>
-        <div>
-          <label for="f-contact">Contacted (person / company)</label>
-          <input type="text" id="f-contact" placeholder="e.g. Sizwe — Xerox support">
-        </div>
-        <div>
-          <label for="f-contactinfo">Contact details</label>
-          <input type="text" id="f-contactinfo" placeholder="Phone, email, ticket ref">
-        </div>
-        <div class="full">
-          <label for="f-tags">Tags</label>
-          <input type="text" id="f-tags" placeholder="comma, separated, keywords — e.g. paper jam, driver, recurring">
-        </div>
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn" id="cancelFormBtn">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="saveEntryBtn">Save entry</button>
-      </div>
-    </form>
+<main class="wrap">
+
+  <section class="stats" aria-label="Log summary">
+    <div class="stat"><div class="stat-k">Total entries</div><div class="stat-v mono" id="sTotal">0</div></div>
+    <div class="stat"><div class="stat-k">Open</div><div class="stat-v mono is-red" id="sOpen">0</div></div>
+    <div class="stat"><div class="stat-k">Monitoring</div><div class="stat-v mono is-amber" id="sMon">0</div></div>
+    <div class="stat"><div class="stat-k">Recurring devices</div><div class="stat-v mono" id="sRep">0</div></div>
   </section>
 
-  <div class="count-row">
-    <span id="countLabel">0 entries</span>
-    <span id="lastUpdatedLabel"></span>
+  <div class="controls">
+    <div class="field-search">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="9" cy="9" r="6.3" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M13.6 13.6 L17.5 17.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+      <label class="sr-only" for="q">Search the log</label>
+      <input type="search" id="q" placeholder="Search device, room, symptom, fix, contact…" autocomplete="off">
+    </div>
+
+    <div class="segmented" id="segStatus" role="group" aria-label="Filter by status"></div>
+
+    <label class="sr-only" for="catFilter">Filter by category</label>
+    <select class="select" id="catFilter"><option value="">All categories</option></select>
+
+    <div class="controls-spacer"></div>
+
+    <div class="menu-wrap">
+      <button class="btn" id="exportBtn" aria-haspopup="true" aria-expanded="false">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M10 3v9m0 0 3.2-3.2M10 12 6.8 8.8M4 14.5v1A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5v-1"
+                stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Export
+      </button>
+      <div class="menu" id="exportMenu" hidden role="menu">
+        <button type="button" id="mPrint" role="menuitem">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 7V3.5h8V7M6 15.5h8V12H6zM4.5 7h11A1.5 1.5 0 0 1 17 8.5v4H3v-4A1.5 1.5 0 0 1 4.5 7" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span><span class="mi-t">Documentation PDF</span><span class="mi-d">Formatted report of the filtered view</span></span>
+        </button>
+        <button type="button" id="mCsv" role="menuitem">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M5 2.5h6.5L16 7v10.5H5zM11 2.5V7h5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span><span class="mi-t">Spreadsheet (CSV)</span><span class="mi-d">Filtered rows for Excel or Sheets</span></span>
+        </button>
+        <div class="menu-sep"></div>
+        <button type="button" id="mBackup" role="menuitem">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 6.5v9A1.5 1.5 0 0 0 4.5 17h11a1.5 1.5 0 0 0 1.5-1.5v-9M3 6.5 4.6 3.4A1.5 1.5 0 0 1 5.9 2.6h8.2a1.5 1.5 0 0 1 1.3.8L17 6.5M3 6.5h14M8 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span><span class="mi-t">Back up everything</span><span class="mi-d">Full JSON archive of all entries</span></span>
+        </button>
+        <button type="button" id="mRestore" role="menuitem">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 17V8m0 0L6.8 11.2M10 8l3.2 3.2M4 5.5v-1A1.5 1.5 0 0 1 5.5 3h9A1.5 1.5 0 0 1 16 4.5v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span><span class="mi-t">Restore from backup</span><span class="mi-d">Merge or replace from a JSON file</span></span>
+        </button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="newBtn">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M10 4.5v11M4.5 10h11" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+      </svg>
+      Log an issue
+    </button>
+    <input type="file" id="restoreInput" accept="application/json,.json" hidden>
   </div>
 
-  <div class="entries" id="entriesList"></div>
+  <div class="table-card">
+    <div class="table-head" aria-hidden="true">
+      <div>Device / system</div>
+      <div class="cell-cat">Category</div>
+      <div class="cell-status">Status</div>
+      <div class="cell-date">Logged</div>
+      <div></div>
+    </div>
+    <div id="rows"></div>
+    <div class="empty" id="empty" hidden>
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M5 4.5h14v15H5zM8.5 9h7M8.5 13h4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h3 id="emptyT">Nothing logged yet</h3>
+      <p id="emptyD">Record the next fix while it is fresh — the detail you skip today is the detail you will want in three months.</p>
+    </div>
+  </div>
 
-  <div class="empty-state" id="emptyState" style="display:none;">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="1.4"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-    <p id="emptyStateText">No entries yet. Log the next fix so future-you doesn't have to solve it twice.</p>
+  <div class="list-meta">
+    <span id="countLabel">0 entries</span>
+    <span id="filterNote"></span>
+  </div>
+</main>
+
+<!-- ============ Entry modal ============ -->
+<div class="backdrop" id="backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h2 id="modalTitle">Log an issue</h2>
+      <button class="icon-btn" id="closeModal" aria-label="Close">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M5.5 5.5l9 9m0-9l-9 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <form id="entryForm">
+      <div class="modal-body">
+
+        <fieldset class="fieldset">
+          <legend>What and where</legend>
+          <div class="fgrid">
+            <div class="f span2">
+              <label for="f-device">Device, system or software <span class="req">*</span></label>
+              <input type="text" id="f-device" required placeholder="Front office HP LaserJet M404">
+            </div>
+            <div class="f">
+              <label for="f-location">Location <span class="req">*</span></label>
+              <input type="text" id="f-location" required placeholder="Admin block, front office">
+            </div>
+            <div class="f">
+              <label for="f-category">Category</label>
+              <select id="f-category"></select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend>The problem</legend>
+          <div class="fgrid">
+            <div class="f span2">
+              <label for="f-problem">Symptoms and error messages <span class="req">*</span></label>
+              <textarea id="f-problem" required placeholder="What was reported, what you observed, exact error text, when it started…"></textarea>
+            </div>
+            <div class="f">
+              <label for="f-severity">Severity</label>
+              <select id="f-severity"></select>
+            </div>
+            <div class="f">
+              <label for="f-status">Status</label>
+              <select id="f-status"></select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend>The fix</legend>
+          <div class="fgrid">
+            <div class="f span2">
+              <label for="f-resolution">How it was resolved</label>
+              <textarea id="f-resolution" placeholder="Exact steps, settings changed, firmware or driver versions, parts replaced…"></textarea>
+              <div class="hint">Write it for someone who has never seen this fault — including yourself in six months.</div>
+            </div>
+            <div class="f">
+              <label for="f-contact">Who you contacted</label>
+              <input type="text" id="f-contact" placeholder="Name and company">
+            </div>
+            <div class="f">
+              <label for="f-contactinfo">Their contact details</label>
+              <input type="text" id="f-contactinfo" placeholder="Phone, email or ticket reference">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend>Record keeping</legend>
+          <div class="fgrid">
+            <div class="f">
+              <label for="f-datelogged">Date logged <span class="req">*</span></label>
+              <input type="date" id="f-datelogged" required>
+            </div>
+            <div class="f">
+              <label for="f-dateresolved">Date resolved</label>
+              <input type="date" id="f-dateresolved">
+            </div>
+            <div class="f">
+              <label for="f-loggedby">Logged by</label>
+              <input type="text" id="f-loggedby" placeholder="Your name">
+            </div>
+            <div class="f">
+              <label for="f-tags">Tags</label>
+              <input type="text" id="f-tags" placeholder="paper jam, driver, recurring">
+              <div class="hint">Comma separated — these are what you will search on later.</div>
+            </div>
+          </div>
+        </fieldset>
+
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Save entry</button>
+      </div>
+    </form>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<div id="print-sheet">
-  <div class="ps-head">
+<!-- ============ Print sheet ============ -->
+<div id="sheet">
+  <div class="sh">
     <div>
-      <h1>Laerskool Fairland — IT Maintenance Log</h1>
-      <p>Fairland Patch Log &middot; Nooit Terug</p>
+      <h1>IT Maintenance Log</h1>
+      <p>Laerskool Fairland &middot; Fairland Patch Log</p>
     </div>
+    <div class="sh-r" id="shMeta"></div>
   </div>
-  <div class="ps-meta" id="psMeta"></div>
-  <div id="psEntries"></div>
+  <div id="shBody"></div>
+  <div class="foot">Laerskool Fairland — internal IT maintenance record. Retain for asset and support history.</div>
 </div>
 
 <script>
@@ -607,444 +776,472 @@
   "use strict";
 
   var CATEGORIES = ["Hardware", "Software", "Network", "Printer / AV", "Account / Access", "Other"];
-  var STATUSES = ["Open", "Monitoring", "Resolved"];
+  var STATUSES   = ["Open", "Monitoring", "Resolved"];
+  var SEVERITIES = ["Low", "Medium", "High"];
+  var STORE_KEY  = "lsf-patch-log-v1";
 
-  var catFilterEl = document.getElementById("catFilter");
+  var $ = function (id) { return document.getElementById(id); };
+
+  var entries = [];
+  var openIds = Object.create(null);
+  var editingId = null;
+  var activeStatus = "";
+  var lastLoggedBy = "";
+
+  /* ---------- utilities ---------- */
+  function todayISO() {
+    var d = new Date();
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+  var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function fmtDate(iso) {
+    if (!iso) return "";
+    var p = String(iso).split("-");
+    if (p.length !== 3) return iso;
+    return p[2] + " " + MONTHS[parseInt(p[1], 10) - 1] + " " + p[0];
+  }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+  function uid() {
+    return "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+  var toastTimer;
+  function toast(msg) {
+    var t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2400);
+  }
+
+  /* ---------- persistence ---------- */
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(entries)); }
+    catch (e) { toast("Could not save — browser storage is full or blocked"); }
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      var parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) { return []; }
+  }
+
+  /* ---------- populate selects ---------- */
+  function fillSelect(el, values, selected) {
+    el.innerHTML = values.map(function (v) {
+      return '<option value="' + esc(v) + '"' + (v === selected ? " selected" : "") + ">" + esc(v) + "</option>";
+    }).join("");
+  }
+  fillSelect($("f-category"), CATEGORIES, "Hardware");
+  fillSelect($("f-status"), STATUSES, "Resolved");
+  fillSelect($("f-severity"), SEVERITIES, "Medium");
   CATEGORIES.forEach(function (c) {
     var o = document.createElement("option");
     o.value = c; o.textContent = c;
-    catFilterEl.appendChild(o);
+    $("catFilter").appendChild(o);
   });
 
-  var statusChipsEl = document.getElementById("statusChips");
-  var activeStatus = "";
-  function renderChips() {
-    statusChipsEl.innerHTML = "";
-    var all = ["All"].concat(STATUSES);
-    all.forEach(function (s) {
-      var val = s === "All" ? "" : s;
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "chip";
-      btn.textContent = s;
-      btn.setAttribute("aria-pressed", String(activeStatus === val));
-      btn.addEventListener("click", function () {
-        activeStatus = val;
-        renderChips();
-        renderList();
+  /* ---------- status segmented control ---------- */
+  function renderSeg() {
+    var seg = $("segStatus");
+    seg.innerHTML = "";
+    [["", "All"]].concat(STATUSES.map(function (s) { return [s, s]; }))
+      .forEach(function (pair) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = pair[1];
+        b.setAttribute("aria-pressed", String(activeStatus === pair[0]));
+        b.addEventListener("click", function () {
+          activeStatus = pair[0];
+          renderSeg();
+          render();
+        });
+        seg.appendChild(b);
       });
-      statusChipsEl.appendChild(btn);
-    });
-  }
-  renderChips();
-
-  var entries = [];        // full local mirror of the store
-  var openIds = {};         // which rows are expanded
-  var editingId = null;     // doc id currently being edited, or null for "new"
-  var db = null;
-
-  var connDot = document.getElementById("connDot");
-  var connText = document.getElementById("connText");
-  function setConn(state, label) {
-    connDot.classList.toggle("off", state !== "ok");
-    connText.textContent = label;
   }
 
-  function todayISO() {
-    var d = new Date();
-    var m = String(d.getMonth() + 1).padStart(2, "0");
-    var day = String(d.getDate()).padStart(2, "0");
-    return d.getFullYear() + "-" + m + "-" + day;
-  }
-
-  function fmtDate(iso) {
-    if (!iso) return "";
-    var parts = iso.split("-");
-    if (parts.length !== 3) return iso;
-    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return parts[2] + " " + months[parseInt(parts[1], 10) - 1] + " " + parts[0];
-  }
-
-  function escapeHtml(s) {
-    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
-  }
-
-  function showToast(msg) {
-    var t = document.getElementById("toast");
-    t.textContent = msg;
-    t.classList.add("show");
-    clearTimeout(showToast._h);
-    showToast._h = setTimeout(function () { t.classList.remove("show"); }, 2200);
-  }
-
-  // ---------- Filtering ----------
-  function getFiltered() {
-    var q = document.getElementById("searchInput").value.trim().toLowerCase();
-    var cat = catFilterEl.value;
+  /* ---------- filtering ---------- */
+  function filtered() {
+    var q = $("q").value.trim().toLowerCase();
+    var cat = $("catFilter").value;
     return entries.filter(function (e) {
       if (activeStatus && e.status !== activeStatus) return false;
       if (cat && e.category !== cat) return false;
       if (q) {
-        var hay = [e.device, e.location, e.problem, e.resolution, e.tags, e.contactedWho, e.category]
-          .join(" ").toLowerCase();
+        var hay = [e.device, e.location, e.problem, e.resolution, e.tags,
+                   e.contactedWho, e.contactInfo, e.category, e.loggedBy]
+                  .join(" ").toLowerCase();
         if (hay.indexOf(q) === -1) return false;
       }
       return true;
     }).sort(function (a, b) {
-      return (b.dateLogged || "").localeCompare(a.dateLogged || "") || (b.createdAt || 0) - (a.createdAt || 0);
+      return String(b.dateLogged || "").localeCompare(String(a.dateLogged || "")) ||
+             (b.createdAt || 0) - (a.createdAt || 0);
     });
   }
 
-  // ---------- List rendering ----------
-  var listEl = document.getElementById("entriesList");
-  var emptyEl = document.getElementById("emptyState");
-  var emptyText = document.getElementById("emptyStateText");
-  var countLabel = document.getElementById("countLabel");
-  var lastUpdatedLabel = document.getElementById("lastUpdatedLabel");
+  /* ---------- stats ---------- */
+  function renderStats() {
+    $("sTotal").textContent = entries.length;
+    $("sOpen").textContent = entries.filter(function (e) { return e.status === "Open"; }).length;
+    $("sMon").textContent  = entries.filter(function (e) { return e.status === "Monitoring"; }).length;
+    var seen = Object.create(null), repeats = Object.create(null);
+    entries.forEach(function (e) {
+      var k = String(e.device || "").trim().toLowerCase();
+      if (!k) return;
+      if (seen[k]) repeats[k] = true;
+      seen[k] = true;
+    });
+    $("sRep").textContent = Object.keys(repeats).length;
+  }
 
-  function renderList() {
-    var filtered = getFiltered();
-    countLabel.textContent = filtered.length + " " + (filtered.length === 1 ? "entry" : "entries") +
-      (filtered.length !== entries.length ? " (of " + entries.length + ")" : "");
+  /* ---------- rows ---------- */
+  function field(label, value, span) {
+    var has = value != null && String(value).trim() !== "";
+    return '<div class="df' + (span ? " span2" : "") + '">' +
+             "<dt>" + esc(label) + "</dt>" +
+             '<dd class="' + (has ? "" : "none") + '">' + (has ? esc(value) : "Not recorded") + "</dd>" +
+           "</div>";
+  }
 
-    if (entries.length === 0) {
-      emptyText.textContent = "No entries yet. Log the next fix so future-you doesn't have to solve it twice.";
-      emptyEl.style.display = "block";
-      listEl.innerHTML = "";
+  function render() {
+    var list = filtered();
+    var rowsEl = $("rows");
+
+    $("countLabel").textContent = list.length + (list.length === 1 ? " entry" : " entries") +
+      (list.length !== entries.length ? " of " + entries.length : "");
+
+    var notes = [];
+    if (activeStatus) notes.push(activeStatus.toLowerCase());
+    if ($("catFilter").value) notes.push($("catFilter").value.toLowerCase());
+    if ($("q").value.trim()) notes.push('matching "' + $("q").value.trim() + '"');
+    $("filterNote").textContent = notes.length ? "Filtered: " + notes.join(" · ") : "";
+
+    if (!list.length) {
+      rowsEl.innerHTML = "";
+      $("empty").hidden = false;
+      if (!entries.length) {
+        $("emptyT").textContent = "Nothing logged yet";
+        $("emptyD").textContent = "Record the next fix while it is fresh — the detail you skip today is the detail you will want in three months.";
+      } else {
+        $("emptyT").textContent = "No matching entries";
+        $("emptyD").textContent = "Nothing in the log matches the current search and filters. Try clearing them.";
+      }
+      renderStats();
       return;
     }
-    if (filtered.length === 0) {
-      emptyText.textContent = "Nothing matches those filters.";
-      emptyEl.style.display = "block";
-      listEl.innerHTML = "";
-      return;
-    }
-    emptyEl.style.display = "none";
+    $("empty").hidden = true;
 
-    listEl.innerHTML = filtered.map(function (e) {
-      var open = !!openIds[e.id];
-      return (
-        '<article class="entry sev-' + escapeHtml(e.severity || "Medium") + '" data-open="' + open + '" data-id="' + e.id + '">' +
-          '<div class="entry-row" data-toggle="' + e.id + '">' +
-            '<div class="entry-main">' +
-              '<div class="entry-device">' + escapeHtml(e.device || "Untitled") + '</div>' +
-              '<div class="entry-sub">' + escapeHtml(e.location || "—") + " · " + escapeHtml(e.problem || "").slice(0, 90) +
-                (e.problem && e.problem.length > 90 ? "…" : "") + '</div>' +
-            '</div>' +
-            '<span class="tag-pill">' + escapeHtml(e.category || "Other") + '</span>' +
-            '<span class="status-pill status-' + escapeHtml(e.status || "Open") + '">' + escapeHtml(e.status || "Open") + '</span>' +
-            '<span class="entry-date mono">' + fmtDate(e.dateLogged) + '</span>' +
-            '<svg class="chevron" viewBox="0 0 20 20" fill="none"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-          '</div>' +
-          '<div class="entry-detail">' +
-            '<div class="detail-grid">' +
-              detailField("What went wrong", e.problem) +
-              detailField("How it was fixed", e.resolution) +
-              detailField("Contacted", e.contactedWho) +
-              detailField("Contact details", e.contactInfo) +
-              detailField("Date resolved", fmtDate(e.dateResolved)) +
-              detailField("Logged by", e.loggedBy) +
-              detailField("Tags", e.tags) +
-              detailField("Severity", e.severity) +
-            '</div>' +
-            '<div class="detail-actions">' +
-              '<button class="btn btn-ghost" data-edit="' + e.id + '">Edit</button>' +
-              '<button class="btn btn-ghost btn-danger-text" data-delete="' + e.id + '">Delete</button>' +
-            '</div>' +
-          '</div>' +
-        '</article>'
-      );
+    rowsEl.innerHTML = list.map(function (e) {
+      var isOpen = !!openIds[e.id];
+      var sev = SEVERITIES.indexOf(e.severity) > -1 ? e.severity : "Medium";
+      var status = STATUSES.indexOf(e.status) > -1 ? e.status : "Open";
+      var meta = '<span class="m-status status status-' + esc(status) + '">' + esc(status) + "</span>" +
+                 esc(e.location || "Location not recorded");
+      if (e.problem) {
+        meta += '<span class="m-extra"><span class="sep">·</span>' +
+                esc(String(e.problem).replace(/\s+/g, " ").slice(0, 76)) +
+                (e.problem.length > 76 ? "…" : "") + "</span>";
+      }
+      return '' +
+      '<div class="row-group" data-open="' + isOpen + '">' +
+        '<button class="row sev-' + esc(sev) + '" type="button" data-toggle="' + esc(e.id) + '" aria-expanded="' + isOpen + '">' +
+          '<span class="cell-main">' +
+            '<span class="row-title">' + esc(e.device || "Untitled entry") + "</span>" +
+            '<span class="row-meta">' + meta + "</span>" +
+          "</span>" +
+          '<span class="cell-cat"><span class="badge">' + esc(e.category || "Other") + "</span></span>" +
+          '<span class="cell-status"><span class="status status-' + esc(status) + '">' + esc(status) + "</span></span>" +
+          '<span class="cell-date mono">' + esc(fmtDate(e.dateLogged)) + "</span>" +
+          '<svg class="chev" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            '<path d="M7.5 4.5 13 10l-5.5 5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>' +
+          "</svg>" +
+        "</button>" +
+        '<div class="detail">' +
+          '<dl class="detail-grid">' +
+            field("What went wrong", e.problem, true) +
+            field("How it was fixed", e.resolution, true) +
+            field("Contacted", e.contactedWho) +
+            field("Contact details", e.contactInfo) +
+            field("Severity", sev) +
+            field("Date resolved", fmtDate(e.dateResolved)) +
+            field("Logged by", e.loggedBy) +
+            field("Tags", e.tags) +
+          "</dl>" +
+          '<div class="detail-actions">' +
+            '<button class="btn btn-sm btn-quiet" type="button" data-edit="' + esc(e.id) + '">Edit entry</button>' +
+            '<button class="btn btn-sm btn-quiet is-danger" type="button" data-del="' + esc(e.id) + '">Delete</button>' +
+          "</div>" +
+        "</div>" +
+      "</div>";
     }).join("");
+
+    renderStats();
   }
 
-  function detailField(label, value, full) {
-    var v = value ? escapeHtml(value) : "";
-    return '<div class="detail-field' + (full ? " full" : "") + '"><div class="k">' + escapeHtml(label) + '</div>' +
-      '<div class="v' + (v ? "" : " empty") + '">' + (v || "Not recorded") + '</div></div>';
-  }
-
-  listEl.addEventListener("click", function (ev) {
-    var toggle = ev.target.closest("[data-toggle]");
-    var editBtn = ev.target.closest("[data-edit]");
-    var delBtn = ev.target.closest("[data-delete]");
-    if (editBtn) {
-      startEdit(editBtn.getAttribute("data-edit"));
-      return;
-    }
-    if (delBtn) {
-      var id = delBtn.getAttribute("data-delete");
-      if (confirm("Delete this log entry? This can't be undone.")) {
-        removeEntry(id);
+  $("rows").addEventListener("click", function (ev) {
+    var t = ev.target.closest("[data-toggle]");
+    var ed = ev.target.closest("[data-edit]");
+    var dl = ev.target.closest("[data-del]");
+    if (ed) { openModal(entries.find(function (x) { return x.id === ed.dataset.edit; })); return; }
+    if (dl) {
+      var e = entries.find(function (x) { return x.id === dl.dataset.del; });
+      if (e && confirm('Delete the log entry for "' + (e.device || "this device") + '"?\n\nThis cannot be undone.')) {
+        entries = entries.filter(function (x) { return x.id !== e.id; });
+        delete openIds[e.id];
+        save(); render(); toast("Entry deleted");
       }
       return;
     }
-    if (toggle) {
-      var tid = toggle.getAttribute("data-toggle");
-      openIds[tid] = !openIds[tid];
-      renderList();
+    if (t) {
+      var id = t.dataset.toggle;
+      if (openIds[id]) { delete openIds[id]; } else { openIds[id] = true; }
+      render();
     }
   });
 
-  document.getElementById("searchInput").addEventListener("input", renderList);
-  catFilterEl.addEventListener("change", renderList);
+  $("q").addEventListener("input", render);
+  $("catFilter").addEventListener("change", render);
 
-  // ---------- Form ----------
-  var formPanel = document.getElementById("formPanel");
-  var formTitle = document.getElementById("formTitle");
-  var form = document.getElementById("entryForm");
-  var newEntryBtn = document.getElementById("newEntryBtn");
-  var cancelFormBtn = document.getElementById("cancelFormBtn");
+  /* ---------- modal ---------- */
+  var backdrop = $("backdrop");
+  var lastFocus = null;
 
-  function openForm(entry) {
+  function openModal(entry) {
     editingId = entry ? entry.id : null;
-    formTitle.textContent = entry ? "Edit log entry" : "New log entry";
-    document.getElementById("f-device").value = entry ? entry.device || "" : "";
-    document.getElementById("f-category").value = entry ? entry.category || "Hardware" : "Hardware";
-    document.getElementById("f-location").value = entry ? entry.location || "" : "";
-    document.getElementById("f-loggedby").value = entry ? entry.loggedBy || "" : (window.__lastLoggedBy || "");
-    document.getElementById("f-status").value = entry ? entry.status || "Open" : "Resolved";
-    document.getElementById("f-severity").value = entry ? entry.severity || "Medium" : "Medium";
-    document.getElementById("f-datelogged").value = entry ? entry.dateLogged || todayISO() : todayISO();
-    document.getElementById("f-dateresolved").value = entry ? entry.dateResolved || "" : "";
-    document.getElementById("f-problem").value = entry ? entry.problem || "" : "";
-    document.getElementById("f-resolution").value = entry ? entry.resolution || "" : "";
-    document.getElementById("f-contact").value = entry ? entry.contactedWho || "" : "";
-    document.getElementById("f-contactinfo").value = entry ? entry.contactInfo || "" : "";
-    document.getElementById("f-tags").value = entry ? entry.tags || "" : "";
-    formPanel.style.display = "block";
-    formPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-    document.getElementById("f-device").focus();
+    $("modalTitle").textContent = entry ? "Edit log entry" : "Log an issue";
+    $("submitBtn").textContent = entry ? "Save changes" : "Save entry";
+
+    $("f-device").value      = entry ? entry.device || "" : "";
+    $("f-category").value    = entry && CATEGORIES.indexOf(entry.category) > -1 ? entry.category : "Hardware";
+    $("f-location").value    = entry ? entry.location || "" : "";
+    $("f-problem").value     = entry ? entry.problem || "" : "";
+    $("f-severity").value    = entry && SEVERITIES.indexOf(entry.severity) > -1 ? entry.severity : "Medium";
+    $("f-status").value      = entry && STATUSES.indexOf(entry.status) > -1 ? entry.status : "Resolved";
+    $("f-resolution").value  = entry ? entry.resolution || "" : "";
+    $("f-contact").value     = entry ? entry.contactedWho || "" : "";
+    $("f-contactinfo").value = entry ? entry.contactInfo || "" : "";
+    $("f-datelogged").value  = entry ? entry.dateLogged || todayISO() : todayISO();
+    $("f-dateresolved").value= entry ? entry.dateResolved || "" : "";
+    $("f-loggedby").value    = entry ? entry.loggedBy || "" : lastLoggedBy;
+    $("f-tags").value        = entry ? entry.tags || "" : "";
+
+    lastFocus = document.activeElement;
+    backdrop.hidden = false;
+    document.body.style.overflow = "hidden";
+    $("f-device").focus();
   }
-  function closeForm() {
-    formPanel.style.display = "none";
+  function closeModal() {
+    backdrop.hidden = true;
+    document.body.style.overflow = "";
     editingId = null;
-    form.reset();
+    $("entryForm").reset();
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
-  newEntryBtn.addEventListener("click", function () { openForm(null); });
-  cancelFormBtn.addEventListener("click", closeForm);
+  $("newBtn").addEventListener("click", function () { openModal(null); });
+  $("closeModal").addEventListener("click", closeModal);
+  $("cancelBtn").addEventListener("click", closeModal);
+  backdrop.addEventListener("mousedown", function (ev) {
+    if (ev.target === backdrop) closeModal();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") {
+      if (!backdrop.hidden) closeModal();
+      else if (!$("exportMenu").hidden) closeMenu();
+    }
+  });
 
-  function startEdit(id) {
-    var e = entries.find(function (x) { return x.id === id; });
-    if (e) openForm(e);
-  }
-
-  form.addEventListener("submit", function (ev) {
+  $("entryForm").addEventListener("submit", function (ev) {
     ev.preventDefault();
-    var device = document.getElementById("f-device").value.trim();
-    var location = document.getElementById("f-location").value.trim();
-    var problem = document.getElementById("f-problem").value.trim();
-    var dateLogged = document.getElementById("f-datelogged").value || todayISO();
+    var device   = $("f-device").value.trim();
+    var location = $("f-location").value.trim();
+    var problem  = $("f-problem").value.trim();
     if (!device || !location || !problem) return;
 
-    var loggedBy = document.getElementById("f-loggedby").value.trim();
-    window.__lastLoggedBy = loggedBy;
+    lastLoggedBy = $("f-loggedby").value.trim();
 
-    var payload = {
+    var data = {
       device: device,
-      category: document.getElementById("f-category").value,
+      category: $("f-category").value,
       location: location,
-      loggedBy: loggedBy,
-      status: document.getElementById("f-status").value,
-      severity: document.getElementById("f-severity").value,
-      dateLogged: dateLogged,
-      dateResolved: document.getElementById("f-dateresolved").value || "",
       problem: problem,
-      resolution: document.getElementById("f-resolution").value.trim(),
-      contactedWho: document.getElementById("f-contact").value.trim(),
-      contactInfo: document.getElementById("f-contactinfo").value.trim(),
-      tags: document.getElementById("f-tags").value.trim(),
+      severity: $("f-severity").value,
+      status: $("f-status").value,
+      resolution: $("f-resolution").value.trim(),
+      contactedWho: $("f-contact").value.trim(),
+      contactInfo: $("f-contactinfo").value.trim(),
+      dateLogged: $("f-datelogged").value || todayISO(),
+      dateResolved: $("f-dateresolved").value || "",
+      loggedBy: lastLoggedBy,
+      tags: $("f-tags").value.trim(),
       updatedAt: Date.now()
     };
 
     if (editingId) {
-      updateEntry(editingId, payload);
+      var i = entries.findIndex(function (x) { return x.id === editingId; });
+      if (i > -1) entries[i] = Object.assign({}, entries[i], data);
+      toast("Entry updated");
     } else {
-      payload.createdAt = Date.now();
-      createEntry(payload);
+      data.id = uid();
+      data.createdAt = Date.now();
+      entries.push(data);
+      toast("Entry saved to the log");
     }
-    closeForm();
+    save();
+    closeModal();
+    render();
   });
 
-  // ---------- Storage layer (db capability, with local fallback) ----------
-  function localSave() {
-    try { localStorage.setItem("fairland-patch-log-fallback", JSON.stringify(entries)); } catch (e) {}
+  /* ---------- export menu ---------- */
+  var menu = $("exportMenu"), menuBtn = $("exportBtn");
+  function openMenu() {
+    menu.hidden = false;
+    menuBtn.setAttribute("aria-expanded", "true");
+    document.addEventListener("mousedown", outside);
   }
-  function localLoad() {
-    try {
-      var raw = localStorage.getItem("fairland-patch-log-fallback");
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) { return []; }
+  function closeMenu() {
+    menu.hidden = true;
+    menuBtn.setAttribute("aria-expanded", "false");
+    document.removeEventListener("mousedown", outside);
   }
-
-  function createEntry(payload) {
-    if (db) {
-      db.collection("entries").add(payload).catch(function (err) {
-        showToast("Couldn't save: " + (err && err.message ? err.message : "unknown error"));
-      });
-    } else {
-      payload.id = "local-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
-      entries.push(payload);
-      localSave();
-      renderList();
-      showToast("Saved");
-    }
+  function outside(ev) {
+    if (!menu.contains(ev.target) && !menuBtn.contains(ev.target)) closeMenu();
   }
-  function updateEntry(id, payload) {
-    if (db) {
-      db.doc("entries/" + id).update(payload).catch(function (err) {
-        showToast("Couldn't update: " + (err && err.message ? err.message : "unknown error"));
-      });
-    } else {
-      var idx = entries.findIndex(function (x) { return x.id === id; });
-      if (idx > -1) entries[idx] = Object.assign({}, entries[idx], payload);
-      localSave();
-      renderList();
-      showToast("Updated");
-    }
-  }
-  function removeEntry(id) {
-    if (db) {
-      db.doc("entries/" + id).delete().catch(function (err) {
-        showToast("Couldn't delete: " + (err && err.message ? err.message : "unknown error"));
-      });
-    } else {
-      entries = entries.filter(function (x) { return x.id !== id; });
-      localSave();
-      renderList();
-      showToast("Deleted");
-    }
-  }
-
-  // ---------- Export: printable documentation ----------
-  document.getElementById("exportPrintBtn").addEventListener("click", function () {
-    var filtered = getFiltered();
-    var psMeta = document.getElementById("psMeta");
-    var psEntries = document.getElementById("psEntries");
-    var now = new Date();
-    psMeta.textContent = "Generated " + now.toLocaleDateString() + " · " + filtered.length +
-      (filtered.length === 1 ? " entry" : " entries") +
-      (activeStatus ? " · status: " + activeStatus : "") +
-      (catFilterEl.value ? " · category: " + catFilterEl.value : "");
-
-    var sevColor = { High: "#AE3B2C", Medium: "#9C6A16", Low: "#7C9C86" };
-    psEntries.innerHTML = filtered.map(function (e) {
-      return (
-        '<div class="ps-entry">' +
-          '<div class="ps-entry-top">' +
-            '<strong>' + escapeHtml(e.device) + '</strong>' +
-            '<span class="ps-badge" style="border-color:' + (sevColor[e.severity] || "#999") + ';color:' + (sevColor[e.severity] || "#999") + '">' + escapeHtml(e.severity || "") + '</span>' +
-          '</div>' +
-          '<div class="ps-fields">' +
-            '<div><b>Location</b>' + escapeHtml(e.location || "—") + '</div>' +
-            '<div><b>Category</b>' + escapeHtml(e.category || "—") + '</div>' +
-            '<div><b>Status</b>' + escapeHtml(e.status || "—") + '</div>' +
-            '<div><b>Date logged</b>' + fmtDate(e.dateLogged) + '</div>' +
-            '<div><b>Date resolved</b>' + fmtDate(e.dateResolved) + '</div>' +
-            '<div><b>Logged by</b>' + escapeHtml(e.loggedBy || "—") + '</div>' +
-            '<div class="full"><b>What went wrong</b>' + escapeHtml(e.problem || "—") + '</div>' +
-            '<div class="full"><b>How it was fixed</b>' + escapeHtml(e.resolution || "Not recorded") + '</div>' +
-            '<div><b>Contacted</b>' + escapeHtml(e.contactedWho || "—") + '</div>' +
-            '<div><b>Contact details</b>' + escapeHtml(e.contactInfo || "—") + '</div>' +
-            '<div class="full"><b>Tags</b>' + escapeHtml(e.tags || "—") + '</div>' +
-          '</div>' +
-        '</div>'
-      );
-    }).join("");
-
-    window.print();
+  menuBtn.addEventListener("click", function () {
+    if (menu.hidden) openMenu(); else closeMenu();
   });
 
-  // ---------- Generic save-a-file helper ----------
-  function saveFile(filename, data, mime) {
+  function download(filename, data, mime) {
     var blob = new Blob([data], { type: mime });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 0);
   }
 
-  // ---------- Export: CSV ----------
-  function csvCell(v) {
-    var s = String(v == null ? "" : v);
-    if (/[",\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
-    return s;
-  }
-  document.getElementById("exportCsvBtn").addEventListener("click", function () {
-    var filtered = getFiltered();
-    var cols = ["device","category","location","status","severity","dateLogged","dateResolved","problem","resolution","contactedWho","contactInfo","tags","loggedBy"];
-    var header = ["Device/System","Category","Location","Status","Severity","Date logged","Date resolved","Problem","Resolution","Contacted","Contact details","Tags","Logged by"];
-    var rows = [header.join(",")].concat(filtered.map(function (e) {
-      return cols.map(function (c) { return csvCell(e[c]); }).join(",");
-    }));
-    var csv = rows.join("\r\n");
-    saveFile("fairland-patch-log-" + todayISO() + ".csv", csv, "text/csv");
-    showToast("CSV downloaded");
+  /* print */
+  $("mPrint").addEventListener("click", function () {
+    closeMenu();
+    var list = filtered();
+    if (!list.length) { toast("Nothing to export in the current view"); return; }
+
+    var bits = [];
+    if (activeStatus) bits.push("status: " + activeStatus);
+    if ($("catFilter").value) bits.push("category: " + $("catFilter").value);
+    if ($("q").value.trim()) bits.push('search: "' + $("q").value.trim() + '"');
+
+    $("shMeta").innerHTML =
+      esc(new Date().toLocaleDateString(undefined, { day:"numeric", month:"long", year:"numeric" })) +
+      "<br>" + list.length + (list.length === 1 ? " entry" : " entries") +
+      (bits.length ? "<br>" + esc(bits.join(" · ")) : "");
+
+    $("shBody").innerHTML = list.map(function (e) {
+      return '<div class="rec">' +
+        '<div class="rec-h"><strong>' + esc(e.device || "Untitled entry") + "</strong>" +
+        "<span>" + esc(e.severity || "—") + " severity · " + esc(e.status || "—") + "</span></div>" +
+        '<div class="kv">' +
+          "<div><b>Location</b><span>" + esc(e.location || "—") + "</span></div>" +
+          "<div><b>Category</b><span>" + esc(e.category || "—") + "</span></div>" +
+          "<div><b>Date logged</b><span>" + esc(fmtDate(e.dateLogged) || "—") + "</span></div>" +
+          "<div><b>Date resolved</b><span>" + esc(fmtDate(e.dateResolved) || "—") + "</span></div>" +
+          '<div class="w"><b>What went wrong</b><span>' + esc(e.problem || "—") + "</span></div>" +
+          '<div class="w"><b>How it was fixed</b><span>' + esc(e.resolution || "Not recorded") + "</span></div>" +
+          "<div><b>Contacted</b><span>" + esc(e.contactedWho || "—") + "</span></div>" +
+          "<div><b>Contact details</b><span>" + esc(e.contactInfo || "—") + "</span></div>" +
+          "<div><b>Logged by</b><span>" + esc(e.loggedBy || "—") + "</span></div>" +
+          "<div><b>Tags</b><span>" + esc(e.tags || "—") + "</span></div>" +
+        "</div></div>";
+    }).join("");
+
+    window.print();
   });
 
-  // ---------- Backup / Restore (JSON) ----------
-  document.getElementById("backupBtn").addEventListener("click", function () {
-    var json = JSON.stringify({ exportedAt: new Date().toISOString(), entries: entries }, null, 2);
-    saveFile("fairland-patch-log-backup-" + todayISO() + ".json", json, "application/json");
-    showToast("Backup saved — keep it somewhere safe");
+  /* csv */
+  $("mCsv").addEventListener("click", function () {
+    closeMenu();
+    var list = filtered();
+    if (!list.length) { toast("Nothing to export in the current view"); return; }
+
+    var cols = ["device","category","location","status","severity","dateLogged","dateResolved",
+                "problem","resolution","contactedWho","contactInfo","tags","loggedBy"];
+    var head = ["Device / system","Category","Location","Status","Severity","Date logged","Date resolved",
+                "Problem","Resolution","Contacted","Contact details","Tags","Logged by"];
+    function cell(v) {
+      var s = String(v == null ? "" : v);
+      return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    var csv = "﻿" + [head.join(",")].concat(list.map(function (e) {
+      return cols.map(function (c) { return cell(e[c]); }).join(",");
+    })).join("\r\n");
+
+    download("fairland-patch-log-" + todayISO() + ".csv", csv, "text/csv;charset=utf-8");
+    toast("CSV downloaded");
   });
 
-  var restoreInput = document.getElementById("restoreInput");
-  document.getElementById("restoreBtn").addEventListener("click", function () { restoreInput.click(); });
-  restoreInput.addEventListener("change", function () {
-    var file = restoreInput.files[0];
+  /* backup */
+  $("mBackup").addEventListener("click", function () {
+    closeMenu();
+    if (!entries.length) { toast("There is nothing to back up yet"); return; }
+    var json = JSON.stringify({ app: "fairland-patch-log", version: 1,
+      exportedAt: new Date().toISOString(), entries: entries }, null, 2);
+    download("fairland-patch-log-backup-" + todayISO() + ".json", json, "application/json");
+    toast("Backup downloaded — store it off this machine");
+  });
+
+  /* restore */
+  $("mRestore").addEventListener("click", function () { closeMenu(); $("restoreInput").click(); });
+  $("restoreInput").addEventListener("change", function () {
+    var file = this.files && this.files[0];
     if (!file) return;
+    var self = this;
     var reader = new FileReader();
     reader.onload = function () {
       var incoming;
       try {
         var parsed = JSON.parse(reader.result);
-        incoming = Array.isArray(parsed) ? parsed : parsed.entries;
-        if (!Array.isArray(incoming)) throw new Error("not a backup file");
-      } catch (e) {
-        showToast("That doesn't look like a valid backup file");
-        restoreInput.value = "";
+        incoming = Array.isArray(parsed) ? parsed : parsed && parsed.entries;
+        if (!Array.isArray(incoming)) throw new Error("bad shape");
+      } catch (err) {
+        toast("That file is not a Patch Log backup");
+        self.value = "";
         return;
       }
-      var mode = confirm(
-        "Restoring " + incoming.length + " entries from this backup.\n\n" +
-        "OK = merge with what's already here (recommended)\n" +
-        "Cancel = replace everything currently stored"
+      var merge = confirm(
+        "This backup holds " + incoming.length + (incoming.length === 1 ? " entry." : " entries.") +
+        "\n\nOK — merge it with the " + entries.length + " already here" +
+        "\nCancel — replace everything currently stored"
       );
-      var existingIds = {};
-      entries.forEach(function (e) { existingIds[e.id] = true; });
+      var known = Object.create(null);
+      entries.forEach(function (e) { known[e.id] = true; });
 
-      if (mode) {
-        incoming.forEach(function (e) {
-          if (!e.id) e.id = "restored-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
-          if (!existingIds[e.id]) entries.push(e);
-        });
+      var clean = incoming.filter(function (e) { return e && typeof e === "object"; })
+        .map(function (e) { return Object.assign({}, e, { id: e.id || uid() }); });
+
+      if (merge) {
+        clean.forEach(function (e) { if (!known[e.id]) entries.push(e); });
       } else {
-        entries = incoming.map(function (e) {
-          if (!e.id) e.id = "restored-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
-          return e;
-        });
+        entries = clean;
+        openIds = Object.create(null);
       }
-
-      localSave();
-      renderList();
-      showToast("Restored — " + entries.length + " entries in the log now");
-      restoreInput.value = "";
+      save(); render();
+      toast(entries.length + (entries.length === 1 ? " entry" : " entries") + " in the log");
+      self.value = "";
     };
     reader.readAsText(file);
   });
 
-  // ---------- Boot ----------
-  function boot() {
-    entries = localLoad();
-    renderList();
-    setConn("off", "Saved to this browser — use Backup regularly");
-  }
-
-  boot();
+  /* ---------- boot ---------- */
+  entries = load();
+  renderSeg();
+  render();
 })();
 </script>
 </body>
