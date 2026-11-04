@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gullcliff Hotel Witches</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Creepster&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1d1630; --panel:#fffaf0; --ink:#2b2236; --muted:#6d6380;
+    --accent:#6a3fb5; --accent-2:#2e9e5b; --warn:#d9534f; --line:#e4d9c6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(ellipse at top,#3a2b5c,var(--bg) 70%);
+    color:var(--ink); font-family:"Andika","Comic Sans MS",system-ui,sans-serif;
+    min-height:100vh; display:flex; justify-content:center; padding:16px;
+  }
+  .wrap{width:100%; max-width:980px}
+  h1{font-family:"Creepster","Andika",cursive; color:#b8f28a; text-align:center;
+     font-size:clamp(2rem,6vw,3.4rem); margin:.2em 0 .1em; letter-spacing:2px;
+     text-shadow:0 3px 0 #2b1d47,0 0 18px rgba(140,230,90,.45)}
+  .sub{color:#d9cdf0; text-align:center; margin:0 0 16px; font-size:1.1rem}
+  .card{background:var(--panel); border-radius:18px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .roles{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin:14px 0}
+  .role{border:2px solid var(--line); border-radius:14px; padding:12px; display:flex; gap:12px; align-items:center; background:#fff}
+  .role svg{flex:none; width:70px; height:90px}
+  .role label{font-weight:700; display:block}
+  .role small{color:var(--muted); display:block; margin-bottom:6px; line-height:1.25}
+  .role input{width:100%; font:inherit; font-size:1.05rem; padding:6px 10px; border:2px solid var(--line); border-radius:10px}
+  .role input:focus{outline:3px solid #c7b3ee; border-color:var(--accent)}
+  .skins{display:flex; gap:6px; margin-top:6px}
+  .skins button{width:22px; height:22px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px #bbb; cursor:pointer; padding:0}
+  .skins button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--accent)}
+  .btn{font:inherit; font-weight:700; font-size:1.15rem; border:none; border-radius:14px; padding:12px 22px; cursor:pointer;
+       background:var(--accent); color:#fff; box-shadow:0 4px 0 #43237d; transition:transform .1s}
+  .btn:active{transform:translateY(3px); box-shadow:0 1px 0 #43237d}
+  .btn.green{background:var(--accent-2); box-shadow:0 4px 0 #1d6a3b}
+  .btn.ghost{background:#efe7fb; color:var(--accent); box-shadow:0 4px 0 #cdbcec}
+  .row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center}
+  .note{color:var(--muted); font-size:.95rem; text-align:center; margin-top:10px}
+
+  /* Game */
+  #game{display:none}
+  .stage{position:relative; width:100%; aspect-ratio:16/9; border-radius:18px 18px 0 0; overflow:hidden; background:#000}
+  .stage svg{position:absolute; inset:0; width:100%; height:100%}
+  .chapter{position:absolute; left:12px; top:10px; background:rgba(20,12,35,.72); color:#fff; padding:4px 12px; border-radius:999px; font-size:.95rem}
+  .box{background:var(--panel); border-radius:0 0 18px 18px; padding:14px 18px 18px; min-height:190px; display:flex; flex-direction:column; gap:10px}
+  .speaker{font-weight:700; color:var(--accent); font-size:1.15rem; display:flex; justify-content:space-between; align-items:center; gap:8px}
+  .speaker.narr{color:var(--muted)}
+  .speaker.hint{color:var(--warn)}
+  .speaker .tools{display:flex; gap:6px}
+  .tool{font:inherit; font-size:.9rem; border:2px solid var(--line); background:#fff; border-radius:10px; padding:3px 10px; cursor:pointer; color:var(--ink)}
+  .tool[aria-pressed="true"]{background:#efe7fb; border-color:var(--accent)}
+  .text{font-size:clamp(1.15rem,2.6vw,1.45rem); line-height:1.5; margin:0; animation:fade .35s ease}
+  .choices{display:flex; flex-direction:column; gap:8px}
+  .choice{font:inherit; font-size:1.15rem; text-align:left; border:3px solid #cdbcec; background:#fff; color:var(--ink);
+          border-radius:14px; padding:10px 14px; cursor:pointer}
+  .choice:hover,.choice:focus{border-color:var(--accent); background:#f6f1ff; outline:none}
+  .choice.nope{animation:shake .4s; border-color:var(--warn)}
+  .next{align-self:flex-end}
+  .bob{animation:bob .9s ease-in-out infinite; transform-box:fill-box; transform-origin:bottom center}
+  @keyframes bob{50%{transform:translateY(-6px)}}
+  @keyframes fade{from{opacity:0; transform:translateY(4px)}}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .flicker{animation:flick 1.6s infinite}
+  @keyframes flick{50%{opacity:.75}}
+  .rain line{animation:rain .6s linear infinite}
+  @keyframes rain{to{transform:translate(-12px,40px)}}
+  .credits{text-align:center}
+  .credits table{margin:12px auto; border-collapse:collapse; font-size:1.2rem}
+  .credits td{padding:6px 14px; border-bottom:1px dashed var(--line)}
+  .credits td:first-child{color:var(--muted); text-align:right}
+  .credits td:last-child{font-weight:700; text-align:left}
+  @media (max-width:520px){ body{padding:8px 16px} .box{min-height:220px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The Witches of Gullcliff Hotel</h1>
+  <p class="sub">A spooky choose-your-path story</p>
+
+  <!-- Setup -->
+  <section id="setup" class="card">
+    <h2 style="margin:0">Who's in the story?</h2>
+    <p style="margin:.3em 0 0">Type a name for each character and pick a skin tone. Names are saved on this computer only.</p>
+    <div class="roles" id="roles"></div>
+    <div class="row">
+      <button class="btn green" id="startBtn">Start the story ▶</button>
+      <button class="btn ghost" id="resetBtn">Reset names</button>
+    </div>
+    <p class="note">Tip: the Grand High Witch is the villain, so a teacher's name (or the default) works well for that role.</p>
+  </section>
+
+  <!-- Game -->
+  <section id="game">
+    <div class="stage">
+      <svg id="bg" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+      <svg id="cast" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Characters in this scene"></svg>
+      <div class="chapter" id="chapter"></div>
+    </div>
+    <div class="box">
+      <div class="speaker" id="speakerRow">
+        <span id="speaker"></span>
+        <span class="tools">
+          <button class="tool" id="readBtn" title="Read this line aloud">🔊 Read</button>
+          <button class="tool" id="autoBtn" aria-pressed="false" title="Read every line aloud">Auto-read</button>
+        </span>
+      </div>
+      <p class="text" id="text"></p>
+      <div class="choices" id="choices"></div>
+      <button class="btn next" id="nextBtn">Next ▶</button>
+    </div>
+  </section>
+
+  <!-- Credits -->
+  <section id="credits" class="card credits" style="display:none">
+    <h2>Starring…</h2>
+    <table id="castTable"></table>
+    <div class="row">
+      <button class="btn green" id="againBtn">Play again</button>
+      <button class="btn ghost" id="namesBtn">Change names</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- Characters ---------- */
+const SKINS = ['#ffdbb4','#e8b88a','#c68642','#8d5524','#5c3a21'];
+const ROLES = [
+  {key:'hero',    label:'The Hero',            desc:'Brave and clever. The main character.', def:'Sam',         skin:1},
+  {key:'friend',  label:'The Best Friend',     desc:'Loves sweets… a bit too much!',          def:'Alex',        skin:2},
+  {key:'grandma', label:'Grandma',             desc:'Wise, kind, and knows all about witches.', def:'Grandma Rose', skin:0},
+  {key:'manager', label:'The Hotel Manager',   desc:'Fussy. Hates mess and noise.',           def:'Mr Bellwether', skin:3},
+  {key:'chef',    label:'The Chef',            desc:'Runs the hotel kitchen.',                def:'Chef Toni',    skin:2},
+  {key:'witch',   label:'The Grand High Witch',desc:'The villain! Wants to get rid of children.', def:'The Grand High Witch', skin:0},
+];
+let names = {}, skins = {};
+
+function load(){
+  ROLES.forEach(r=>{names[r.key]=r.def; skins[r.key]=r.skin});
+  try{
+    const saved = JSON.parse(localStorage.getItem('gullcliff-cast')||'null');
+    if(saved){ Object.assign(names, saved.names||{}); Object.assign(skins, saved.skins||{}); }
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem('gullcliff-cast', JSON.stringify({names,skins})) }catch(e){} }
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fill = t => t.replace(/\{(\w+)\}/g, (_,k)=> names[k] ?? k);
+
+/* ---------- Drawing: characters (feet at 0,0) ---------- */
+function face(cy, eye='#222', mouth='smile'){
+  const m = mouth==='smile' ? `M-9,${cy+11} Q0,${cy+18} 9,${cy+11}`
+          : mouth==='grin'  ? `M-13,${cy+9} Q0,${cy+22} 13,${cy+9}`
+          : `M-8,${cy+14} L8,${cy+14}`;
+  return `<circle cx="-10" cy="${cy}" r="3.6" fill="${eye}"/><circle cx="10" cy="${cy}" r="3.6" fill="${eye}"/>
+          <path d="${m}" stroke="#6b2f24" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+}
+function kid(skin, shirt, hair){
+  return `<rect x="-15" y="-48" width="12" height="48" rx="4" fill="#3b4a6b"/>
+  <rect x="3" y="-48" width="12" height="48" rx="4" fill="#3b4a6b"/>
+  <rect x="-24" y="-108" width="48" height="64" rx="14" fill="${shirt}"/>
+  <rect x="-35" y="-102" width="12" height="42" rx="6" fill="${shirt}"/>
+  <rect x="23" y="-102" width="12" height="42" rx="6" fill="${shirt}"/>
+  <circle cx="-29" cy="-58" r="7" fill="${skin}"/><circle cx="29" cy="-58" r="7" fill="${skin}"/>
+  <circle cx="0" cy="-136" r="28" fill="${skin}"/>
+  <path d="M-29,-136 C-32,-174 32,-174 29,-136 C18,-154 -14,-158 -29,-136Z" fill="${hair}"/>
+  <circle cx="-17" cy="-125" r="4" fill="#f59a9a" opacity=".6"/><circle cx="17" cy="-125" r="4" fill="#f59a9a" opacity=".6"/>
+  ${face(-136)}`;
+}
+function grandma(skin){
+  return `<g transform="scale(1.2)">
+  <path d="M-28,-108 L28,-108 L40,0 L-40,0Z" fill="#7b5ea7"/>
+  <path d="M-30,-108 L30,-108 L22,-70 L-22,-70Z" fill="#c8b6e6"/>
+  <circle cx="-32" cy="-62" r="7" fill="${skin}"/>
+  <line x1="44" y1="-62" x2="50" y2="0" stroke="#6b4226" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="40" cy="-62" r="7" fill="${skin}"/>
+  <circle cx="0" cy="-134" r="26" fill="${skin}"/>
+  <path d="M-27,-134 C-28,-166 28,-166 27,-134 C16,-150 -16,-150 -27,-134Z" fill="#d9d9de"/>
+  <circle cx="0" cy="-165" r="12" fill="#d9d9de"/>
+  ${face(-134)}
+  <circle cx="-10" cy="-134" r="8" fill="none" stroke="#333" stroke-width="2"/>
+  <circle cx="10" cy="-134" r="8" fill="none" stroke="#333" stroke-width="2"/>
+  <line x1="-2" y1="-134" x2="2" y2="-134" stroke="#333" stroke-width="2"/></g>`;
+}
+function manager(skin){
+  return `<g transform="scale(1.3)">
+  <rect x="-15" y="-50" width="12" height="50" fill="#22243a"/><rect x="3" y="-50" width="12" height="50" fill="#22243a"/>
+  <rect x="-25" y="-112" width="50" height="66" rx="10" fill="#2d2f45"/>
+  <path d="M-10,-112 L10,-112 L0,-86Z" fill="#fff"/><path d="M-3,-106 L3,-106 L4,-80 L0,-76 L-4,-80Z" fill="#c0392b"/>
+  <rect x="-35" y="-108" width="11" height="44" rx="5" fill="#2d2f45"/><rect x="24" y="-108" width="11" height="44" rx="5" fill="#2d2f45"/>
+  <circle cx="-29" cy="-62" r="7" fill="${skin}"/><circle cx="29" cy="-62" r="7" fill="${skin}"/>
+  <circle cx="0" cy="-136" r="25" fill="${skin}"/>
+  <path d="M-25,-140 C-26,-150 -20,-156 -14,-154 L-14,-142Z M25,-140 C26,-150 20,-156 14,-154 L14,-142Z" fill="#333"/>
+  ${face(-138,'#222','flat')}
+  <path d="M-14,-127 Q-7,-133 0,-128 Q7,-133 14,-127 Q7,-124 0,-126 Q-7,-124 -14,-127Z" fill="#333"/></g>`;
+}
+function chef(skin){
+  return `<g transform="scale(1.3)">
+  <rect x="-15" y="-50" width="12" height="50" fill="#555"/><rect x="3" y="-50" width="12" height="50" fill="#555"/>
+  <rect x="-26" y="-112" width="52" height="68" rx="12" fill="#fff" stroke="#ddd"/>
+  <circle cx="-8" cy="-96" r="3" fill="#bbb"/><circle cx="8" cy="-96" r="3" fill="#bbb"/><circle cx="-8" cy="-80" r="3" fill="#bbb"/><circle cx="8" cy="-80" r="3" fill="#bbb"/>
+  <rect x="-36" y="-108" width="12" height="44" rx="6" fill="#fff" stroke="#ddd"/><rect x="24" y="-108" width="12" height="44" rx="6" fill="#fff" stroke="#ddd"/>
+  <circle cx="-30" cy="-60" r="7" fill="${skin}"/><circle cx="30" cy="-60" r="7" fill="${skin}"/>
+  <circle cx="0" cy="-136" r="25" fill="${skin}"/>
+  <rect x="-20" y="-178" width="40" height="28" fill="#fff" stroke="#ddd"/>
+  <circle cx="-14" cy="-180" r="12" fill="#fff"/><circle cx="0" cy="-186" r="14" fill="#fff"/><circle cx="14" cy="-180" r="12" fill="#fff"/>
+  ${face(-134,'#222','grin')}</g>`;
+}
+function lady(skin, dress='#9b59b6', big=false){
+  const s = big ? 1.4 : 1.25;
+  return `<ellipse cx="34" cy="0" rx="40" ry="7" fill="#000" opacity=".25"/>
+  <g transform="scale(${s})">
+  <path d="M-26,-108 L26,-108 L40,0 L-40,0Z" fill="${dress}"/>
+  <circle cx="-32" cy="-62" r="8" fill="#f4f0e8" stroke="#ccc"/><circle cx="32" cy="-62" r="8" fill="#f4f0e8" stroke="#ccc"/>
+  <circle cx="0" cy="-134" r="25" fill="${skin}"/>
+  <path d="M-25,-134 C-30,-112 -26,-108 -20,-110 C-24,-130 -18,-150 0,-152 C18,-150 24,-130 20,-110 C26,-108 30,-112 25,-134 C25,-160 -25,-160 -25,-134Z" fill="#8a5a2b"/>
+  <ellipse cx="0" cy="-156" rx="44" ry="9" fill="#e7c6e0"/>
+  <path d="M-24,-158 C-22,-186 22,-186 24,-158Z" fill="#e7c6e0"/>
+  <circle cx="16" cy="-166" r="7" fill="#ff6fa8"/><circle cx="16" cy="-166" r="3" fill="#ffd34d"/>
+  <circle cx="-15" cy="-124" r="4" fill="#ff8fb0" opacity=".7"/><circle cx="15" cy="-124" r="4" fill="#ff8fb0" opacity=".7"/>
+  ${face(-134,'#222','smile')}</g>`;
+}
+function realWitch(big=false){
+  const s = big ? 1.4 : 1.25, g='#8bc34a';
+  return `<g transform="scale(${s})">
+  <path d="M-26,-108 L26,-108 L44,0 L-44,0Z" fill="${big?'#1b1b2f':'#3b2a4f'}"/>
+  ${big?'<path d="M-26,-108 L-60,-20 L-44,0Z M26,-108 L60,-20 L44,0Z" fill="#5b1f6b"/>':''}
+  <circle cx="-32" cy="-62" r="8" fill="${g}"/><circle cx="32" cy="-62" r="8" fill="${g}"/>
+  <path d="M-30,-150 L-44,-176 L-20,-160 L-14,-190 L0,-162 L14,-190 L20,-160 L44,-176 L30,-150Z" fill="#2a2a2a"/>
+  <circle cx="0" cy="-134" r="26" fill="${g}"/>
+  <path d="M-4,-134 L0,-118 L6,-126Z" fill="#6f9e38"/>
+  <g class="flicker"><circle cx="-10" cy="-138" r="5" fill="#d4ff3a"/><circle cx="10" cy="-138" r="5" fill="#d4ff3a"/></g>
+  <circle cx="-10" cy="-138" r="2" fill="#111"/><circle cx="10" cy="-138" r="2" fill="#111"/>
+  <path d="M-12,-120 Q0,-114 12,-120" stroke="#2e4a12" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <rect x="-6" y="-120" width="4" height="5" fill="#fff"/><rect x="3" y="-120" width="4" height="5" fill="#fff"/>
+  ${big?'<path d="M-18,-158 L-12,-176 L-4,-162 L0,-180 L4,-162 L12,-176 L18,-158Z" fill="#f1c40f"/>':''}</g>`;
+}
+function frog(scarf){
+  return `<g transform="scale(1.1)">
+  <ellipse cx="-30" cy="-8" rx="18" ry="9" fill="#3e9a44"/><ellipse cx="30" cy="-8" rx="18" ry="9" fill="#3e9a44"/>
+  <ellipse cx="0" cy="-30" rx="40" ry="30" fill="#5cb85c"/>
+  <ellipse cx="0" cy="-22" rx="26" ry="18" fill="#a8e29a"/>
+  <circle cx="-18" cy="-58" r="13" fill="#5cb85c"/><circle cx="18" cy="-58" r="13" fill="#5cb85c"/>
+  <circle cx="-18" cy="-58" r="8" fill="#fff"/><circle cx="18" cy="-58" r="8" fill="#fff"/>
+  <circle cx="-16" cy="-57" r="4" fill="#111"/><circle cx="20" cy="-57" r="4" fill="#111"/>
+  <path d="M-16,-38 Q0,-28 16,-38" stroke="#245e27" stroke-width="3" fill="none" stroke-linecap="round"/>
+  ${scarf?`<path d="M-26,-46 Q0,-36 26,-46 L24,-40 Q0,-30 -24,-40Z" fill="${scarf}"/>`:''}</g>`;
+}
+const LOOK = {
+  hero:   ()=>kid(SKINS[skins.hero], '#e85d4a', '#3a2a1a'),
+  friend: ()=>kid(SKINS[skins.friend], '#3fa7d6', '#c97b2f'),
+  'friend:frog': ()=>frog('#3fa7d6'),
+  grandma:()=>grandma(SKINS[skins.grandma]),
+  manager:()=>manager(SKINS[skins.manager]),
+  chef:   ()=>chef(SKINS[skins.chef]),
+  witch:  ()=>lady(SKINS[skins.witch], '#2c3e50', true),
+  'witch:real': ()=>realWitch(true),
+  'crowd:ladies':  ()=>`<g transform="translate(-55,0) scale(.8)">${lady(SKINS[1],'#c0587e')}</g><g transform="translate(55,0) scale(.8)">${lady(SKINS[3],'#5b8bd0')}</g><g transform="scale(.85)">${lady(SKINS[0],'#9b59b6')}</g>`,
+  'crowd:witches': ()=>`<g transform="translate(-55,0) scale(.8)">${realWitch()}</g><g transform="translate(55,0) scale(.8)">${realWitch()}</g><g transform="scale(.85)">${realWitch()}</g>`,
+  'crowd:frogs':   ()=>`<g transform="translate(-60,0) scale(.8)">${frog()}</g><g transform="translate(60,-10) scale(.9)">${frog()}</g><g transform="translate(0,-60) scale(.7)">${frog()}</g><g>${frog()}</g>`,
+};
+const LABEL = {n:'Story', crowd:'The Sunshine Ladies', hint:'Hmm…'};
+const labelOf = who => LABEL[who] || names[who] || who;
+
+/* ---------- Drawing: backgrounds (800 x 450) ---------- */
+const rainSVG = (x,y,w,h)=>{ let l=''; for(let i=0;i<24;i++){const rx=x+((i*37)%w), ry=y+((i*53)%h); l+=`<line x1="${rx}" y1="${ry}" x2="${rx-6}" y2="${ry+16}" style="animation-delay:-${(i%6)/10}s"/>`} return `<g class="rain" stroke="#9fc4ff" stroke-width="2" opacity=".8">${l}</g>`; };
+const chandelier = x => `<line x1="${x}" y1="0" x2="${x}" y2="40" stroke="#c9a54a" stroke-width="3"/><path d="M${x-50},55 Q${x},85 ${x+50},55" stroke="#c9a54a" stroke-width="4" fill="none"/>${[-50,-25,0,25,50].map(d=>`<circle cx="${x+d}" cy="${d===0?70:60}" r="6" fill="#fff6c8"/><circle cx="${x+d}" cy="${d===0?70:60}" r="14" fill="#fff6c8" opacity=".25"/>`).join('')}`;
+const BG = {
+  title: ()=>BG.cottage(),
+  cottage: ()=>`
+    <rect width="800" height="450" fill="#a8693f"/>
+    <rect width="800" height="360" fill="#c98b5a"/>
+    ${[0,1,2,3,4,5,6,7].map(i=>`<rect x="${i*100}" y="0" width="4" height="360" fill="#b5784a"/>`).join('')}
+    <rect y="360" width="800" height="90" fill="#6b4226"/>
+    <rect x="70" y="70" width="180" height="140" fill="#1f2c4f" stroke="#5a3a20" stroke-width="10"/>
+    <line x1="160" y1="70" x2="160" y2="210" stroke="#5a3a20" stroke-width="6"/><line x1="70" y1="140" x2="250" y2="140" stroke="#5a3a20" stroke-width="6"/>
+    <path d="M200,80 L185,115 L198,115 L182,150" stroke="#fff7a8" stroke-width="4" fill="none" class="flicker"/>
+    ${rainSVG(75,75,170,130)}
+    <rect x="520" y="130" width="230" height="235" fill="#8a8178"/>
+    <rect x="500" y="118" width="270" height="22" fill="#6e655d"/>
+    <path d="M560,365 L560,230 Q635,175 710,230 L710,365Z" fill="#2a1a12"/>
+    <path d="M590,365 Q600,300 620,330 Q630,270 650,325 Q665,290 680,365Z" fill="#f39c12" class="flicker"/>
+    <path d="M610,365 Q620,320 635,340 Q645,310 660,365Z" fill="#ffd34d"/>
+    <ellipse cx="400" cy="420" rx="300" ry="26" fill="#9c3d3d"/><ellipse cx="400" cy="420" rx="250" ry="18" fill="#b84c4c"/>`,
+  lobby: ()=>`
+    <rect width="800" height="450" fill="#f3e2c7"/>
+    ${Array.from({length:20},(_,i)=>`<rect x="${i*40}" y="0" width="18" height="340" fill="#ecd6b3"/>`).join('')}
+    <rect y="330" width="800" height="120" fill="#d9c49c"/>
+    <path d="M300,330 L500,330 L640,450 L160,450Z" fill="#b3283a"/><path d="M320,330 L480,330 L600,450 L200,450Z" fill="#c9374a"/>
+    ${chandelier(400)}
+    <rect x="30" y="230" width="190" height="110" fill="#7a4b28"/><rect x="20" y="222" width="210" height="16" fill="#5c3720"/>
+    <circle cx="190" cy="214" r="9" fill="#e0b84a"/><rect x="186" y="206" width="8" height="4" fill="#e0b84a"/>
+    <rect x="40" y="90" width="170" height="110" fill="#5c3720"/>${[0,1,2,3,4,5].map(i=>`<circle cx="${62+(i%3)*55}" cy="${120+Math.floor(i/3)*45}" r="7" fill="#e0b84a"/>`).join('')}
+    <line x1="640" y1="200" x2="610" y2="340" stroke="#5c3720" stroke-width="6"/><line x1="720" y1="200" x2="750" y2="340" stroke="#5c3720" stroke-width="6"/>
+    <rect x="590" y="110" width="180" height="120" rx="6" fill="#fffbe6" stroke="#5c3720" stroke-width="5"/>
+    <text x="680" y="140" text-anchor="middle" font-family="Andika,sans-serif" font-size="15" font-weight="700" fill="#c0587e">SUNSHINE SOCIETY</text>
+    <text x="680" y="160" text-anchor="middle" font-family="Andika,sans-serif" font-size="13" fill="#555">for Helpful Ladies</text>
+    <text x="680" y="182" text-anchor="middle" font-family="Andika,sans-serif" font-size="12" fill="#555">Blue Ballroom, 3 o'clock</text>
+    <text x="680" y="210" text-anchor="middle" font-family="Andika,sans-serif" font-size="16" font-weight="700" fill="#c0392b">NO CHILDREN!</text>`,
+  beach: ()=>`
+    <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8f5"/><stop offset="1" stop-color="#c9ecff"/></linearGradient></defs>
+    <rect width="800" height="450" fill="url(#sky)"/>
+    <circle cx="660" cy="80" r="45" fill="#ffd34d"/><circle cx="660" cy="80" r="62" fill="#ffd34d" opacity=".3"/>
+    <path d="M60,90 q20,-25 45,-5 q25,-20 45,5 q15,20 -10,22 h-75 q-25,-2 -5,-22z" fill="#6f7f95" opacity=".9"/>
+    <path d="M240,60 q20,-25 45,-5 q25,-20 45,5 q15,20 -10,22 h-75 q-25,-2 -5,-22z" fill="#6f7f95" opacity=".9"/>
+    ${rainSVG(50,90,300,140)}
+    <rect y="210" width="800" height="100" fill="#2f8fcf"/>
+    ${[0,1,2,3,4,5,6,7].map(i=>`<path d="M${i*110},${235+(i%2)*25} q15,-10 30,0" stroke="#e8f6ff" stroke-width="3" fill="none"/>`).join('')}
+    <path d="M0,290 Q400,260 800,290 L800,450 L0,450Z" fill="#f2d48f"/>
+    <rect x="560" y="330" width="90" height="60" fill="#e0b56a"/>${[0,1,2,3].map(i=>`<rect x="${560+i*24}" y="318" width="14" height="14" fill="#e0b56a"/>`).join('')}
+    <rect x="596" y="356" width="18" height="34" rx="9" fill="#b98a46"/>
+    <line x1="140" y1="300" x2="140" y2="420" stroke="#8b5a2b" stroke-width="5"/>
+    <path d="M60,310 Q140,230 220,310Z" fill="#e85d4a"/><path d="M113,310 Q140,232 167,310Z" fill="#fff"/>`,
+  ballroom: (dark)=>`
+    <rect width="800" height="450" fill="#3d5a99"/>
+    ${Array.from({length:10},(_,i)=>`<rect x="${i*80+30}" y="0" width="20" height="330" fill="#36508c"/>`).join('')}
+    <rect y="330" width="800" height="120" fill="#7a5233"/>
+    ${Array.from({length:16},(_,i)=>`<line x1="${i*50}" y1="330" x2="${i*50-40}" y2="450" stroke="#6a4529" stroke-width="2"/>`).join('')}
+    <rect x="220" y="230" width="360" height="40" fill="#5c3720"/><rect x="220" y="225" width="360" height="8" fill="#c9a54a"/>
+    <path d="M220,40 L580,40 L580,60 Q400,100 220,60Z" fill="#8e1f3b"/>
+    ${chandelier(400)}
+    ${[0,1,2,3,4,5,6].map(i=>`<g transform="translate(${130+i*90},300)"><rect x="-14" y="-30" width="28" height="30" rx="4" fill="#c9a54a"/><rect x="-16" y="-2" width="32" height="8" fill="#a8873a"/><line x1="-12" y1="6" x2="-12" y2="24" stroke="#a8873a" stroke-width="3"/><line x1="12" y1="6" x2="12" y2="24" stroke="#a8873a" stroke-width="3"/></g>`).join('')}
+    <path d="M0,0 L120,0 Q90,200 110,450 L0,450Z" fill="#1d2b5c"/><path d="M800,0 L680,0 Q710,200 690,450 L800,450Z" fill="#1d2b5c"/>
+    <path d="M20,0 Q30,220 15,450" stroke="#2a3b74" stroke-width="10" fill="none"/><path d="M780,0 Q770,220 785,450" stroke="#2a3b74" stroke-width="10" fill="none"/>
+    ${dark?'<rect width="800" height="450" fill="#1f5a1a" opacity=".28"/>':''}`,
+  meeting: ()=>BG.ballroom(true),
+  room: (night)=>`
+    <rect width="800" height="450" fill="#e6d6ee"/>
+    ${Array.from({length:14},(_,i)=>`<circle cx="${i*60+20}" cy="${(i%2)*60+50}" r="6" fill="#d4bfe0"/><circle cx="${i*60+50}" cy="${(i%2)*60+170}" r="6" fill="#d4bfe0"/>`).join('')}
+    <rect y="340" width="800" height="110" fill="#8a6a8f"/>
+    <rect x="520" y="60" width="210" height="170" fill="${night?'#1b2550':'#9fd7ff'}" stroke="#fff" stroke-width="10"/>
+    ${night?'<circle cx="680" cy="105" r="22" fill="#fff8d0"/><circle cx="670" cy="100" r="22" fill="#1b2550"/>':'<rect x="525" y="170" width="200" height="55" fill="#2f8fcf"/>'}
+    <line x1="625" y1="60" x2="625" y2="230" stroke="#fff" stroke-width="6"/>
+    <rect x="40" y="250" width="240" height="100" rx="10" fill="#fff"/><rect x="40" y="230" width="70" height="40" rx="12" fill="#f4e9ff"/>
+    <rect x="40" y="200" width="20" height="150" fill="#6b4226"/><rect x="80" y="290" width="200" height="60" fill="#c0587e"/>
+    <rect x="330" y="300" width="50" height="45" fill="#6b4226"/><line x1="355" y1="300" x2="355" y2="250" stroke="#333" stroke-width="3"/>
+    <path d="M335,250 L375,250 L365,225 L345,225Z" fill="#ffd34d"/>
+    ${night?'<rect width="800" height="450" fill="#0b1030" opacity=".35"/>':''}`,
+  night: ()=>BG.room(true),
+  corridor: ()=>`
+    <rect width="800" height="450" fill="#5a3d5c"/>
+    <path d="M0,0 L320,150 L320,300 L0,450Z" fill="#7a5480"/><path d="M800,0 L480,150 L480,300 L800,450Z" fill="#6b4a70"/>
+    <rect x="320" y="150" width="160" height="150" fill="#3a2540"/>
+    <path d="M0,450 L320,300 L480,300 L800,450Z" fill="#9c2b3a"/>
+    <path d="M60,90 L170,140 L170,340 L60,390Z" fill="#4b2e1c"/><path d="M220,160 L280,185 L280,310 L220,335Z" fill="#4b2e1c"/>
+    <path d="M740,90 L630,140 L630,340 L740,390Z" fill="#2b4a1c"/>
+    <path d="M740,90 L630,140 L630,340 L740,390Z" fill="#7dff4a" opacity=".15" class="flicker"/>
+    <text x="685" y="200" text-anchor="middle" font-family="Creepster,cursive" font-size="44" fill="#b8f28a">13</text>
+    <text x="115" y="200" text-anchor="middle" font-family="Andika,sans-serif" font-size="26" fill="#e0b84a">11</text>
+    <text x="250" y="215" text-anchor="middle" font-family="Andika,sans-serif" font-size="16" fill="#e0b84a">12</text>
+    <circle cx="400" cy="40" r="16" fill="#fff6c8"/><circle cx="400" cy="40" r="40" fill="#fff6c8" opacity=".2"/>`,
+  balcony: ()=>`
+    <rect width="800" height="450" fill="#141c40"/>
+    ${Array.from({length:30},(_,i)=>`<circle cx="${(i*97)%800}" cy="${(i*41)%140}" r="${i%3?1.5:2.5}" fill="#fff"/>`).join('')}
+    <circle cx="110" cy="70" r="30" fill="#fff8d0"/>
+    <rect x="0" y="150" width="800" height="300" fill="#d8c8a8"/>
+    ${[0,1,2,3].map(i=>`<rect x="${40+i*195}" y="180" width="110" height="120" fill="${i===3?'#ffe9a0':'#2d3560'}"/><rect x="${20+i*195}" y="300" width="150" height="10" fill="#8a7a5a"/>${Array.from({length:8},(_,j)=>`<rect x="${24+i*195+j*19}" y="310" width="5" height="45" fill="#8a7a5a"/>`).join('')}<rect x="${20+i*195}" y="352" width="150" height="8" fill="#8a7a5a"/>`).join('')}
+    <text x="680" y="175" text-anchor="middle" font-family="Creepster,cursive" font-size="26" fill="#3b7a1e">13</text>
+    <rect x="660" y="260" width="40" height="40" fill="#2e7d32"/><rect x="668" y="250" width="24" height="12" fill="#2e7d32"/><text x="680" y="286" text-anchor="middle" font-size="11" fill="#fff" font-family="Andika">HOP</text>
+    <rect y="360" width="800" height="90" fill="#bfae8c"/>`,
+  kitchen: ()=>`
+    <rect width="800" height="450" fill="#fff"/>
+    ${Array.from({length:120},(_,i)=>`<rect x="${(i%20)*40}" y="${Math.floor(i/20)*40}" width="40" height="40" fill="${(i+Math.floor(i/20))%2?'#d6ecf7':'#fff'}"/>`).join('')}
+    <rect y="330" width="800" height="120" fill="#9aa5ad"/>
+    <rect x="460" y="230" width="300" height="110" fill="#5d6d7e"/><rect x="450" y="222" width="320" height="14" fill="#34495e"/>
+    <rect x="520" y="140" width="150" height="90" rx="10" fill="#7f8c8d"/><ellipse cx="595" cy="142" rx="78" ry="12" fill="#6ab04c"/>
+    <path d="M560,120 q-12,-20 0,-40 q12,-20 0,-40" stroke="#dfe6e9" stroke-width="6" fill="none" opacity=".8" class="flicker"/>
+    <path d="M620,120 q-12,-20 0,-40 q12,-20 0,-40" stroke="#dfe6e9" stroke-width="6" fill="none" opacity=".8" class="flicker"/>
+    <text x="595" y="200" text-anchor="middle" font-family="Andika" font-size="16" fill="#fff" font-weight="700">PEA SOUP</text>
+    <rect x="40" y="70" width="300" height="12" fill="#6b4226"/>
+    ${[0,1,2,3,4].map(i=>`<line x1="${70+i*60}" y1="82" x2="${70+i*60}" y2="110" stroke="#333" stroke-width="2"/><circle cx="${70+i*60}" cy="125" r="18" fill="#b87333"/>`).join('')}
+    <rect x="40" y="250" width="160" height="90" fill="#c19a6b"/><text x="120" y="300" text-anchor="middle" font-family="Andika" font-size="16" fill="#5c3720">POTATOES</text>`,
+  dining: ()=>`
+    <rect width="800" height="450" fill="#f6ead2"/>
+    ${Array.from({length:8},(_,i)=>`<rect x="${i*100+20}" y="40" width="60" height="200" rx="30" fill="#2f8fcf" opacity=".35"/>`).join('')}
+    <rect y="330" width="800" height="120" fill="#7a5233"/>
+    ${chandelier(220)}${chandelier(580)}
+    ${[120,400,680].map(x=>`<ellipse cx="${x}" cy="335" rx="110" ry="22" fill="#fff"/><rect x="${x-110}" y="335" width="220" height="40" fill="#fff"/><ellipse cx="${x-40}" cy="330" rx="18" ry="6" fill="#6ab04c"/><ellipse cx="${x+40}" cy="330" rx="18" ry="6" fill="#6ab04c"/>`).join('')}`,
+  green: ()=>BG.dining()+`<rect width="800" height="450" fill="#7dff4a" opacity=".35"/>${Array.from({length:12},(_,i)=>`<circle cx="${(i*131)%800}" cy="${120+(i*61)%220}" r="${30+(i%4)*12}" fill="#c9f7b0" opacity=".5"/>`).join('')}`,
+};
+
+/* ---------- The story (original, inspired by classic witch tales) ----------
+   Each line: [speaker, text, (optional) new cast list]
+   Choices: {t:text, go:sceneId} or {t:text, wrong:hint} */
+const SC = {
+  intro:{ ch:'Chapter 1 · A Warning', bg:'cottage', cast:['hero','grandma'], lines:[
+    ['n',"It is a dark and stormy night. {hero} is staying with {grandma}, who is very old and very wise."],
+    ['grandma',"Come and sit by the fire, {hero}. I have something very important to tell you."],
+    ['grandma',"Witches are real. Not the silly kind with broomsticks. Real witches look just like ordinary ladies."],
+    ['hero',"Ordinary ladies? Then how can anybody tell who is a witch?"],
+  ], choices:[
+    {t:"Ask: “How can I spot a witch?”", go:'signs'},
+    {t:"Say: “I don't believe you!”", go:'doubt'},
+  ]},
+  doubt:{ ch:'Chapter 1 · A Warning', bg:'cottage', cast:['hero','grandma'], lines:[
+    ['grandma',"Ha! That is exactly what the witches want you to think."],
+    ['grandma',"Listen carefully, {hero}. One day this might save your life."],
+  ], choices:[{t:"“Okay… I'm listening.”", go:'signs'}]},
+  signs:{ ch:'Chapter 1 · A Warning', bg:'cottage', cast:['hero','grandma'], lines:[
+    ['grandma',"Sign number one: a witch's shadow is always a little bit late. When she moves, her shadow follows a moment after."],
+    ['grandma',"Sign number two: witches smell of burnt sugar, like toffee left in the pan for too long."],
+    ['grandma',"Sign number three: witches cannot stand the sound of children laughing. It makes them sneeze and sneeze!"],
+    ['grandma',"Sign number four: when a witch is angry, her eyes flash bright green."],
+    ['hero',"Late shadows. Burnt sugar. Sneezing at laughter. Green eyes. Got it!"],
+    ['grandma',"Good. Tomorrow we are going on holiday to the seaside, to the Gullcliff Hotel. Let me test you first…"],
+    ['grandma',"Quick! What does a witch smell of?"],
+  ], choices:[
+    {t:"Roses and perfume", wrong:"Not quite! Think back. It was something sweet that had been cooked for too long…"},
+    {t:"Burnt sugar", go:'lobby'},
+    {t:"Old socks", wrong:"Ha! Old socks would be funny, but no. Think about toffee left in the pan…"},
+  ]},
+  lobby:{ ch:'Chapter 2 · The Gullcliff Hotel', bg:'lobby', cast:['hero','manager'], lines:[
+    ['n',"The Gullcliff Hotel is grand and shiny, with a red carpet and a sparkling chandelier."],
+    ['manager',"Welcome, welcome! I am {manager}, the manager. Please do not make a mess. And please do not make a noise!"],
+    ['n',"Near the front desk, {hero} meets another child on holiday.", ['hero','friend','manager']],
+    ['friend',"Hi! I'm {friend}. Want a sweet? I've got a whole pocket full."],
+    ['hero',"Thanks! Hey, look at that sign."],
+    ['n',"The sign says: SUNSHINE SOCIETY FOR HELPFUL LADIES. Blue Ballroom, 3 o'clock. NO CHILDREN!"],
+    ['friend',"Helpful ladies who don't like children? That's a bit weird."],
+  ], choices:[
+    {t:"Go and explore the Blue Ballroom", go:'ballroom'},
+    {t:"Go to the beach with {friend}", go:'beach'},
+  ]},
+  beach:{ ch:'Chapter 2 · The Gullcliff Hotel', bg:'beach', cast:['hero','friend'], lines:[
+    ['n',"The sand is warm and the sea is sparkly."],
+    ['friend',"Let's build the biggest sandcastle ever!"],
+    ['n',"But then big grey clouds roll in. Splat! Splat! It starts to pour with rain."],
+    ['friend',"Eek! I'm going to find more sweets. See you later!"],
+    ['n',"{hero} runs back inside, dripping wet, looking for a quiet place to dry off…", ['hero']],
+  ], choices:[{t:"Slip into the Blue Ballroom", go:'ballroom'}]},
+  ballroom:{ ch:'Chapter 3 · The Blue Ballroom', bg:'ballroom', cast:['hero'], lines:[
+    ['n',"The Blue Ballroom is empty. Rows of golden chairs face a little stage."],
+    ['n',"Suddenly… voices! Lots of them, coming this way!"],
+    ['hero',"Uh-oh. No children allowed. I need to hide, fast!"],
+  ], choices:[
+    {t:"Hide under a chair", wrong:"A chair is much too small. They would see you at once! Try somewhere else."},
+    {t:"Hide behind the long velvet curtain", go:'hide'},
+  ]},
+  hide:{ ch:'Chapter 3 · The Blue Ballroom', bg:'ballroom', cast:['crowd:ladies'], lines:[
+    ['n',"{hero} squeezes behind the curtain and peeps through a tiny gap."],
+    ['n',"In walk the ladies of the Sunshine Society, in big flowery hats and friendly smiles."],
+    ['n',"But something is strange. When the ladies move… their shadows move a moment later."],
+    ['hero',"(whispering) Late shadows… and that smell. Burnt sugar!"],
+    ['n',"What does this mean?"],
+  ], choices:[
+    {t:"They are just tired ladies", wrong:"Remember what {grandma} said about late shadows and burnt sugar…"},
+    {t:"They are WITCHES!", go:'meeting'},
+  ]},
+  meeting:{ ch:'Chapter 4 · The Secret Meeting', bg:'meeting', cast:['witch','crowd:ladies'], lines:[
+    ['n',"A tall lady walks onto the stage. Click! The door is locked. Everyone goes quiet."],
+    ['witch',"You may take off your disguises, my dears!"],
+    ['n',"The ladies peel off their faces like masks. Underneath, their skin is green and wrinkly!", ['witch:real','crowd:witches']],
+    ['witch',"I am {witch}, the Grand High Witch of the whole world!"],
+    ['witch',"Children are noisy. Children are sticky. Children are SMELLY. I want them all gone!"],
+    ['witch',"So I have invented… Hop-Pop Toffees! One bite and — POP! — a child turns into a frog!"],
+    ['witch',"On Saturday, at the sandcastle contest, we will give a free toffee to every child!"],
+    ['crowd',"Hooray! Hooray! Hop-Pop Toffees!"],
+  ], choices:[{t:"Keep watching…", go:'friendArrives'}]},
+  friendArrives:{ ch:'Chapter 4 · The Secret Meeting', bg:'meeting', cast:['witch:real','friend'], lines:[
+    ['n',"Just then, a little side door creaks open. It's {friend}, following the smell of toffee!"],
+    ['friend',"Ooh, toffee! Can I have one?"],
+    ['witch',"Of course, sweetie. Have a… nice… BIG… one."],
+    ['n',"{friend} takes a bite. POP! There is a puff of green smoke…"],
+    ['n',"…and where {friend} was standing, there is now a small, surprised frog.", ['witch:real','friend:frog']],
+    ['friend',"Ribbit?! Hey! What happened to me?"],
+    ['n',"The witches sniff the air. “I smell another child,” hisses {witch}. What should {hero} do?", ['hero','witch:real','friend:frog']],
+  ], choices:[
+    {t:"Stay very still and say nothing", wrong:"They can smell you! Staying still won't work for long. Think… what do witches hate?"},
+    {t:"Shout “I can see you!”", wrong:"Too risky! That would just make them grab you. What makes witches sneeze?"},
+    {t:"Laugh as loudly as you can", go:'laugh'},
+  ]},
+  laugh:{ ch:'Chapter 4 · The Secret Meeting', bg:'meeting', cast:['hero','crowd:witches'], lines:[
+    ['n',"{hero} jumps out from behind the curtain and laughs: HA HA HA HA HA!"],
+    ['n',"The witches start to sneeze. AH-CHOO! AH-CHOO! Hats fly off. Wigs fall down."],
+    ['witch',"Stop that horrible noise! Catch that child!", ['hero','witch:real','crowd:witches']],
+    ['n',"Their eyes flash green, but they cannot stop sneezing. {hero} scoops up {friend} and runs!", ['hero','friend:frog']],
+  ], choices:[{t:"Run to {grandma}'s room!", go:'plan'}]},
+  plan:{ ch:"Chapter 5 · Grandma's Plan", bg:'room', cast:['hero','grandma','friend:frog'], lines:[
+    ['grandma',"{hero}! What has happened? And why are you holding a frog?"],
+    ['friend',"Hello. It's me, {friend}. Ribbit."],
+    ['grandma',"Oh my goodness. Hop-Pop Toffees! I have heard of them."],
+    ['hero',"Can we turn {friend} back?"],
+    ['grandma',"Yes! But I need some of the witches' own toffee mixture to make the cure."],
+    ['grandma',"{witch} will keep it in her room. Room 13, I expect. Witches love the number 13."],
+    ['grandma',"And if we had some extra… we could give the witches a taste of their own medicine."],
+    ['n',"How will they get the mixture?"],
+  ], choices:[
+    {t:"{friend} hops along the balconies", go:'balcony'},
+    {t:"{hero} sneaks down the corridor", go:'corridor'},
+  ]},
+  balcony:{ ch:'Chapter 6 · Room 13', bg:'balcony', cast:['friend:frog'], lines:[
+    ['n',"Being a frog has one good thing about it: frogs are AMAZING at jumping!"],
+    ['n',"{friend} hops from balcony to balcony, all the way to Room 13."],
+    ['n',"Inside, on the windowsill, is a big green bottle labelled: HOP-POP MIXTURE."],
+    ['friend',"Got it! It's heavy… but I'm a very strong frog!"],
+  ], choices:[{t:"Hurry back to {grandma}", go:'gotIt'}]},
+  corridor:{ ch:'Chapter 6 · Room 13', bg:'corridor', cast:['hero','friend:frog'], lines:[
+    ['n',"{hero} tiptoes down the long, creaky corridor, with {friend} hiding in a pocket."],
+    ['n',"Room 13. The door is open a crack. Inside, {witch} is snoring in a big armchair. ZZZZZ…"],
+    ['friend',"(whispering) There's the bottle, on the table!"],
+  ], choices:[
+    {t:"Knock politely on the door", wrong:"Knock on a witch's door?! She would wake up! Try again."},
+    {t:"Tiptoe in and grab the bottle", go:'gotIt'},
+  ]},
+  gotIt:{ ch:"Chapter 6 · Room 13", bg:'room', cast:['hero','grandma','friend:frog'], lines:[
+    ['n',"Back in the room, {grandma} pours a little of the mixture into a teacup, to make the cure."],
+    ['grandma',"The cure must bubble all night long. Now, about the rest of this bottle…"],
+    ['grandma',"Tonight the Sunshine Society are having a big dinner. Green pea soup."],
+    ['hero',"So if the mixture went into their soup…"],
+    ['grandma',"Exactly, my clever one."],
+  ], choices:[{t:"Go to the hotel kitchen", go:'kitchen'}]},
+  kitchen:{ ch:'Chapter 7 · The Soup', bg:'kitchen', cast:['hero','chef'], lines:[
+    ['n',"The hotel kitchen is hot and busy. Pots bubble and pans clatter."],
+    ['chef',"Oi! Out! Out! No children in my kitchen!"],
+  ], choices:[
+    {t:"Ask {chef} for help", go:'chefHelp'},
+    {t:"Sneak to the soup pot yourself", go:'sneak'},
+  ]},
+  chefHelp:{ ch:'Chapter 7 · The Soup', bg:'kitchen', cast:['hero','chef','friend:frog'], lines:[
+    ['hero',"Please, {chef}! The Sunshine ladies are witches, and they want to turn every child into a frog!"],
+    ['chef',"Ha! What a silly story."],
+    ['friend',"It's true! Look at me!"],
+    ['chef',"A… TALKING… FROG?! Okay. Okay! I believe you. What do we do?"],
+    ['n',"{chef} lifts the lid while {hero} pours the whole bottle into the big pot of green soup. Glug, glug, glug."],
+    ['chef',"Ha! Nobody will ever notice. It's green already!"],
+  ], choices:[{t:"Wait for dinner time…", go:'dinner'}]},
+  sneak:{ ch:'Chapter 7 · The Soup', bg:'kitchen', cast:['hero'], lines:[
+    ['n',"{hero} crawls under the tables, past the chef's big feet…"],
+    ['n',"Up on tiptoes… glug, glug, glug… the whole bottle goes into the green soup!"],
+    ['chef',"Hey! Who's there?", ['hero','chef']],
+    ['n',"{hero} dives behind a sack of potatoes until the coast is clear. Phew!", ['hero']],
+  ], choices:[{t:"Wait for dinner time…", go:'dinner'}]},
+  dinner:{ ch:'Chapter 8 · Dinner Time', bg:'dining', cast:['witch','crowd:ladies','manager'], lines:[
+    ['n',"That evening, the dining room is full. The Sunshine ladies slurp their soup. Slurp! Slurp!"],
+    ['witch',"Mmm. Delicious soup. Very… green."],
+    ['n',"Then {witch} stops. Her shadow wobbles. Her eyes flash green."],
+    ['witch',"This tastes like… HOP-POP MIXTURE?! Who did this?!", ['witch:real','crowd:witches','manager']],
+    ['n',"POP! POP! POP-POP-POP! Green smoke fills the whole room!"],
+  ], choices:[{t:"Wait for the smoke to clear…", go:'frogs'}]},
+  frogs:{ ch:'Chapter 8 · Dinner Time', bg:'green', cast:['crowd:frogs','manager'], lines:[
+    ['n',"When the smoke clears, every single witch has turned into a frog! Even {witch}!"],
+    ['manager',"FROGS! Frogs in my dining room! Somebody DO something!"],
+    ['n',"The frogs hop out of the doors, across the beach, and splash into the sea. They are never seen again."],
+    ['n',"{hero} laughs and laughs. And this time, nobody sneezes.", ['hero','manager']],
+  ], choices:[{t:"The next morning…", go:'ending'}]},
+  ending:{ ch:'Chapter 9 · The Cure', bg:'room', cast:['hero','grandma','friend:frog'], lines:[
+    ['n',"The next morning, the cure has finished bubbling."],
+    ['grandma',"Drink up, {friend}."],
+    ['n',"{friend} sips the cure. POP! There is a puff of pink smoke…"],
+    ['friend',"I'm ME again! No more flies for breakfast!", ['hero','grandma','friend']],
+    ['grandma',"Well done, {hero}. You were brave, and you were clever. The world is a little safer today."],
+    ['n',"THE END"],
+  ], choices:[{t:"See who starred in the story ⭐", go:'#credits'}]},
+};
+
+/* ---------- Engine ---------- */
+const $ = id => document.getElementById(id);
+let cur, idx, shown, autoRead = false;
+
+function drawCast(speaker){
+  const n = shown.length, gap = Math.min(230, 700/Math.max(n,1));
+  $('cast').innerHTML = shown.map((look,i)=>{
+    const role = look.split(':')[0], x = 400 + (i-(n-1)/2)*gap;
+    const talking = role===speaker || (speaker==='crowd' && role==='crowd');
+    const name = role==='crowd' ? (look==='crowd:frogs' ? 'Frogs!' : look==='crowd:witches' ? 'The Witches' : 'Sunshine Ladies') : names[role];
+    const w = Math.max(70, name.length*10+24);
+    return `<g transform="translate(${x},405)" opacity="${talking||speaker==='n'?1:.82}">
+      <g class="${talking?'bob':''}">${LOOK[look]()}</g>
+      <rect x="${-w/2}" y="10" width="${w}" height="28" rx="14" fill="${talking?'#6a3fb5':'rgba(20,12,35,.75)'}"/>
+      <text x="0" y="30" text-anchor="middle" font-family="Andika,sans-serif" font-size="17" font-weight="700" fill="#fff">${esc(name)}</text></g>`;
+  }).join('');
+}
+
+function go(id){
+  if(id==='#credits') return showCredits();
+  cur = SC[id]; idx = 0; shown = cur.cast.slice();
+  $('bg').innerHTML = BG[cur.bg]();
+  $('chapter').textContent = cur.ch;
+  showLine();
+}
+
+function setBox(who, text){
+  const sp = $('speakerRow');
+  sp.className = 'speaker' + (who==='n'?' narr':who==='hint'?' hint':'');
+  $('speaker').textContent = labelOf(who);
+  const t = $('text'); t.textContent = text;
+  t.style.animation='none'; void t.offsetWidth; t.style.animation='';
+  if(autoRead) speak();
+}
+
+function showLine(){
+  const [who, text, cast] = cur.lines[idx];
+  if(cast) shown = cast;
+  drawCast(who);
+  setBox(who, fill(text));
+  const last = idx === cur.lines.length-1;
+  $('nextBtn').style.display = last ? 'none' : '';
+  $('choices').innerHTML = '';
+  if(last) cur.choices.forEach(c=>{
+    const b = document.createElement('button');
+    b.className = 'choice'; b.textContent = fill(c.t);
+    b.onclick = ()=>{
+      if(c.wrong){ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); setBox('hint', fill(c.wrong)); }
+      else go(c.go);
+    };
+    $('choices').appendChild(b);
+  });
+}
+
+function next(){ if(idx < cur.lines.length-1){ idx++; showLine(); } }
+
+// Friendly female narrator: try the nicest-sounding voices first, then any English female voice
+const VOICE_PREFS = [/sonia.*natural/i, /libby.*natural/i, /aria.*natural/i, /jenny.*natural/i, /natural.*(female|woman)/i,
+  /google uk english female/i, /hazel/i, /susan/i, /zira/i, /samantha/i, /karen/i, /serena/i, /female/i];
+let narratorVoice;
+function pickVoice(){
+  if(narratorVoice) return narratorVoice;
+  const vs = speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
+  for(const re of VOICE_PREFS){ const v = vs.find(v=>re.test(v.name)); if(v) return narratorVoice = v; }
+  return null;
+}
+function speak(){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance($('text').textContent.replace(/\(whispering\)/,''));
+  const v = pickVoice(); if(v){ u.voice = v; u.lang = v.lang; }
+  u.pitch = 1.1; u.rate = .9; speechSynthesis.speak(u);
+}
+
+function show(which){
+  ['setup','game','credits'].forEach(s=> $(s).style.display = s===which ? (s==='game'?'block':'') : 'none');
+}
+function showCredits(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  $('castTable').innerHTML = ROLES.map(r=>`<tr><td>${esc(r.label)}</td><td>${esc(names[r.key])}</td></tr>`).join('');
+  show('credits');
+}
+
+/* ---------- Setup screen ---------- */
+function preview(key){
+  const look = key==='witch' ? LOOK['witch:real'] : LOOK[key];
+  return `<svg viewBox="-60 -230 120 250">${look()}</svg>`;
+}
+function buildSetup(){
+  $('roles').innerHTML = ROLES.map(r=>`
+    <div class="role">
+      <span id="pv-${r.key}">${preview(r.key)}</span>
+      <div style="flex:1">
+        <label for="in-${r.key}">${esc(r.label)}</label>
+        <small>${esc(r.desc)}</small>
+        <input id="in-${r.key}" maxlength="24" value="${esc(names[r.key])}" autocomplete="off">
+        ${r.key==='witch'?'':`<div class="skins" role="group" aria-label="Skin tone">${SKINS.map((c,i)=>`<button style="background:${c}" data-role="${r.key}" data-skin="${i}" aria-label="Skin tone ${i+1}" aria-pressed="${skins[r.key]===i}"></button>`).join('')}</div>`}
+      </div>
+    </div>`).join('');
+  ROLES.forEach(r=> $('in-'+r.key).addEventListener('input', e=>{ names[r.key] = e.target.value.trim() || r.def; save(); }));
+  document.querySelectorAll('.skins button').forEach(b=> b.onclick = ()=>{
+    const k=b.dataset.role; skins[k]=+b.dataset.skin; save();
+    b.parentNode.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+    $('pv-'+k).innerHTML = preview(k);
+  });
+}
+
+$('startBtn').onclick = ()=>{ show('game'); go('intro'); };
+$('resetBtn').onclick = ()=>{ try{localStorage.removeItem('gullcliff-cast')}catch(e){} load(); buildSetup(); };
+$('againBtn').onclick = ()=>{ show('game'); go('intro'); };
+$('namesBtn').onclick = ()=>{ buildSetup(); show('setup'); };
+$('nextBtn').onclick = next;
+$('text').onclick = next;
+$('readBtn').onclick = speak;
+$('autoBtn').onclick = e=>{ autoRead=!autoRead; e.target.setAttribute('aria-pressed', autoRead); if(autoRead) speak(); else if('speechSynthesis' in window) speechSynthesis.cancel(); };
+document.addEventListener('keydown', e=>{
+  if($('game').style.display!=='block' || e.target.tagName==='BUTTON') return;
+  if(e.key===' '||e.key==='Enter'||e.key==='ArrowRight'){ e.preventDefault(); next(); }
+});
+
+load(); buildSetup(); show('setup');
+</script>
+</body>
+</html>

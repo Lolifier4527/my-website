@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gullcliff Hotel Witches 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Creepster&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1d1630; --panel:#fffaf0; --ink:#2b2236; --muted:#6d6380;
+    --accent:#6a3fb5; --accent-2:#2e9e5b; --warn:#d9534f; --line:#e4d9c6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(ellipse at top,#3a2b5c,var(--bg) 70%);
+    color:var(--ink); font-family:"Andika","Comic Sans MS",system-ui,sans-serif;
+    min-height:100vh; display:flex; justify-content:center; padding:16px;
+  }
+  .wrap{width:100%; max-width:980px}
+  h1{font-family:"Creepster","Andika",cursive; color:#b8f28a; text-align:center;
+     font-size:clamp(2rem,6vw,3.4rem); margin:.2em 0 .1em; letter-spacing:2px;
+     text-shadow:0 3px 0 #2b1d47,0 0 18px rgba(140,230,90,.45)}
+  .sub{color:#d9cdf0; text-align:center; margin:0 0 16px; font-size:1.1rem}
+  .panel{background:var(--panel); border-radius:0 0 18px 18px; padding:16px 18px 18px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .roles{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; margin:12px 0}
+  .role{border:2px solid var(--line); border-radius:14px; padding:10px 12px; background:#fff}
+  .role label{font-weight:700; display:block}
+  .role small{color:var(--muted); display:block; margin-bottom:6px; line-height:1.25}
+  .role input{width:100%; font:inherit; font-size:1.05rem; padding:6px 10px; border:2px solid var(--line); border-radius:10px}
+  .role input:focus{outline:3px solid #c7b3ee; border-color:var(--accent)}
+  .skins{display:flex; gap:6px; margin-top:6px}
+  .skins button{width:22px; height:22px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px #bbb; cursor:pointer; padding:0}
+  .skins button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--accent)}
+  .btn{font:inherit; font-weight:700; font-size:1.15rem; border:none; border-radius:14px; padding:12px 22px; cursor:pointer;
+       background:var(--accent); color:#fff; box-shadow:0 4px 0 #43237d; transition:transform .1s}
+  .btn:active{transform:translateY(3px); box-shadow:0 1px 0 #43237d}
+  .btn.green{background:var(--accent-2); box-shadow:0 4px 0 #1d6a3b}
+  .btn.ghost{background:#efe7fb; color:var(--accent); box-shadow:0 4px 0 #cdbcec}
+  .row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center}
+  .note{color:var(--muted); font-size:.95rem; text-align:center; margin:10px 0 0}
+
+  .stage{position:relative; width:100%; aspect-ratio:16/9; border-radius:18px 18px 0 0; overflow:hidden; background:#120c20}
+  .stage canvas{position:absolute; inset:0; width:100%!important; height:100%!important; display:block}
+  .tags{position:absolute; inset:0; pointer-events:none}
+  .tag{position:absolute; transform:translate(-50%,4px); white-space:nowrap; font-weight:700; color:#fff;
+       background:rgba(20,12,35,.78); padding:2px 12px; border-radius:999px; font-size:clamp(.75rem,1.8vw,1rem); transition:background .2s;
+       overflow:hidden; text-overflow:ellipsis}
+  @media (max-width:520px){ .tag{padding:2px 7px} }
+  .tag.on{background:var(--accent)}
+  .chapter{position:absolute; left:12px; top:10px; background:rgba(20,12,35,.72); color:#fff; padding:4px 12px; border-radius:999px; font-size:.95rem}
+  .nogl{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; padding:24px; font-size:1.1rem}
+
+  .box{display:flex; flex-direction:column; gap:10px; min-height:190px}
+  .speaker{font-weight:700; color:var(--accent); font-size:1.15rem; display:flex; justify-content:space-between; align-items:center; gap:8px}
+  .speaker.narr{color:var(--muted)}
+  .speaker.hint{color:var(--warn)}
+  .speaker .tools{display:flex; gap:6px}
+  .tool{font:inherit; font-size:.9rem; border:2px solid var(--line); background:#fff; border-radius:10px; padding:3px 10px; cursor:pointer; color:var(--ink)}
+  .tool[aria-pressed="true"]{background:#efe7fb; border-color:var(--accent)}
+  .text{font-size:clamp(1.15rem,2.6vw,1.45rem); line-height:1.5; margin:0; animation:fade .35s ease}
+  .choices{display:flex; flex-direction:column; gap:8px}
+  .choice{font:inherit; font-size:1.15rem; text-align:left; border:3px solid #cdbcec; background:#fff; color:var(--ink);
+          border-radius:14px; padding:10px 14px; cursor:pointer}
+  .choice:hover,.choice:focus{border-color:var(--accent); background:#f6f1ff; outline:none}
+  .choice.nope{animation:shake .4s; border-color:var(--warn)}
+  .next{align-self:flex-end}
+  @keyframes fade{from{opacity:0; transform:translateY(4px)}}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .credits{text-align:center}
+  .credits table{margin:8px auto 14px; border-collapse:collapse; font-size:1.2rem}
+  .credits td{padding:6px 14px; border-bottom:1px dashed var(--line)}
+  .credits td:first-child{color:var(--muted); text-align:right}
+  .credits td:last-child{font-weight:700; text-align:left}
+  @media (max-width:520px){ body{padding:8px 16px} .box{min-height:220px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The Witches of Gullcliff Hotel</h1>
+  <p class="sub">A spooky choose-your-path story · 3D edition</p>
+
+  <div class="stage" id="stage">
+    <div class="tags" id="tags"></div>
+    <div class="chapter" id="chapter"></div>
+  </div>
+
+  <!-- Setup -->
+  <section id="setup" class="panel">
+    <h2 style="margin:0">Who's in the story?</h2>
+    <p style="margin:.3em 0 0">Type a name for each character and pick a skin tone. Names are saved on this computer only.</p>
+    <div class="roles" id="roles"></div>
+    <div class="row">
+      <button class="btn green" id="startBtn">Start the story ▶</button>
+      <button class="btn ghost" id="resetBtn">Reset names</button>
+    </div>
+    <p class="note">Tip: the Grand High Witch is the villain, so a teacher's name (or the default) works well for that role.</p>
+  </section>
+
+  <!-- Story -->
+  <section id="game" class="panel box" style="display:none">
+    <div class="speaker" id="speakerRow">
+      <span id="speaker"></span>
+      <span class="tools">
+        <button class="tool" id="readBtn" title="Read this line aloud">🔊 Read</button>
+        <button class="tool" id="autoBtn" aria-pressed="false" title="Read every line aloud">Auto-read</button>
+      </span>
+    </div>
+    <p class="text" id="text"></p>
+    <div class="choices" id="choices"></div>
+    <button class="btn next" id="nextBtn">Next ▶</button>
+  </section>
+
+  <!-- Credits -->
+  <section id="credits" class="panel credits" style="display:none">
+    <h2 style="margin:.2em 0">Starring…</h2>
+    <table id="castTable"></table>
+    <div class="row">
+      <button class="btn green" id="againBtn">Play again</button>
+      <button class="btn ghost" id="namesBtn">Change names</button>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ---------- Characters & names ---------- */
+const SKINS = ['#ffdbb4','#e8b88a','#c68642','#8d5524','#5c3a21'];
+const ROLES = [
+  {key:'hero',    label:'The Hero',            desc:'Brave and clever. The main character.', def:'Sam',         skin:1},
+  {key:'friend',  label:'The Best Friend',     desc:'Loves sweets… a bit too much!',          def:'Alex',        skin:2},
+  {key:'grandma', label:'Grandma',             desc:'Wise, kind, and knows all about witches.', def:'Grandma Rose', skin:0},
+  {key:'manager', label:'The Hotel Manager',   desc:'Fussy. Hates mess and noise.',           def:'Mr Bellwether', skin:3},
+  {key:'chef',    label:'The Chef',            desc:'Runs the hotel kitchen.',                def:'Chef Toni',    skin:2},
+  {key:'witch',   label:'The Grand High Witch',desc:'The villain! Wants to get rid of children.', def:'The Grand High Witch', skin:0},
+];
+let names = {}, skins = {};
+function load(){
+  ROLES.forEach(r=>{names[r.key]=r.def; skins[r.key]=r.skin});
+  try{
+    const saved = JSON.parse(localStorage.getItem('gullcliff-cast')||'null');
+    if(saved){ Object.assign(names, saved.names||{}); Object.assign(skins, saved.skins||{}); }
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem('gullcliff-cast', JSON.stringify({names,skins})) }catch(e){} }
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fill = t => t.replace(/\{(\w+)\}/g, (_,k)=> names[k] ?? k);
+const LABEL = {n:'Story', crowd:'The Sunshine Ladies', hint:'Hmm…'};
+const labelOf = who => LABEL[who] || names[who] || who;
+
+/* ---------- The story (original, inspired by classic witch tales) ----------
+   Each line: [speaker, text, (optional) new cast list]
+   Choices: {t:text, go:sceneId} or {t:text, wrong:hint} */
+const SC = {
+  intro:{ ch:'Chapter 1 · A Warning', bg:'cottage', cast:['hero','grandma'], lines:[
+    ['n',"It is a dark and stormy night. {hero} is staying with {grandma}, who is very old and very wise."],
+    ['grandma',"Come and sit by the fire, {hero}. I have something very important to tell you."],
+    ['grandma',"Witches are real. Not the silly kind with broomsticks. Real witches look just like ordinary ladies."],
+    ['hero',"Ordinary ladies? Then how can anybody tell who is a witch?"],
+  ], choices:[
+    {t:"Ask: “How can I spot a witch?”", go:'signs'},
+    {t:"Say: “I don't believe you!”", go:'doubt'},
+  ]},
+  doubt:{ ch:'Chapter 1 · A Warning', bg:'cottage', cast:['hero','grandma'], lines:[
+    ['grandma',"Ha! That is exactly what the witches want you to think."],
+    ['grandma',"Listen carefully, {hero}. One day this might save your life."],
+  ], choices:[{t:"“Okay… I'm listening.”", go:'signs'}]},
+  signs:{ ch:'Chapter 1 · A Warning', bg:'cottage', cast:['hero','grandma'], lines:[
+    ['grandma',"Sign number one: a witch's shadow is always a little bit late. When she moves, her shadow follows a moment after."],
+    ['grandma',"Sign number two: witches smell of burnt sugar, like toffee left in the pan for too long."],
+    ['grandma',"Sign number three: witches cannot stand the sound of children laughing. It makes them sneeze and sneeze!"],
+    ['grandma',"Sign number four: when a witch is angry, her eyes flash bright green."],
+    ['hero',"Late shadows. Burnt sugar. Sneezing at laughter. Green eyes. Got it!"],
+    ['grandma',"Good. Tomorrow we are going on holiday to the seaside, to the Gullcliff Hotel. Let me test you first…"],
+    ['grandma',"Quick! What does a witch smell of?"],
+  ], choices:[
+    {t:"Roses and perfume", wrong:"Not quite! Think back. It was something sweet that had been cooked for too long…"},
+    {t:"Burnt sugar", go:'lobby'},
+    {t:"Old socks", wrong:"Ha! Old socks would be funny, but no. Think about toffee left in the pan…"},
+  ]},
+  lobby:{ ch:'Chapter 2 · The Gullcliff Hotel', bg:'lobby', cast:['hero','manager'], lines:[
+    ['n',"The Gullcliff Hotel is grand and shiny, with a red carpet and a sparkling chandelier."],
+    ['manager',"Welcome, welcome! I am {manager}, the manager. Please do not make a mess. And please do not make a noise!"],
+    ['n',"Near the front desk, {hero} meets another child on holiday.", ['hero','friend','manager']],
+    ['friend',"Hi! I'm {friend}. Want a sweet? I've got a whole pocket full."],
+    ['hero',"Thanks! Hey, look at that sign."],
+    ['n',"The sign says: SUNSHINE SOCIETY FOR HELPFUL LADIES. Blue Ballroom, 3 o'clock. NO CHILDREN!"],
+    ['friend',"Helpful ladies who don't like children? That's a bit weird."],
+  ], choices:[
+    {t:"Go and explore the Blue Ballroom", go:'ballroom'},
+    {t:"Go to the beach with {friend}", go:'beach'},
+  ]},
+  beach:{ ch:'Chapter 2 · The Gullcliff Hotel', bg:'beach', cast:['hero','friend'], lines:[
+    ['n',"The sand is warm and the sea is sparkly."],
+    ['friend',"Let's build the biggest sandcastle ever!"],
+    ['n',"But then big grey clouds roll in. Splat! Splat! It starts to pour with rain."],
+    ['friend',"Eek! I'm going to find more sweets. See you later!"],
+    ['n',"{hero} runs back inside, dripping wet, looking for a quiet place to dry off…", ['hero']],
+  ], choices:[{t:"Slip into the Blue Ballroom", go:'ballroom'}]},
+  ballroom:{ ch:'Chapter 3 · The Blue Ballroom', bg:'ballroom', cast:['hero'], lines:[
+    ['n',"The Blue Ballroom is empty. Rows of golden chairs face a little stage."],
+    ['n',"Suddenly… voices! Lots of them, coming this way!"],
+    ['hero',"Uh-oh. No children allowed. I need to hide, fast!"],
+  ], choices:[
+    {t:"Hide under a chair", wrong:"A chair is much too small. They would see you at once! Try somewhere else."},
+    {t:"Hide behind the long velvet curtain", go:'hide'},
+  ]},
+  hide:{ ch:'Chapter 3 · The Blue Ballroom', bg:'ballroom', cast:['crowd:ladies'], lines:[
+    ['n',"{hero} squeezes behind the curtain and peeps through a tiny gap."],
+    ['n',"In walk the ladies of the Sunshine Society, in big flowery hats and friendly smiles."],
+    ['n',"But something is strange. When the ladies move… their shadows move a moment later."],
+    ['hero',"(whispering) Late shadows… and that smell. Burnt sugar!"],
+    ['n',"What does this mean?"],
+  ], choices:[
+    {t:"They are just tired ladies", wrong:"Remember what {grandma} said about late shadows and burnt sugar…"},
+    {t:"They are WITCHES!", go:'meeting'},
+  ]},
+  meeting:{ ch:'Chapter 4 · The Secret Meeting', bg:'meeting', cast:['witch','crowd:ladies'], lines:[
+    ['n',"A tall lady walks onto the stage. Click! The door is locked. Everyone goes quiet."],
+    ['witch',"You may take off your disguises, my dears!"],
+    ['n',"The ladies peel off their faces like masks. Underneath, their skin is green and wrinkly!", ['witch:real','crowd:witches']],
+    ['witch',"I am {witch}, the Grand High Witch of the whole world!"],
+    ['witch',"Children are noisy. Children are sticky. Children are SMELLY. I want them all gone!"],
+    ['witch',"So I have invented… Hop-Pop Toffees! One bite and — POP! — a child turns into a frog!"],
+    ['witch',"On Saturday, at the sandcastle contest, we will give a free toffee to every child!"],
+    ['crowd',"Hooray! Hooray! Hop-Pop Toffees!"],
+  ], choices:[{t:"Keep watching…", go:'friendArrives'}]},
+  friendArrives:{ ch:'Chapter 4 · The Secret Meeting', bg:'meeting', cast:['witch:real','friend'], lines:[
+    ['n',"Just then, a little side door creaks open. It's {friend}, following the smell of toffee!"],
+    ['friend',"Ooh, toffee! Can I have one?"],
+    ['witch',"Of course, sweetie. Have a… nice… BIG… one."],
+    ['n',"{friend} takes a bite. POP! There is a puff of green smoke…"],
+    ['n',"…and where {friend} was standing, there is now a small, surprised frog.", ['witch:real','friend:frog']],
+    ['friend',"Ribbit?! Hey! What happened to me?"],
+    ['n',"The witches sniff the air. “I smell another child,” hisses {witch}. What should {hero} do?", ['hero','witch:real','friend:frog']],
+  ], choices:[
+    {t:"Stay very still and say nothing", wrong:"They can smell you! Staying still won't work for long. Think… what do witches hate?"},
+    {t:"Shout “I can see you!”", wrong:"Too risky! That would just make them grab you. What makes witches sneeze?"},
+    {t:"Laugh as loudly as you can", go:'laugh'},
+  ]},
+  laugh:{ ch:'Chapter 4 · The Secret Meeting', bg:'meeting', cast:['hero','crowd:witches'], lines:[
+    ['n',"{hero} jumps out from behind the curtain and laughs: HA HA HA HA HA!"],
+    ['n',"The witches start to sneeze. AH-CHOO! AH-CHOO! Hats fly off. Wigs fall down."],
+    ['witch',"Stop that horrible noise! Catch that child!", ['hero','witch:real','crowd:witches']],
+    ['n',"Their eyes flash green, but they cannot stop sneezing. {hero} scoops up {friend} and runs!", ['hero','friend:frog']],
+  ], choices:[{t:"Run to {grandma}'s room!", go:'plan'}]},
+  plan:{ ch:"Chapter 5 · Grandma's Plan", bg:'room', cast:['hero','grandma','friend:frog'], lines:[
+    ['grandma',"{hero}! What has happened? And why are you holding a frog?"],
+    ['friend',"Hello. It's me, {friend}. Ribbit."],
+    ['grandma',"Oh my goodness. Hop-Pop Toffees! I have heard of them."],
+    ['hero',"Can we turn {friend} back?"],
+    ['grandma',"Yes! But I need some of the witches' own toffee mixture to make the cure."],
+    ['grandma',"{witch} will keep it in her room. Room 13, I expect. Witches love the number 13."],
+    ['grandma',"And if we had some extra… we could give the witches a taste of their own medicine."],
+    ['n',"How will they get the mixture?"],
+  ], choices:[
+    {t:"{friend} hops along the balconies", go:'balcony'},
+    {t:"{hero} sneaks down the corridor", go:'corridor'},
+  ]},
+  balcony:{ ch:'Chapter 6 · Room 13', bg:'balcony', cast:['friend:frog'], lines:[
+    ['n',"Being a frog has one good thing about it: frogs are AMAZING at jumping!"],
+    ['n',"{friend} hops from balcony to balcony, all the way to Room 13."],
+    ['n',"Inside, on the windowsill, is a big green bottle labelled: HOP-POP MIXTURE."],
+    ['friend',"Got it! It's heavy… but I'm a very strong frog!"],
+  ], choices:[{t:"Hurry back to {grandma}", go:'gotIt'}]},
+  corridor:{ ch:'Chapter 6 · Room 13', bg:'corridor', cast:['hero','friend:frog'], lines:[
+    ['n',"{hero} tiptoes down the long, creaky corridor, with {friend} hiding in a pocket."],
+    ['n',"Room 13. The door is open a crack. Inside, {witch} is snoring in a big armchair. ZZZZZ…"],
+    ['friend',"(whispering) There's the bottle, on the table!"],
+  ], choices:[
+    {t:"Knock politely on the door", wrong:"Knock on a witch's door?! She would wake up! Try again."},
+    {t:"Tiptoe in and grab the bottle", go:'gotIt'},
+  ]},
+  gotIt:{ ch:"Chapter 6 · Room 13", bg:'room', cast:['hero','grandma','friend:frog'], lines:[
+    ['n',"Back in the room, {grandma} pours a little of the mixture into a teacup, to make the cure."],
+    ['grandma',"The cure must bubble all night long. Now, about the rest of this bottle…"],
+    ['grandma',"Tonight the Sunshine Society are having a big dinner. Green pea soup."],
+    ['hero',"So if the mixture went into their soup…"],
+    ['grandma',"Exactly, my clever one."],
+  ], choices:[{t:"Go to the hotel kitchen", go:'kitchen'}]},
+  kitchen:{ ch:'Chapter 7 · The Soup', bg:'kitchen', cast:['hero','chef'], lines:[
+    ['n',"The hotel kitchen is hot and busy. Pots bubble and pans clatter."],
+    ['chef',"Oi! Out! Out! No children in my kitchen!"],
+  ], choices:[
+    {t:"Ask {chef} for help", go:'chefHelp'},
+    {t:"Sneak to the soup pot yourself", go:'sneak'},
+  ]},
+  chefHelp:{ ch:'Chapter 7 · The Soup', bg:'kitchen', cast:['hero','chef','friend:frog'], lines:[
+    ['hero',"Please, {chef}! The Sunshine ladies are witches, and they want to turn every child into a frog!"],
+    ['chef',"Ha! What a silly story."],
+    ['friend',"It's true! Look at me!"],
+    ['chef',"A… TALKING… FROG?! Okay. Okay! I believe you. What do we do?"],
+    ['n',"{chef} lifts the lid while {hero} pours the whole bottle into the big pot of green soup. Glug, glug, glug."],
+    ['chef',"Ha! Nobody will ever notice. It's green already!"],
+  ], choices:[{t:"Wait for dinner time…", go:'dinner'}]},
+  sneak:{ ch:'Chapter 7 · The Soup', bg:'kitchen', cast:['hero'], lines:[
+    ['n',"{hero} crawls under the tables, past the chef's big feet…"],
+    ['n',"Up on tiptoes… glug, glug, glug… the whole bottle goes into the green soup!"],
+    ['chef',"Hey! Who's there?", ['hero','chef']],
+    ['n',"{hero} dives behind a sack of potatoes until the coast is clear. Phew!", ['hero']],
+  ], choices:[{t:"Wait for dinner time…", go:'dinner'}]},
+  dinner:{ ch:'Chapter 8 · Dinner Time', bg:'dining', cast:['witch','crowd:ladies','manager'], lines:[
+    ['n',"That evening, the dining room is full. The Sunshine ladies slurp their soup. Slurp! Slurp!"],
+    ['witch',"Mmm. Delicious soup. Very… green."],
+    ['n',"Then {witch} stops. Her shadow wobbles. Her eyes flash green."],
+    ['witch',"This tastes like… HOP-POP MIXTURE?! Who did this?!", ['witch:real','crowd:witches','manager']],
+    ['n',"POP! POP! POP-POP-POP! Green smoke fills the whole room!"],
+  ], choices:[{t:"Wait for the smoke to clear…", go:'frogs'}]},
+  frogs:{ ch:'Chapter 8 · Dinner Time', bg:'green', cast:['crowd:frogs','manager'], lines:[
+    ['n',"When the smoke clears, every single witch has turned into a frog! Even {witch}!"],
+    ['manager',"FROGS! Frogs in my dining room! Somebody DO something!"],
+    ['n',"The frogs hop out of the doors, across the beach, and splash into the sea. They are never seen again."],
+    ['n',"{hero} laughs and laughs. And this time, nobody sneezes.", ['hero','manager']],
+  ], choices:[{t:"The next morning…", go:'ending'}]},
+  ending:{ ch:'Chapter 9 · The Cure', bg:'room', cast:['hero','grandma','friend:frog'], lines:[
+    ['n',"The next morning, the cure has finished bubbling."],
+    ['grandma',"Drink up, {friend}."],
+    ['n',"{friend} sips the cure. POP! There is a puff of pink smoke…"],
+    ['friend',"I'm ME again! No more flies for breakfast!", ['hero','grandma','friend']],
+    ['grandma',"Well done, {hero}. You were brave, and you were clever. The world is a little safer today."],
+    ['n',"THE END"],
+  ], choices:[{t:"See who starred in the story ⭐", go:'#credits'}]},
+};
+
+/* =====================================================================
+   3D world (three.js). Units: 1 ≈ 1 metre-ish, floor at y = 0,
+   characters stand along z = 0, camera looks from +z.
+   ===================================================================== */
+const has3D = !!window.THREE && (()=>{ try{ return !!document.createElement('canvas').getContext('webgl') }catch(e){ return false } })();
+let R, scene, camera, hemi, sun, roomGroup, castGroup, roomUpd = [], fx = [], tagEls = [], castFigs = [];
+let roomKey = null, castKey = null, speakerNow = 'n', camFocus = 0;
+const clock = has3D ? new THREE.Clock() : null;
+
+/* Primitive helpers */
+const matCache = {};
+function mat(c, o={}){
+  const k = c + JSON.stringify(o);
+  return matCache[k] || (matCache[k] = new THREE.MeshStandardMaterial(Object.assign({color:c, roughness:.85, flatShading:true}, o)));
+}
+function mesh(geo, c, x=0, y=0, z=0, o){
+  const m = new THREE.Mesh(geo, o && o.own ? new THREE.MeshStandardMaterial(Object.assign({color:c, roughness:.85, flatShading:true}, o.own)) : mat(c, o));
+  m.position.set(x,y,z); m.castShadow = true; m.receiveShadow = true; return m;
+}
+const B = (w,h,d,c,x,y,z,o)=>mesh(new THREE.BoxGeometry(w,h,d),c,x,y,z,o);
+const S = (r,c,x,y,z,o)=>mesh(new THREE.SphereGeometry(r,18,14),c,x,y,z,o);
+const Cy = (rt,rb,h,c,x,y,z,o,seg=20)=>mesh(new THREE.CylinderGeometry(rt,rb,h,seg),c,x,y,z,o);
+const Co = (r,h,c,x,y,z,o,seg=14)=>mesh(new THREE.ConeGeometry(r,h,seg),c,x,y,z,o);
+function grp(...kids){ const g = new THREE.Group(); kids.flat().forEach(k=>k && g.add(k)); return g; }
+function at(obj,x=0,y=0,z=0,ry=0,s=1){ obj.position.set(x,y,z); obj.rotation.y = ry; obj.scale.setScalar(s); return obj; }
+const glow = (c,i=1)=>({emissive:c, emissiveIntensity:i});
+
+function textTex(lines, {w=512,h=256,bg='#fffbe6',border='#5c3720'}={}){
+  const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+  const g = cv.getContext('2d');
+  if(bg){ g.fillStyle=bg; g.fillRect(0,0,w,h); }
+  if(border){ g.strokeStyle=border; g.lineWidth=14; g.strokeRect(7,7,w-14,h-14); }
+  g.textAlign='center'; g.textBaseline='middle';
+  const total = lines.reduce((a,l)=>a+l[1]*1.25,0); let y = (h-total)/2;
+  lines.forEach(([t,size,color,font])=>{ g.font = `bold ${size}px ${font||'Andika, sans-serif'}`; g.fillStyle=color; y += size*.625; g.fillText(t,w/2,y); y += size*.625; });
+  const tex = new THREE.CanvasTexture(cv); tex.anisotropy = 4; return tex;
+}
+function sign(tex, w, h, x, y, z, ry=0, o={}){
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshStandardMaterial(Object.assign({map:tex, roughness:.9}, o)));
+  m.position.set(x,y,z); m.rotation.y = ry; return m;
+}
+function checkerTex(a,b,rep){
+  const cv = document.createElement('canvas'); cv.width=cv.height=64; const g=cv.getContext('2d');
+  g.fillStyle=a; g.fillRect(0,0,64,64); g.fillStyle=b; g.fillRect(0,0,32,32); g.fillRect(32,32,32,32);
+  g.strokeStyle='rgba(0,0,0,.08)'; g.strokeRect(0,0,32,32); g.strokeRect(32,32,32,32);
+  const t = new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(rep[0],rep[1]); t.magFilter=THREE.NearestFilter; return t;
+}
+
+/* ---------- Character builders (facing +z) ---------- */
+function face(g, y, r, {eye='#222', mouth='smile', eyeOpts}={}){
+  const ex = r*.36, ez = r*.9;
+  g.add(S(r*.13, eye, -ex, y+r*.12, ez, eyeOpts), S(r*.13, eye, ex, y+r*.12, ez, eyeOpts));
+  if(mouth==='flat'){ g.add(B(r*.45, r*.07, r*.08, '#6b2f24', 0, y-r*.38, r*.93)); return; }
+  const arc = new THREE.Mesh(new THREE.TorusGeometry(mouth==='grin'?r*.32:r*.24, r*.05, 6, 16, Math.PI), mat('#6b2f24'));
+  arc.rotation.z = Math.PI; arc.position.set(0, y-r*.18, r*.9); arc.rotation.x = -.35; g.add(arc);
+}
+function hairCap(r, color, y, z=0, tilt=-.35){
+  const m = mesh(new THREE.SphereGeometry(r, 18, 12, 0, Math.PI*2, 0, Math.PI*.5), color, 0, y, z);
+  m.rotation.x = tilt; return m;
+}
+function arms(g, color, skin, y, spread, len=.62, hand=skin){
+  [-1,1].forEach(s=>{ const a = B(.17, len, .2, color, s*spread, y, 0); a.rotation.z = s*.08; g.add(a, S(.1, hand, s*(spread+.04), y-len/2-.05, 0)); });
+}
+function kid(skin, shirt, hair){
+  const g = new THREE.Group();
+  g.add(B(.22,.7,.24,'#3b4a6b',-.14,.38,0), B(.22,.7,.24,'#3b4a6b',.14,.38,0));
+  g.add(B(.26,.12,.34,'#2a2a2a',-.14,.06,.04), B(.26,.12,.34,'#2a2a2a',.14,.06,.04));
+  g.add(B(.62,.75,.38,shirt,0,1.1,0));
+  arms(g, shirt, skin, 1.1, .42);
+  g.add(Cy(.1,.1,.12,skin,0,1.52,0));
+  g.add(S(.36,skin,0,1.82,0), hairCap(.39,hair,1.84,-.02));
+  g.add(S(.06,'#f59a9a',-.21,1.74,.29), S(.06,'#f59a9a',.21,1.74,.29));
+  face(g, 1.82, .36);
+  return g;
+}
+function grandma(skin){
+  const g = new THREE.Group();
+  g.add(Cy(.3,.55,1.3,'#7b5ea7',0,.65,0), Cy(.36,.44,.34,'#c8b6e6',0,1.2,0));
+  [-1,1].forEach(s=> g.add(S(.1,skin,s*.42,.85,.12)));
+  const cane = Cy(.03,.03,1.1,'#6b4226',.5,.55,.15); cane.rotation.z = -.08; g.add(cane);
+  g.add(S(.34,skin,0,1.66,0), hairCap(.36,'#d9d9de',1.68,-.03), S(.15,'#d9d9de',0,2.02,-.12));
+  face(g, 1.66, .34);
+  [-1,1].forEach(s=>{ const ring = new THREE.Mesh(new THREE.TorusGeometry(.085,.015,6,16), mat('#333')); ring.position.set(s*.12,1.7,.33); g.add(ring); });
+  g.add(B(.08,.015,.02,'#333',0,1.7,.34));
+  return at(g,0,0,0,0,1.15);
+}
+function manager(skin){
+  const g = new THREE.Group();
+  g.add(B(.24,.75,.26,'#22243a',-.15,.4,0), B(.24,.75,.26,'#22243a',.15,.4,0));
+  g.add(B(.28,.12,.36,'#111',-.15,.06,.04), B(.28,.12,.36,'#111',.15,.06,.04));
+  g.add(B(.72,.82,.42,'#2d2f45',0,1.17,0), B(.2,.5,.02,'#ffffff',0,1.32,.22), B(.08,.42,.03,'#c0392b',0,1.26,.24));
+  arms(g, '#2d2f45', skin, 1.15, .46);
+  g.add(S(.34,skin,0,1.88,0));
+  g.add(B(.08,.22,.3,'#333',-.33,1.9,-.02), B(.08,.22,.3,'#333',.33,1.9,-.02));
+  g.add(B(.34,.07,.06,'#333',0,1.77,.32));
+  face(g, 1.88, .34, {mouth:'flat'});
+  return at(g,0,0,0,0,1.15);
+}
+function chef(skin){
+  const g = new THREE.Group();
+  g.add(B(.24,.72,.26,'#6c6c6c',-.15,.38,0), B(.24,.72,.26,'#6c6c6c',.15,.38,0));
+  g.add(B(.74,.85,.44,'#ffffff',0,1.15,0));
+  [[-.12,1.3],[.12,1.3],[-.12,1.08],[.12,1.08]].forEach(([x,y])=>g.add(S(.035,'#bbbbbb',x,y,.23)));
+  arms(g, '#ffffff', skin, 1.13, .48);
+  g.add(Cy(.25,.25,.2,'#ffffff',0,1.62,0,{},10));
+  g.add(S(.34,skin,0,1.9,0));
+  g.add(Cy(.27,.25,.42,'#ffffff',0,2.33,0), S(.32,'#ffffff',0,2.58,0));
+  face(g, 1.9, .34, {mouth:'grin'});
+  return at(g,0,0,0,0,1.15);
+}
+function lady(skin, dress, big=false){
+  const g = new THREE.Group();
+  // the "late shadow": a dark patch that is not quite where it should be
+  const sh = new THREE.Mesh(new THREE.CircleGeometry(.62, 20), new THREE.MeshBasicMaterial({color:'#000', transparent:true, opacity:.28}));
+  sh.rotation.x = -Math.PI/2; sh.position.set(.55,.015,-.25); sh.userData.lateShadow = true; g.add(sh);
+  g.add(Cy(.24,.6,1.38,dress,0,.69,0));
+  [-1,1].forEach(s=>{ const a = Cy(.07,.09,.6,dress,s*.33,1.05,0); a.rotation.z = s*.25; g.add(a, S(.1,'#f4f0e8',s*.4,.74,.04)); });
+  g.add(S(.33,skin,0,1.66,0), hairCap(.37,'#8a5a2b',1.66,-.04,-.6));
+  g.add(Cy(.64,.64,.05,'#e7c6e0',0,1.95,0,{},24), Cy(.3,.35,.3,'#e7c6e0',0,2.1,0));
+  g.add(S(.09,'#ff6fa8',.27,2.07,.2), S(.045,'#ffd34d',.29,2.08,.28));
+  g.add(S(.06,'#ff8fb0',-.2,1.59,.27), S(.06,'#ff8fb0',.2,1.59,.27));
+  face(g, 1.66, .33);
+  return at(g,0,0,0,0,big?1.3:1.1);
+}
+const witchEye = has3D ? new THREE.MeshStandardMaterial({color:'#d4ff3a', emissive:'#a6ff00', emissiveIntensity:1}) : null;
+function realWitch(big=false){
+  const g = new THREE.Group(), skin = '#8bc34a';
+  g.add(Cy(.28,.68,1.42, big?'#1b1b2f':'#3b2a4f',0,.71,0));
+  if(big){ const cape = new THREE.Mesh(new THREE.CylinderGeometry(.42,.9,1.5,20,1,true,Math.PI/2,Math.PI), new THREE.MeshStandardMaterial({color:'#5b1f6b', side:THREE.DoubleSide, flatShading:true}));
+    cape.position.set(0,.76,-.05); cape.castShadow = true; g.add(cape); }
+  [-1,1].forEach(s=>{ const a = Cy(.07,.1,.62,'#2a2140',s*.36,1.05,0); a.rotation.z = s*.35; g.add(a, S(.11,skin,s*.46,.76,.05)); });
+  g.add(S(.34,skin,0,1.68,0));
+  for(let i=0;i<9;i++){ const a = (i/9)*Math.PI*2, sp = Co(.1,.5,'#262626',Math.sin(a)*.3,1.95,Math.cos(a)*.3-.05);
+    sp.rotation.z = -Math.sin(a)*.9; sp.rotation.x = Math.cos(a)*.9; g.add(sp); }
+  const nose = Co(.06,.26,'#6f9e38',0,1.62,.4); nose.rotation.x = Math.PI/2; g.add(nose);
+  const eL = new THREE.Mesh(new THREE.SphereGeometry(.06,12,10), witchEye), eR = eL.clone();
+  eL.position.set(-.12,1.74,.29); eR.position.set(.12,1.74,.29); g.add(eL,eR);
+  g.add(B(.24,.05,.05,'#2e4a12',0,1.5,.31), B(.04,.05,.04,'#fff',-.05,1.47,.32), B(.04,.05,.04,'#fff',.06,1.47,.32));
+  if(big) for(let i=0;i<7;i++){ const a = (i/7)*Math.PI*2; g.add(Co(.06,.22,'#f1c40f',Math.sin(a)*.2,2.18,Math.cos(a)*.2,{metalness:.5,roughness:.3})); }
+  return at(g,0,0,0,0,big?1.3:1.1);
+}
+function frog(scarf){
+  const g = new THREE.Group(), c = '#5cb85c';
+  const body = S(.5,c,0,.36,0); body.scale.set(1,.72,.9); g.add(body);
+  const belly = S(.36,'#a8e29a',0,.32,.2); belly.scale.set(1,.7,.6); g.add(belly);
+  [-1,1].forEach(s=>{
+    const leg = S(.22,'#3e9a44',s*.42,.14,.05); leg.scale.set(1.2,.5,1.4); g.add(leg);
+    g.add(S(.17,c,s*.23,.72,.12), S(.12,'#ffffff',s*.23,.76,.22), S(.06,'#111',s*.23,.77,.32));
+  });
+  const m = new THREE.Mesh(new THREE.TorusGeometry(.2,.03,6,16,Math.PI), mat('#245e27'));
+  m.rotation.z = Math.PI; m.position.set(0,.52,.42); g.add(m);
+  if(scarf){ const t = new THREE.Mesh(new THREE.TorusGeometry(.36,.06,8,24), mat(scarf)); t.rotation.x = Math.PI/2; t.position.y = .58; g.add(t); }
+  return at(g,0,0,0,0,1.25);
+}
+function trio(make, spread=.85){
+  return grp(at(make(0),-spread,0,-.45,.25,.9), at(make(1),0,0,0,0,.95), at(make(2),spread,0,-.45,-.25,.9));
+}
+const LOOK = {
+  hero:   ()=>kid(SKINS[skins.hero], '#e85d4a', '#3a2a1a'),
+  friend: ()=>kid(SKINS[skins.friend], '#3fa7d6', '#c97b2f'),
+  'friend:frog': ()=>frog('#3fa7d6'),
+  grandma:()=>grandma(SKINS[skins.grandma]),
+  manager:()=>manager(SKINS[skins.manager]),
+  chef:   ()=>chef(SKINS[skins.chef]),
+  witch:  ()=>lady(SKINS[skins.witch], '#2c3e50', true),
+  'witch:real': ()=>realWitch(true),
+  'crowd:ladies':  ()=>trio(i=>lady(SKINS[[1,0,3][i]], ['#c0587e','#9b59b6','#5b8bd0'][i])),
+  'crowd:witches': ()=>trio(()=>realWitch()),
+  'crowd:frogs':   ()=>grp(trio(()=>frog(), .8), at(frog(),-.4,0,.6,.3,.75), at(frog(),.45,0,.7,-.3,.7)),
+};
+const castName = look => look==='crowd:frogs' ? 'Frogs!' : look==='crowd:witches' ? 'The Witches' : look==='crowd:ladies' ? 'Sunshine Ladies' : names[look.split(':')[0]];
+
+/* ---------- Room builders ---------- */
+function floorAndWall(floorC, wallC, {floorTex, wallTex}={}){
+  const fl = new THREE.Mesh(new THREE.PlaneGeometry(40,24), floorTex ? new THREE.MeshStandardMaterial({map:floorTex, roughness:.9}) : mat(floorC));
+  fl.rotation.x = -Math.PI/2; fl.receiveShadow = true;
+  const wl = new THREE.Mesh(new THREE.PlaneGeometry(40,14), wallTex ? new THREE.MeshStandardMaterial({map:wallTex, roughness:.9}) : mat(wallC));
+  wl.position.set(0,7,-5); wl.receiveShadow = true;
+  return [fl, wl];
+}
+function chandelier(x,y,z,withLight=true){
+  const g = grp(Cy(.03,.03,1.4,'#c9a54a',x,y+.7,z), Cy(.12,.12,.12,'#c9a54a',x,y,z));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(.7,.05,8,28), mat('#c9a54a',{metalness:.6,roughness:.35}));
+  ring.rotation.x = Math.PI/2; ring.position.set(x,y-.15,z); g.add(ring);
+  for(let i=0;i<8;i++){ const a=i/8*Math.PI*2; g.add(S(.09,'#fff6c8',x+Math.cos(a)*.7,y,z+Math.sin(a)*.7,glow('#ffe9a0',1.2))); }
+  g.add(S(.14,'#fff6c8',x,y-.35,z,glow('#ffe9a0',1.2)));
+  if(withLight){ const p = new THREE.PointLight('#ffe7b0', .7, 14); p.position.set(x,y-.3,z); g.add(p); }
+  return g;
+}
+function rain(box){ // falling streaks inside {x0,x1,y0,y1,z0,z1}
+  const n = 160, geo = new THREE.BufferGeometry(), pos = new Float32Array(n*6);
+  const rnd = (a,b)=>a+Math.random()*(b-a);
+  for(let i=0;i<n;i++){ const x=rnd(box.x0,box.x1), y=rnd(box.y0,box.y1), z=rnd(box.z0,box.z1); pos.set([x,y,z,x-.05,y-.35,z],i*6); }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  const lines = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({color:'#bcd6ff', transparent:true, opacity:.7}));
+  roomUpd.push((t,dt)=>{ for(let i=0;i<n;i++){ let y = pos[i*6+1]-dt*9; if(y<box.y0) y=box.y1; pos[i*6+1]=y; pos[i*6+4]=y-.35; } geo.attributes.position.needsUpdate = true; });
+  return lines;
+}
+function steam(x,y,z,color='#eef3f5',count=8){
+  const g = new THREE.Group(), puffs = [];
+  for(let i=0;i<count;i++){ const m = new THREE.Mesh(new THREE.SphereGeometry(.22,10,8), new THREE.MeshStandardMaterial({color, transparent:true, opacity:.5})); m.userData.off = i/count; g.add(m); puffs.push(m); }
+  roomUpd.push(t=>puffs.forEach(m=>{ const k=(t*.35+m.userData.off)%1; m.position.set(x+Math.sin(k*6+m.userData.off*9)*.25, y+k*2.2, z); m.scale.setScalar(.6+k*1.4); m.material.opacity=.55*(1-k); }));
+  return g;
+}
+function chair(x,z,ry=0,c='#c9a54a'){
+  return at(grp(B(.6,.08,.55,c,0,.5,0), B(.6,.7,.08,c,0,.88,-.24), ...[[-.25,-.22],[.25,-.22],[-.25,.22],[.25,.22]].map(([a,b])=>Cy(.03,.03,.5,'#8a6d2a',a,.25,b))),x,0,z,ry);
+}
+
+const ROOMS = {
+  cottage(){
+    const g = grp(floorAndWall('#6b4226','#c98b5a'));
+    for(let i=-9;i<=9;i++) g.add(B(.08,9,.05,'#b5784a',i*1.2,4.5,-4.95));
+    g.add(B(3,.15,.2,'#5a3a20',0,4.2,-4.9));
+    // stormy window
+    const glass = B(2.2,1.7,.05,'#1f2c4f',-4,3,-4.9,{own:glow('#0a1430',1)});
+    g.add(B(2.6,2.1,.15,'#5a3a20',-4,3,-4.97), glass, B(.1,1.7,.1,'#5a3a20',-4,3,-4.85), B(2.2,.1,.1,'#5a3a20',-4,3,-4.85));
+    g.add(rain({x0:-5,x1:-3,y0:2.2,y1:3.8,z0:-4.84,z1:-4.8}));
+    roomUpd.push(t=>{ const f = (t%7)>6.75 ? 3 : 0; glass.material.emissiveIntensity = 1+f; });
+    // fireplace
+    g.add(B(3,3.2,1,'#8a8178',4.5,1.6,-4.5), B(3.5,.25,1.25,'#6e655d',4.5,3.2,-4.4), B(1.8,1.6,.2,'#2a1a12',4.5,.8,-3.95));
+    const flames = [Co(.35,.9,'#f39c12',4.3,.5,-3.85,{own:glow('#ff7b00',1.4)}), Co(.3,1.1,'#ffb92e',4.65,.6,-3.85,{own:glow('#ffa000',1.4)}), Co(.2,.7,'#ffe066',4.5,.4,-3.75,{own:glow('#ffd000',1.6)})];
+    g.add(...flames, B(1.2,.15,.3,'#4a2a14',4.5,.08,-3.85));
+    const fire = new THREE.PointLight('#ff9a3c', 1.4, 12); fire.position.set(4.5,1,-3); g.add(fire);
+    roomUpd.push(t=>{ flames.forEach((f,i)=>{ f.scale.y = 1+Math.sin(t*9+i*2)*.15; f.scale.x = 1+Math.cos(t*7+i)*.08; }); fire.intensity = 1.2+Math.sin(t*11)*.25+Math.sin(t*5.3)*.15; });
+    // rug, armchair, clock
+    const rug = Cy(3.2,3.2,.03,'#b84c4c',0,.02,.6,{},32); rug.scale.z = .45; g.add(rug);
+    g.add(at(grp(B(1.4,.6,1.2,'#8e2d2d',0,.3,0), B(1.4,1.2,.3,'#8e2d2d',0,.9,-.5), B(.25,.85,1.2,'#7a2525',-.7,.43,0), B(.25,.85,1.2,'#7a2525',.7,.43,0)),-6.2,0,-1.8,.5));
+    g.add(B(.8,2.2,.5,'#5a3a20',-1.5,1.1,-4.7), Cy(.28,.28,.05,'#f4e9d0',-1.5,1.7,-4.43,{},20).rotateX(Math.PI/2));
+    return {g, sky:'#3a2a20', hemi:['#ffd9a8','#4a2a14',.45], sun:['#ffcf99',.45]};
+  },
+  lobby(){
+    const g = grp(floorAndWall('#d9c49c','#f3e2c7'));
+    for(let i=-10;i<=10;i++) g.add(B(.45,10,.04,'#ecd6b3',i*1.1,5,-4.96));
+    g.add(B(3.6,.02,24,'#c9374a',0,.012,0), B(3.2,.025,24,'#b3283a',0,.015,0));
+    g.add(chandelier(0,4.3,-1.5));
+    // reception desk with bell + key board
+    g.add(B(3.6,1.3,1.1,'#7a4b28',-5,.65,-3), B(3.9,.12,1.3,'#5c3720',-5,1.36,-3), Cy(.14,.18,.12,'#e0b84a',-4.2,1.48,-2.8,{metalness:.7,roughness:.3}));
+    g.add(B(2.4,1.4,.1,'#5c3720',-5,3,-4.9));
+    for(let i=0;i<8;i++) g.add(S(.07,'#e0b84a',-5.9+(i%4)*.6,3.3-Math.floor(i/4)*.6,-4.82,{metalness:.7,roughness:.3}));
+    // Sunshine Society sign on an easel
+    const tex = textTex([['SUNSHINE SOCIETY',44,'#c0587e'],['for Helpful Ladies',30,'#555'],["Blue Ballroom · 3 o'clock",28,'#555'],['NO CHILDREN!',48,'#c0392b']],{w:512,h:340});
+    g.add(at(grp(Cy(.04,.04,2.4,'#5c3720',-.6,1.1,0), Cy(.04,.04,2.4,'#5c3720',.6,1.1,0), Cy(.04,.04,2.3,'#5c3720',0,1.1,-.5), B(1.95,1.32,.06,'#5c3720',0,1.75,.02), sign(tex,1.8,1.2,0,1.75,.06)),5.3,0,-2.4,-.35));
+    // potted plants
+    [[-7.5,-3.5],[7.8,-3.8]].forEach(([x,z])=>g.add(Cy(.4,.3,.7,'#a0522d',x,.35,z), S(.6,'#3c8d40',x,1.1,z), S(.45,'#4caf50',x+.3,1.4,z)));
+    return {g, sky:'#f3e2c7', hemi:['#fff4e0','#8a6a4a',.75], sun:['#fff1d6',.55]};
+  },
+  beach(){
+    const g = new THREE.Group();
+    const sand = new THREE.Mesh(new THREE.PlaneGeometry(60,30), mat('#f2d48f')); sand.rotation.x=-Math.PI/2; sand.position.z = 6; sand.receiveShadow = true; g.add(sand);
+    const sea = new THREE.Mesh(new THREE.PlaneGeometry(80,40), mat('#2f8fcf',{roughness:.3,metalness:.1})); sea.rotation.x=-Math.PI/2; sea.position.set(0,.04,-29); g.add(sea);
+    const waves = [];
+    for(let i=0;i<14;i++){ const w = B(1.4,.05,.12,'#e8f6ff',-14+i*2.2,.08,-10-(i%3)*2); waves.push(w); g.add(w); }
+    roomUpd.push(t=>waves.forEach((w,i)=>{ w.position.z = -10-(i%3)*2+Math.sin(t*1.2+i)*.6; }));
+    g.add(S(1.6,'#ffd34d',10,8,-30,glow('#ffc400',1)));
+    [[-6,6.5,-12],[3,7.5,-15],[-1,6,-10]].forEach(([x,y,z])=>g.add(grp(S(1,'#7d8aa0',x,y,z), S(1.3,'#6f7f95',x+1.2,y+.3,z), S(.9,'#7d8aa0',x+2.4,y,z))));
+    g.add(rain({x0:-9,x1:9,y0:0,y1:7,z0:-6,z1:4}));
+    // umbrella + towel
+    g.add(Cy(.05,.05,2.6,'#8b5a2b',-5.5,1.3,-1.5), Co(1.6,.7,'#e85d4a',-5.5,2.75,-1.5,{},8), B(1.2,.02,2,'#3fa7d6',-5.2,.02,-.4));
+    // sandcastle
+    const sc = '#e0b56a';
+    g.add(at(grp(B(1.6,.8,1.2,sc,0,.4,0), ...[-.7,.7].map(x=>grp(Cy(.3,.35,1.2,sc,x,.6,.4), Co(.36,.4,sc,x,1.4,.4))), Cy(.3,.35,1.5,sc,0,.75,-.3), Co(.36,.5,sc,0,1.75,-.3), B(.02,.5,.02,'#5c3720',0,2.2,-.3), B(.3,.2,.02,'#e85d4a',.15,2.35,-.3)),5,0,-1.8,-.3));
+    return {g, sky:'#8fd3ff', hemi:['#dff3ff','#e0c080',.75], sun:['#fff6dd',.75], fog:['#bfdcef',20,60]};
+  },
+  ballroom(dark){
+    const g = grp(floorAndWall('#7a5233','#3d5a99'));
+    for(let i=-8;i<=8;i++) g.add(B(.35,10,.15,'#36508c',i*2.2,5,-4.9));
+    for(let i=-20;i<=20;i++) g.add(B(.03,.01,24,'#6a4529',i*.5,.005,0));
+    g.add(B(9,.6,2.6,'#5c3720',0,.3,-3.7), B(9.1,.08,2.7,'#c9a54a',0,.62,-3.7));
+    g.add(B(9.5,.8,.3,'#8e1f3b',0,5.2,-3.2), B(9.5,.1,.32,'#c9a54a',0,4.78,-3.2));
+    // velvet curtains (folds)
+    [-1,1].forEach(s=>{ for(let i=0;i<5;i++) g.add(Cy(.28,.32,6.5,'#1d2b5c',s*(6+i*.42),3.25,-1.2-(i%2)*.2,{},10)); });
+    for(let x=-3.6;x<=3.6;x+=1.2) g.add(chair(x,-2.1,Math.PI));
+    g.add(chandelier(0,4.5,-1, !dark));
+    if(dark){ const p = new THREE.PointLight('#7dff4a', 1.2, 12); p.position.set(0,3,-2); g.add(p);
+      roomUpd.push(t=>{ p.intensity = 1+Math.sin(t*2)*.3; }); }
+    return dark ? {g, sky:'#0d1a10', hemi:['#9ad38a','#1a2a12',.35], sun:['#b9ffb0',.3], fog:['#1a3a16',10,26]}
+                : {g, sky:'#1d2b5c', hemi:['#d8e4ff','#3a2a1a',.6], sun:['#ffffff',.5]};
+  },
+  meeting(){ return ROOMS.ballroom(true); },
+  room(night){
+    const g = grp(floorAndWall('#8a6a8f','#e6d6ee'));
+    for(let i=-8;i<=8;i++) for(let j=0;j<4;j++) g.add(S(.07,'#d4bfe0',i*1.1+(j%2)*.55,1+j*1.4,-4.95));
+    // window
+    g.add(B(3,2.4,.15,'#ffffff',4,3,-4.95), B(2.7,2.1,.05,night?'#1b2550':'#9fd7ff',4,3,-4.88,{own:glow(night?'#0b1030':'#7fc4ff',.8)}), B(.1,2.1,.1,'#ffffff',4,3,-4.82));
+    if(night) g.add(S(.3,'#fff8d0',4.6,3.5,-4.8,glow('#fff3b0',1))); else g.add(B(2.7,.6,.06,'#2f8fcf',4,2.25,-4.86,{own:glow('#1f6fa0',.5)}));
+    // bed
+    g.add(B(3.2,.6,2.3,'#6b4226',-5,.3,-2.8), B(3.1,.3,2.2,'#ffffff',-5,.75,-2.8), B(3.12,.33,1.45,'#c0587e',-5,.77,-2.4), B(.2,1.5,2.3,'#6b4226',-6.6,.75,-2.8), B(.9,.25,1.2,'#f4e9ff',-5.9,1.02,-2.8));
+    // bedside table, lamp, bubbling cure
+    g.add(B(.9,.8,.8,'#6b4226',-2.8,.4,-3.6), Cy(.04,.04,.6,'#333',-2.8,1.1,-3.6), Co(.35,.4,'#ffd34d',-2.8,1.5,-3.6,{own:glow('#ffcc33',night?1.2:.4)}));
+    const lamp = new THREE.PointLight('#ffd27a', night?1:.4, 8); lamp.position.set(-2.8,1.4,-3.2); g.add(lamp);
+    g.add(B(1.2,.8,.8,'#6b4226',2,.4,-3.6), Cy(.13,.09,.16,'#ffffff',2,.88,-3.6), Cy(.12,.12,.02,'#ff7fbf',2,.96,-3.6,{own:glow('#ff5fa8',.8)}));
+    g.add(steam(2,1,-3.6,'#ffd0ea',5));
+    return night ? {g, sky:'#1b2550', hemi:['#8a90c8','#2a1a30',.35], sun:['#9fb0ff',.25]}
+                 : {g, sky:'#e6d6ee', hemi:['#fff6ff','#6a5070',.75], sun:['#ffffff',.55]};
+  },
+  night(){ return ROOMS.room(true); },
+  corridor(){
+    const g = new THREE.Group();
+    const fl = new THREE.Mesh(new THREE.PlaneGeometry(6.4,40), mat('#9c2b3a')); fl.rotation.x=-Math.PI/2; fl.position.z=-10; fl.receiveShadow=true; g.add(fl);
+    [-1,1].forEach(s=>{ const w = new THREE.Mesh(new THREE.PlaneGeometry(40,5), mat(s<0?'#7a5480':'#6b4a70')); w.rotation.y = -s*Math.PI/2; w.position.set(s*3.2,2.5,-10); w.receiveShadow=true; g.add(w); });
+    g.add(B(6.4,5,.1,'#3a2540',0,2.5,-29));
+    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(6.4,40), mat('#2a1a30')); ceil.rotation.x = Math.PI/2; ceil.position.set(0,5,-10); g.add(ceil);
+    [-3,-11,-17,-23].forEach((z,i)=>{ g.add(B(.1,2.6,1.3,'#4b2e1c',-3.14,1.3,z), S(.06,'#e0b84a',-3.06,1.3,z+.45,{metalness:.7})); });
+    [-15,-22].forEach(z=>g.add(B(.1,2.6,1.3,'#4b2e1c',3.14,1.3,z)));
+    // Room 13, glowing and slightly open
+    const door = B(.1,2.6,1.3,'#2b4a1c',3.14,1.3,-5,{own:glow('#3aff2a',.35)});
+    door.rotation.y = .5; door.position.z = -5.3; g.add(door);
+    g.add(sign(textTex([['13',150,'#b8f28a','Creepster, cursive']],{w:256,h:256,bg:'#1d2b14',border:'#b8f28a'}),.7,.7,3.08,3,-4.6,-Math.PI/2,{emissive:'#ffffff',emissiveMap:null,emissiveIntensity:.15}));
+    const spill = new THREE.PointLight('#7dff4a', 1.2, 6); spill.position.set(2.6,1.2,-4.8); g.add(spill);
+    roomUpd.push(t=>{ spill.intensity = 1+Math.sin(t*3)*.4; door.material.emissiveIntensity = .3+Math.sin(t*3)*.15; });
+    [1,-6,-13,-20].forEach(z=>{ g.add(S(.2,'#fff6c8',0,4.8,z,glow('#ffe9a0',1.2))); const p = new THREE.PointLight('#ffe0a0',.5,8); p.position.set(0,4.4,z); g.add(p); });
+    return {g, sky:'#120b18', hemi:['#d0b0d8','#2a1020',.35], sun:['#ffe0c0',.25], fog:['#120b18',8,30], cam:{y:2.2}};
+  },
+  balcony(){
+    const g = new THREE.Group();
+    const geo = new THREE.BufferGeometry(), n = 300, p = new Float32Array(n*3);
+    for(let i=0;i<n;i++) p.set([(Math.random()-.5)*80, 6+Math.random()*25, -30-Math.random()*10], i*3);
+    geo.setAttribute('position', new THREE.BufferAttribute(p,3));
+    g.add(new THREE.Points(geo, new THREE.PointsMaterial({color:'#ffffff', size:.18})));
+    g.add(S(1.4,'#fff8d0',-10,11,-34,glow('#fff3b0',1)));
+    g.add(B(40,14,.5,'#d8c8a8',0,5,-3.3));
+    for(let i=-3;i<=3;i++){ const lit = i===2;
+      g.add(B(1.8,2.3,.1,lit?'#ffe9a0':'#2d3560',i*3.6,1.6,-3,lit?{own:glow('#ffcf66',.9)}:undefined));
+      g.add(B(1.8,2.3,.1,'#2d3560',i*3.6,5.6,-3)); }
+    g.add(sign(textTex([['13',150,'#2e7d32','Creepster, cursive']],{w:256,h:256,bg:'#ffe9a0',border:null}),.6,.6,7.2,3.05,-2.92));
+    const win = new THREE.PointLight('#ffcf66', 1, 6); win.position.set(7.2,1.6,-1.8); g.add(win);
+    // balcony slab + railing
+    g.add(B(40,.3,3.6,'#8a7a5a',0,-.15,-1.4), B(40,.08,.12,'#6d5f45',0,1,.3));
+    for(let x=-12;x<=12;x+=.6) g.add(Cy(.035,.035,1,'#6d5f45',x,.5,.3,{},6));
+    // the HOP-POP bottle on the sill
+    g.add(Cy(.2,.22,.6,'#2e7d32',6.4,.3,-2.6,{own:{roughness:.2,metalness:.1,emissive:'#103a10',emissiveIntensity:.6}}), Cy(.07,.1,.25,'#2e7d32',6.4,.72,-2.6), Cy(.08,.08,.08,'#8b5a2b',6.4,.88,-2.6));
+    g.add(sign(textTex([['HOP-POP',60,'#ffffff']],{w:256,h:128,bg:'#1b5e20',border:null}),.34,.17,6.4,.32,-2.39));
+    return {g, sky:'#141c40', hemi:['#8090d0','#1a1a30',.45], sun:['#b0c0ff',.4]};
+  },
+  kitchen(){
+    const g = grp(floorAndWall('#9aa5ad','#ffffff',{wallTex:checkerTex('#ffffff','#d6ecf7',[20,7])}));
+    g.add(B(4.2,1.2,1.5,'#5d6d7e',4,.6,-3.6), B(4.4,.1,1.6,'#34495e',4,1.25,-3.6));
+    g.add(Cy(.95,.85,1.1,'#7f8c8d',4,1.85,-3.6,{metalness:.5,roughness:.35}), Cy(.88,.88,.05,'#6ab04c',4,2.37,-3.6,{own:glow('#2a5a10',.6)}));
+    g.add(steam(4,2.5,-3.6));
+    g.add(sign(textTex([['PEA SOUP',60,'#ffffff']],{w:256,h:96,bg:'#34495e',border:null}),1.3,.48,4,1.85,-2.73));
+    g.add(B(5,.15,.25,'#6b4226',-3,3.6,-4.85));
+    for(let i=0;i<5;i++){ const x=-5+i; g.add(Cy(.01,.01,.4,'#333',x,3.35,-4.8), Cy(.3,.3,.08,'#b87333',x,2.95,-4.75,{metalness:.6,roughness:.3}).rotateX(Math.PI/2)); }
+    g.add(B(5,1.1,1.2,'#c19a6b',-3.5,.55,-4), B(5.2,.1,1.3,'#ddd',-3.5,1.15,-4));
+    [[-6.6,-1.6],[-6,-2.2]].forEach(([x,z])=>{ const s = S(.6,'#b08a5a',x,.55,z); s.scale.set(1,1.1,.9); g.add(s); });
+    g.add(sign(textTex([['POTATOES',54,'#5c3720']],{w:256,h:96,bg:'#d8b98a',border:null}),.8,.3,-6.6,.6,-1.05));
+    return {g, sky:'#ffffff', hemi:['#ffffff','#8090a0',.8], sun:['#ffffff',.55]};
+  },
+  dining(green){
+    const g = grp(floorAndWall('#7a5233','#f6ead2'));
+    for(let i=-4;i<=4;i++) g.add(B(1.2,3.6,.05,'#9fd7ff',i*2.6,3.3,-4.95,{own:glow('#7fc4ff',.35)}), Cy(.6,.6,.05,'#9fd7ff',i*2.6,5.1,-4.95,{own:glow('#7fc4ff',.35)},16).rotateX(Math.PI/2));
+    [[-5.2,-2.6],[0,-3.4],[5.2,-2.6]].forEach(([x,z])=>{
+      g.add(Cy(1.2,1.25,.9,'#ffffff',x,.45,z,{},28));
+      for(let k=0;k<3;k++){ const a = (k-1)*.8; g.add(Cy(.22,.14,.1,'#6ab04c',x+Math.sin(a)*.8,.95,z+Math.cos(a)*.6)); }
+      g.add(chair(x-1.6,z,Math.PI/2,'#8e1f3b'), chair(x+1.6,z,-Math.PI/2,'#8e1f3b'));
+    });
+    g.add(chandelier(-3.5,4.3,-1.5), chandelier(3.5,4.3,-1.5));
+    if(green){
+      for(let i=0;i<14;i++){ const m = new THREE.Mesh(new THREE.SphereGeometry(.6+Math.random()*.8,12,10), new THREE.MeshStandardMaterial({color:'#b6f5a0', transparent:true, opacity:.35}));
+        m.position.set((Math.random()-.5)*16, .5+Math.random()*3.5, -1-Math.random()*4); m.userData.ph = Math.random()*6; g.add(m);
+        roomUpd.push(t=>{ m.position.y += Math.sin(t+m.userData.ph)*.004; m.material.opacity = .25+Math.sin(t*.8+m.userData.ph)*.1; }); }
+      return {g, sky:'#bfe8a8', hemi:['#d8ffc8','#406030',.7], sun:['#e0ffd0',.45], fog:['#a8e890',8,26]};
+    }
+    return {g, sky:'#f6ead2', hemi:['#fff4e0','#7a5a3a',.7], sun:['#fff1d6',.5]};
+  },
+  green(){ return ROOMS.dining(true); },
+};
+
+/* ---------- Scene management ---------- */
+function disposeGroup(g){ if(!g) return; scene.remove(g); g.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material && !Object.values(matCache).includes(o.material) && o.material!==witchEye){ if(o.material.map) o.material.map.dispose(); o.material.dispose(); } }); }
+
+function setRoom(key){
+  if(!R || key===roomKey) return;
+  roomKey = key; roomUpd = [];
+  fx.forEach(f=>f(99)); fx = [];
+  disposeGroup(roomGroup);
+  const r = ROOMS[key]();
+  roomGroup = r.g; scene.add(roomGroup);
+  scene.background = new THREE.Color(r.sky);
+  scene.fog = r.fog ? new THREE.Fog(r.fog[0], r.fog[1], r.fog[2]) : null;
+  hemi.color.set(r.hemi[0]); hemi.groundColor.set(r.hemi[1]); hemi.intensity = r.hemi[2];
+  sun.color.set(r.sun[0]); sun.intensity = r.sun[1];
+  camera.userData.baseY = (r.cam && r.cam.y) || 2.7;
+}
+
+function setCast(list){
+  const key = list.join('|') + JSON.stringify(skins);
+  if(key===castKey){ updateTags(); return; }
+  castKey = key;
+  if(R){ disposeGroup(castGroup); castGroup = new THREE.Group(); scene.add(castGroup); }
+  const weights = list.map(l=>l.startsWith('crowd')?2:1), total = weights.reduce((a,b)=>a+b,0);
+  const slot = Math.min(3.2, 11.5/total);
+  let cursor = -total*slot/2;
+  castFigs = list.map((look,i)=>{
+    const x = cursor + weights[i]*slot/2; cursor += weights[i]*slot;
+    const fig = { look, role: look.split(':')[0], x, z: look.startsWith('crowd') ? -.3 : 0, slotW: weights[i]*slot };
+    if(R){ fig.obj = LOOK[look](); const holder = new THREE.Group(); holder.add(fig.obj); holder.position.set(x,0,fig.z);
+      holder.traverse(o=>{ if(o.isMesh && !o.userData.lateShadow) o.castShadow = true; });
+      castGroup.add(holder); fig.holder = holder; fig.baseScale = fig.obj.scale.x; }
+    return fig;
+  });
+  $('tags').innerHTML = castFigs.map(f=>`<span class="tag">${esc(castName(f.look))}</span>`).join('');
+  tagEls = [...$('tags').children];
+  updateTags();
+}
+function updateTags(){
+  castFigs.forEach((f,i)=>{
+    const on = f.role===speakerNow; tagEls[i] && tagEls[i].classList.toggle('on', on);
+    f.talk = on;
+  });
+  const sp = castFigs.find(f=>f.talk); camFocus = sp ? sp.x*.3 : 0;
+  if(!R) tagEls.forEach((el,i)=>{ el.style.left = (50 + castFigs[i].x*6.5)+'%'; el.style.top = '82%'; });
+}
+
+function puff(color){
+  if(!R) return;
+  castFigs.forEach(f=>{
+    for(let i=0;i<14;i++){
+      const m = new THREE.Mesh(new THREE.SphereGeometry(.25,10,8), new THREE.MeshStandardMaterial({color, transparent:true, opacity:.85, emissive:color, emissiveIntensity:.3}));
+      const v = new THREE.Vector3((Math.random()-.5)*2.2, Math.random()*1.8+.4, (Math.random()-.5)*1.5);
+      m.position.set(f.x, .9, f.z); scene.add(m);
+      let life = 0;
+      fx.push(dt=>{ life += dt; m.position.addScaledVector(v, dt); v.multiplyScalar(.96); m.scale.setScalar(1+life*3); m.material.opacity = .85*(1-life/1.4);
+        if(life>1.4){ scene.remove(m); m.geometry.dispose(); m.material.dispose(); return false; } return true; });
+    }
+  });
+}
+
+function initGL(){
+  const stage = $('stage');
+  if(!has3D){ stage.insertAdjacentHTML('beforeend','<div class="nogl">The 3D view needs an internet connection (to load three.js) and a browser with WebGL.<br>The 2D version, index.html, works offline.</div>'); return; }
+  R = new THREE.WebGLRenderer({antialias:true});
+  R.setPixelRatio(Math.min(devicePixelRatio,2));
+  R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.prepend(R.domElement);
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(42, 16/9, .1, 120);
+  camera.position.set(0,2.7,9); camera.userData.baseY = 2.7;
+  hemi = new THREE.HemisphereLight('#ffffff','#444444',.6); scene.add(hemi);
+  sun = new THREE.DirectionalLight('#ffffff',.6); sun.position.set(4,9,7); sun.castShadow = true;
+  sun.shadow.mapSize.set(1024,1024); Object.assign(sun.shadow.camera,{left:-10,right:10,top:8,bottom:-4,near:1,far:30});
+  scene.add(sun);
+  const fit = ()=>{ const w = stage.clientWidth, h = stage.clientHeight; R.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix(); };
+  new ResizeObserver(fit).observe(stage); fit();
+  R.setAnimationLoop(frame);
+}
+
+const v3 = has3D ? new THREE.Vector3() : null;
+function frame(){
+  const raw = clock.getDelta(), dt = Math.min(raw, .05), t = clock.elapsedTime;
+  roomUpd.forEach(f=>f(t,dt));
+  fx = fx.filter(f=>f(Math.min(raw, .5)));
+  witchEye.emissiveIntensity = .6 + Math.abs(Math.sin(t*3))*1.2;
+  // camera: slow sway, drift toward whoever is talking
+  camera.position.x += ((camFocus + Math.sin(t*.25)*.5) - camera.position.x)*.03;
+  camera.position.y += ((camera.userData.baseY + Math.sin(t*.4)*.08) - camera.position.y)*.05;
+  camera.lookAt(camera.position.x*.5, 1.5, 0);
+  // characters: breathe, bounce when talking, turn a little toward the camera
+  const W = R.domElement.clientWidth, H = R.domElement.clientHeight;
+  castFigs.forEach((f,i)=>{
+    if(!f.holder) return;
+    const o = f.obj;
+    o.position.y = f.talk ? Math.abs(Math.sin(t*7))*.12 : 0;
+    o.scale.y = f.baseScale*(1+Math.sin(t*2+i)*.012);
+    f.holder.rotation.y = Math.atan2(camera.position.x - f.x, 9)*.8 + (f.talk ? Math.sin(t*3)*.08 : 0);
+    o.traverse(m=>{ if(m.userData.lateShadow) m.position.x = .55 + Math.sin(t*1.5-1.2)*.25; });
+    v3.set(f.x, 0, f.z).project(camera);
+    const el = tagEls[i]; if(el){ el.style.left = ((v3.x+1)/2*W)+'px'; el.style.top = Math.min(H-28, (1-v3.y)/2*H)+'px';
+      el.style.maxWidth = Math.max(44, W*f.slotW/13 - 4)+'px'; }
+  });
+  R.render(scene, camera);
+}
+
+/* ---------- Story engine ---------- */
+const $ = id => document.getElementById(id);
+let cur, idx, autoRead = false;
+
+function go(id){
+  if(id==='#credits') return showCredits();
+  cur = SC[id]; idx = 0;
+  setRoom(cur.bg);
+  $('chapter').textContent = cur.ch;
+  showLine(cur.cast);
+}
+function setBox(who, text){
+  $('speakerRow').className = 'speaker' + (who==='n'?' narr':who==='hint'?' hint':'');
+  $('speaker').textContent = labelOf(who);
+  const t = $('text'); t.textContent = text;
+  t.style.animation='none'; void t.offsetWidth; t.style.animation='';
+  if(autoRead) speak();
+}
+function showLine(startCast){
+  const [who, text, cast] = cur.lines[idx];
+  speakerNow = who;
+  if(cast || startCast) setCast(cast || startCast); else updateTags();
+  if(/POP/.test(text)) puff(/pink/.test(text) ? '#ff9ad5' : '#9dff6a');
+  setBox(who, fill(text));
+  const last = idx === cur.lines.length-1;
+  $('nextBtn').style.display = last ? 'none' : '';
+  $('choices').innerHTML = '';
+  if(last) cur.choices.forEach(c=>{
+    const b = document.createElement('button');
+    b.className = 'choice'; b.textContent = fill(c.t);
+    b.onclick = ()=>{
+      if(c.wrong){ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); setBox('hint', fill(c.wrong)); }
+      else go(c.go);
+    };
+    $('choices').appendChild(b);
+  });
+}
+function next(){ if(idx < cur.lines.length-1){ idx++; showLine(); } }
+// Friendly female narrator: try the nicest-sounding voices first, then any English female voice
+const VOICE_PREFS = [/sonia.*natural/i, /libby.*natural/i, /aria.*natural/i, /jenny.*natural/i, /natural.*(female|woman)/i,
+  /google uk english female/i, /hazel/i, /susan/i, /zira/i, /samantha/i, /karen/i, /serena/i, /female/i];
+let narratorVoice;
+function pickVoice(){
+  if(narratorVoice) return narratorVoice;
+  const vs = speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
+  for(const re of VOICE_PREFS){ const v = vs.find(v=>re.test(v.name)); if(v) return narratorVoice = v; }
+  return null;
+}
+function speak(){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance($('text').textContent.replace(/\(whispering\)/,''));
+  const v = pickVoice(); if(v){ u.voice = v; u.lang = v.lang; }
+  u.pitch = 1.1; u.rate = .9; speechSynthesis.speak(u);
+}
+
+const LINEUP = ['hero','friend','grandma','manager','chef','witch:real'];
+function show(which){ ['setup','game','credits'].forEach(s=> $(s).style.display = s===which ? '' : 'none'); }
+function showLineup(room, title){ setRoom(room); $('chapter').textContent = title; speakerNow = 'n'; castKey = null; setCast(LINEUP); }
+function showCredits(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  $('castTable').innerHTML = ROLES.map(r=>`<tr><td>${esc(r.label)}</td><td>${esc(names[r.key])}</td></tr>`).join('');
+  showLineup('lobby', 'The End · Starring…');
+  show('credits');
+}
+
+/* ---------- Setup screen ---------- */
+function buildSetup(){
+  $('roles').innerHTML = ROLES.map(r=>`
+    <div class="role">
+      <label for="in-${r.key}">${esc(r.label)}</label>
+      <small>${esc(r.desc)}</small>
+      <input id="in-${r.key}" maxlength="24" value="${esc(names[r.key])}" autocomplete="off">
+      ${r.key==='witch'?'':`<div class="skins" role="group" aria-label="Skin tone">${SKINS.map((c,i)=>`<button style="background:${c}" data-role="${r.key}" data-skin="${i}" aria-label="Skin tone ${i+1}" aria-pressed="${skins[r.key]===i}"></button>`).join('')}</div>`}
+    </div>`).join('');
+  ROLES.forEach((r,i)=> $('in-'+r.key).addEventListener('input', e=>{
+    names[r.key] = e.target.value.trim() || r.def; save();
+    if(tagEls[i]) tagEls[i].textContent = names[r.key];
+  }));
+  ROLES.forEach((r,i)=> $('in-'+r.key).addEventListener('focus', ()=>{ speakerNow = LINEUP[i].split(':')[0]; updateTags(); }));
+  document.querySelectorAll('.skins button').forEach(b=> b.onclick = ()=>{
+    const k=b.dataset.role; skins[k]=+b.dataset.skin; save();
+    b.parentNode.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+    speakerNow = k; setCast(LINEUP);
+  });
+}
+
+$('startBtn').onclick = ()=>{ show('game'); go('intro'); };
+$('resetBtn').onclick = ()=>{ try{localStorage.removeItem('gullcliff-cast')}catch(e){} load(); buildSetup(); castKey=null; setCast(LINEUP); };
+$('againBtn').onclick = ()=>{ show('game'); go('intro'); };
+$('namesBtn').onclick = ()=>{ buildSetup(); show('setup'); showLineup('cottage','Meet the cast'); };
+$('nextBtn').onclick = next;
+$('text').onclick = next;
+$('readBtn').onclick = speak;
+$('autoBtn').onclick = e=>{ autoRead=!autoRead; e.target.setAttribute('aria-pressed', autoRead); if(autoRead) speak(); else if('speechSynthesis' in window) speechSynthesis.cancel(); };
+document.addEventListener('keydown', e=>{
+  if($('game').style.display==='none' || e.target.tagName==='BUTTON' || e.target.tagName==='INPUT') return;
+  if(e.key===' '||e.key==='Enter'||e.key==='ArrowRight'){ e.preventDefault(); next(); }
+});
+
+load(); initGL(); buildSetup(); show('setup'); showLineup('cottage','Meet the cast');
+</script>
+</body>
+</html>
