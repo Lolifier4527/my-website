@@ -75,6 +75,25 @@
   .credits td:first-child{color:var(--muted); text-align:right}
   .credits td:last-child{font-weight:700; text-align:left}
   @media (max-width:520px){ body{padding:8px 16px} .box{min-height:220px} }
+  .script{border-radius:18px}
+  .script h3{margin:20px 0 4px; color:var(--accent)}
+  .script h3 small{color:var(--muted); font-weight:400}
+  .script table{width:100%; border-collapse:collapse; margin:4px 0 10px}
+  .script td{padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.4}
+  .script td.id{font-family:Consolas,monospace; font-size:.9rem; white-space:nowrap; color:var(--muted)}
+  .script td.who{font-weight:700; white-space:nowrap}
+  .script .star{color:var(--warn); font-weight:700}
+  @media (max-width:600px){
+    .script td.id{white-space:normal; word-break:break-all; font-size:.75rem; width:28%}
+    .script td.who{white-space:normal}
+  }
+  @media print{
+    body{background:#fff; padding:0; display:block}
+    .wrap > *:not(#script){display:none !important}
+    #script{box-shadow:none; padding:0}
+    .noprint{display:none !important}
+    .script tr{break-inside:avoid}
+  }
 </style>
 </head>
 <body>
@@ -90,6 +109,7 @@
     <div class="row">
       <button class="btn green" id="startBtn">Start the story ▶</button>
       <button class="btn ghost" id="resetBtn">Reset names</button>
+      <button class="btn ghost" id="scriptBtn">🎙 Recording script</button>
     </div>
     <p class="note">Tip: the Grand High Witch is the villain, so a teacher's name (or the default) works well for that role.</p>
   </section>
@@ -123,6 +143,15 @@
       <button class="btn green" id="againBtn">Play again</button>
       <button class="btn ghost" id="namesBtn">Change names</button>
     </div>
+  </section>
+
+  <!-- Recording script -->
+  <section id="script" class="card script" style="display:none">
+    <div class="row noprint" style="justify-content:space-between">
+      <button class="btn ghost" id="scriptBack">◀ Back</button>
+      <button class="btn green" id="printBtn">🖨 Print script</button>
+    </div>
+    <div id="scriptBody"></div>
   </section>
 </div>
 
@@ -576,7 +605,7 @@ function drawCast(speaker){
 
 function go(id){
   if(id==='#credits') return showCredits();
-  cur = SC[id]; idx = 0; shown = cur.cast.slice();
+  cur = SC[id]; curKey = id; idx = 0; shown = cur.cast.slice();
   $('bg').innerHTML = BG[cur.bg]();
   $('chapter').textContent = cur.ch;
   showLine();
@@ -593,17 +622,18 @@ function setBox(who, text){
 
 function showLine(){
   const [who, text, cast] = cur.lines[idx];
+  lineId = curKey + '-' + (idx+1);
   if(cast) shown = cast;
   drawCast(who);
   setBox(who, fill(text));
   const last = idx === cur.lines.length-1;
   $('nextBtn').style.display = last ? 'none' : '';
   $('choices').innerHTML = '';
-  if(last) cur.choices.forEach(c=>{
+  if(last) cur.choices.forEach((c,ci)=>{
     const b = document.createElement('button');
     b.className = 'choice'; b.textContent = fill(c.t);
     b.onclick = ()=>{
-      if(c.wrong){ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); setBox('hint', fill(c.wrong)); }
+      if(c.wrong){ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); lineId = curKey + '-hint-' + (ci+1); setBox('hint', fill(c.wrong)); }
       else go(c.go);
     };
     $('choices').appendChild(b);
@@ -622,22 +652,57 @@ function pickVoice(){
   for(const re of VOICE_PREFS){ const v = vs.find(v=>re.test(v.name)); if(v) return narratorVoice = v; }
   return null;
 }
+let lineId = '', curKey = '', voiceAudio = null;
+function stopVoice(){
+  if(voiceAudio){ voiceAudio.pause(); voiceAudio = null; }
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+}
+// A recorded file (voice/<line id>.mp3) wins; any line without one is read by the computer voice
 function speak(){
+  stopVoice();
+  if(!lineId) return tts();
+  const a = voiceAudio = new Audio('voice/' + lineId + '.mp3');
+  let fell = false;
+  const fallback = ()=>{ if(!fell && voiceAudio===a){ fell = true; voiceAudio = null; tts(); } };
+  a.onerror = fallback; a.play().catch(fallback);
+}
+function tts(){
   if(!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance($('text').textContent.replace(/\(whispering\)/,''));
   const v = pickVoice(); if(v){ u.voice = v; u.lang = v.lang; }
   u.pitch = 1.1; u.rate = .9; speechSynthesis.speak(u);
 }
 
 function show(which){
-  ['setup','game','credits'].forEach(s=> $(s).style.display = s===which ? (s==='game'?'block':'') : 'none');
+  ['setup','game','credits','script'].forEach(s=> $(s).style.display = s===which ? (s==='game'?'block':'') : 'none');
 }
 function showCredits(){
-  if('speechSynthesis' in window) speechSynthesis.cancel();
+  stopVoice();
   $('castTable').innerHTML = ROLES.map(r=>`<tr><td>${esc(r.label)}</td><td>${esc(names[r.key])}</td></tr>`).join('');
   show('credits');
 }
+
+/* ---------- Recording script (one row per voice file) ---------- */
+function buildScript(){
+  const row = (id, who, raw) => `<tr><td class="id">${id}.mp3</td><td class="who">${esc(who)}</td><td>${raw.includes('{')?'<span class="star">★</span> ':''}${esc(fill(raw))}</td></tr>`;
+  let rows = '', count = 0;
+  for(const [key, s] of Object.entries(SC)){
+    rows += `<h3>${esc(s.ch)} <small>· ${key}</small></h3><table>`;
+    s.lines.forEach((L,i)=>{ rows += row(`${key}-${i+1}`, labelOf(L[0]), L[1]); count++; });
+    s.choices.forEach((c,i)=>{ if(c.wrong){ rows += row(`${key}-hint-${i+1}`, 'Hint', c.wrong); count++; } });
+    rows += '</table>';
+  }
+  $('scriptBody').innerHTML = `
+    <h2 style="margin:.6em 0 .2em">🎙 Recording script — The Witches of Gullcliff Hotel</h2>
+    <p>There are <b>${count} lines</b>. Record each one as its own MP3 file, named exactly as shown in the first column (for example <b>intro-1.mp3</b>).
+       Put all the files in a folder called <b>voice</b> next to the game. The game plays a recording whenever it finds one, and uses the computer voice for any line that is missing.</p>
+    <p><span class="star">★</span> = this line says a character's name. The names shown are the ones typed in right now, so re-record these lines if the names change.</p>
+    <p>Tips: record somewhere quiet, keep the phone or microphone the same distance away each time, leave a short pause at the start and end, and read slowly and clearly with lots of expression.</p>
+    ${rows}`;
+}
+$('scriptBtn').onclick = ()=>{ buildScript(); show('script'); scrollTo(0,0); };
+$('scriptBack').onclick = ()=> show('setup');
+$('printBtn').onclick = ()=> print();
 
 /* ---------- Setup screen ---------- */
 function preview(key){
@@ -670,7 +735,7 @@ $('namesBtn').onclick = ()=>{ buildSetup(); show('setup'); };
 $('nextBtn').onclick = next;
 $('text').onclick = next;
 $('readBtn').onclick = speak;
-$('autoBtn').onclick = e=>{ autoRead=!autoRead; e.target.setAttribute('aria-pressed', autoRead); if(autoRead) speak(); else if('speechSynthesis' in window) speechSynthesis.cancel(); };
+$('autoBtn').onclick = e=>{ autoRead=!autoRead; e.target.setAttribute('aria-pressed', autoRead); if(autoRead) speak(); else stopVoice(); };
 document.addEventListener('keydown', e=>{
   if($('game').style.display!=='block' || e.target.tagName==='BUTTON') return;
   if(e.key===' '||e.key==='Enter'||e.key==='ArrowRight'){ e.preventDefault(); next(); }
