@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three Little Pigs 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Luckiest+Guy&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#3f8f4a; --panel:#fffaf0; --ink:#3a2a22; --muted:#7a6a5e;
+    --accent:#d6487e; --accent-2:#2e9e5b; --warn:#d9534f; --line:#ead9c6; --tint:#fde4ee;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:linear-gradient(#7cc6f0, #a8dcf5 30%, #5aa95c 62%, #2f6b3a);
+    color:var(--ink); font-family:"Andika","Comic Sans MS",system-ui,sans-serif;
+    min-height:100vh; display:flex; justify-content:center; padding:16px;
+  }
+  .wrap{width:100%; max-width:980px}
+  h1{font-family:"Luckiest Guy","Andika",cursive; color:#ff9cbc; text-align:center; font-weight:400;
+     font-size:clamp(2rem,6vw,3.4rem); margin:.2em 0 .1em; letter-spacing:2px;
+     text-shadow:0 3px 0 #7a2848,0 0 14px rgba(255,255,255,.6)}
+  .sub{color:#fff; text-align:center; margin:0 0 16px; font-size:1.1rem; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,.35)}
+  .panel{background:var(--panel); border-radius:0 0 18px 18px; padding:16px 18px 18px; box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .roles{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; margin:12px 0}
+  .role{border:2px solid var(--line); border-radius:14px; padding:10px 12px; background:#fff}
+  .role label{font-weight:700; display:block}
+  .role small{color:var(--muted); display:block; margin-bottom:6px; line-height:1.25}
+  .role input{width:100%; font:inherit; font-size:1.05rem; padding:6px 10px; border:2px solid var(--line); border-radius:10px}
+  .role input:focus{outline:3px solid #f5b8cf; border-color:var(--accent)}
+  .skins{display:flex; gap:6px; margin-top:6px}
+  .skins button{width:22px; height:22px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px #bbb; cursor:pointer; padding:0}
+  .skins button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--accent)}
+  .btn{font:inherit; font-weight:700; font-size:1.15rem; border:none; border-radius:14px; padding:12px 22px; cursor:pointer;
+       background:var(--accent); color:#fff; box-shadow:0 4px 0 #9c2c58; transition:transform .1s}
+  .btn:active{transform:translateY(3px); box-shadow:0 1px 0 #9c2c58}
+  .btn.green{background:var(--accent-2); box-shadow:0 4px 0 #1d6a3b}
+  .btn.ghost{background:var(--tint); color:#b03a68; box-shadow:0 4px 0 #f0bcd0}
+  .row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center}
+  .note{color:var(--muted); font-size:.95rem; text-align:center; margin:10px 0 0}
+
+  .stage{position:relative; width:100%; aspect-ratio:16/9; border-radius:18px 18px 0 0; overflow:hidden; background:#9fd8ff}
+  .stage canvas{position:absolute; inset:0; width:100%!important; height:100%!important; display:block}
+  .tags{position:absolute; inset:0; pointer-events:none}
+  .tag{position:absolute; transform:translate(-50%,4px); white-space:nowrap; font-weight:700; color:#fff;
+       background:rgba(45,28,20,.78); padding:2px 12px; border-radius:999px; font-size:clamp(.75rem,1.8vw,1rem); transition:background .2s;
+       overflow:hidden; text-overflow:ellipsis}
+  @media (max-width:520px){ .tag{padding:2px 7px} }
+  .tag.on{background:var(--accent)}
+  .chapter{position:absolute; left:12px; top:10px; background:rgba(45,28,20,.72); color:#fff; padding:4px 12px; border-radius:999px; font-size:.95rem}
+  .nogl{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#2b2236; padding:24px; font-size:1.1rem}
+
+  .box{display:flex; flex-direction:column; gap:10px; min-height:190px}
+  .speaker{font-weight:700; color:var(--accent); font-size:1.15rem; display:flex; justify-content:space-between; align-items:center; gap:8px}
+  .speaker.narr{color:var(--muted)}
+  .speaker.hint{color:var(--warn)}
+  .speaker .tools{display:flex; gap:6px}
+  .tool{font:inherit; font-size:.9rem; border:2px solid var(--line); background:#fff; border-radius:10px; padding:3px 10px; cursor:pointer; color:var(--ink)}
+  .tool[aria-pressed="true"]{background:var(--tint); border-color:var(--accent)}
+  .text{font-size:clamp(1.15rem,2.6vw,1.45rem); line-height:1.5; margin:0; animation:fade .35s ease}
+  .choices{display:flex; flex-direction:column; gap:8px}
+  .choice{font:inherit; font-size:1.15rem; text-align:left; border:3px solid #f0bcd0; background:#fff; color:var(--ink);
+          border-radius:14px; padding:10px 14px; cursor:pointer}
+  .choice:hover,.choice:focus{border-color:var(--accent); background:#fff4f8; outline:none}
+  .choice.nope{animation:shake .4s; border-color:var(--warn)}
+  .next{align-self:flex-end}
+  @keyframes fade{from{opacity:0; transform:translateY(4px)}}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .credits{text-align:center}
+  .credits table{margin:8px auto 14px; border-collapse:collapse; font-size:1.2rem}
+  .credits td{padding:6px 14px; border-bottom:1px dashed var(--line)}
+  .credits td:first-child{color:var(--muted); text-align:right}
+  .credits td:last-child{font-weight:700; text-align:left}
+  @media (max-width:520px){ body{padding:8px 16px} .box{min-height:220px} }
+  .script{border-radius:18px}
+  .script h3{margin:20px 0 4px; color:var(--accent)}
+  .script h3 small{color:var(--muted); font-weight:400}
+  .script table{width:100%; border-collapse:collapse; margin:4px 0 10px}
+  .script td{padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.4}
+  .script td.id{font-family:Consolas,monospace; font-size:.9rem; white-space:nowrap; color:var(--muted)}
+  .script td.who{font-weight:700; white-space:nowrap}
+  .script .star{color:var(--warn); font-weight:700}
+  @media (max-width:600px){
+    .script td.id{white-space:normal; word-break:break-all; font-size:.75rem; width:28%}
+    .script td.who{white-space:normal}
+  }
+  @media print{
+    body{background:#fff; padding:0; display:block}
+    .wrap > *:not(#script){display:none !important}
+    #script{box-shadow:none; padding:0}
+    .noprint{display:none !important}
+    .script tr{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The Three Little Pigs</h1>
+  <p class="sub">A huff-and-puff choose-your-path story · 3D edition</p>
+
+  <div class="stage" id="stage">
+    <div class="tags" id="tags"></div>
+    <div class="chapter" id="chapter"></div>
+  </div>
+
+  <!-- Setup -->
+  <section id="setup" class="panel">
+    <h2 style="margin:0">Who's in the story?</h2>
+    <p style="margin:.3em 0 0">Type a name for each character and pick a colour. Names are saved on this computer only.</p>
+    <div class="roles" id="roles"></div>
+    <div class="row">
+      <button class="btn green" id="startBtn">Start the story ▶</button>
+      <button class="btn ghost" id="resetBtn">Reset names</button>
+      <button class="btn ghost" id="scriptBtn">🎙 Recording script</button>
+    </div>
+    <p class="note">Tip: the Big Bad Wolf is the villain, so a teacher's name (or the default) works well for that role.</p>
+  </section>
+
+  <!-- Story -->
+  <section id="game" class="panel box" style="display:none">
+    <div class="speaker" id="speakerRow">
+      <span id="speaker"></span>
+      <span class="tools">
+        <button class="tool" id="readBtn" title="Read this line aloud">🔊 Read</button>
+        <button class="tool" id="autoBtn" aria-pressed="false" title="Read every line aloud">Auto-read</button>
+      </span>
+    </div>
+    <p class="text" id="text"></p>
+    <div class="choices" id="choices"></div>
+    <button class="btn next" id="nextBtn">Next ▶</button>
+  </section>
+
+  <!-- Credits -->
+  <section id="credits" class="panel credits" style="display:none">
+    <h2 style="margin:.2em 0">Starring…</h2>
+    <table id="castTable"></table>
+    <div class="row">
+      <button class="btn green" id="againBtn">Play again</button>
+      <button class="btn ghost" id="namesBtn">Change names</button>
+    </div>
+  </section>
+
+  <!-- Recording script -->
+  <section id="script" class="panel script" style="display:none">
+    <div class="row noprint" style="justify-content:space-between">
+      <button class="btn ghost" id="scriptBack">◀ Back</button>
+      <button class="btn green" id="printBtn">🖨 Print script</button>
+    </div>
+    <div id="scriptBody"></div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ---------- Characters & names ---------- */
+const PALS = {
+  skin: ['#ffdbb4','#e8b88a','#c68642','#8d5524','#5c3a21'],
+  pig:  ['#f7b8c4','#f29aae','#eda88a','#c98f72','#9c7464'],
+};
+const ROLES = [
+  {key:'pig1',       label:'Little Pig 1',     desc:'Builds with straw. Likes doing things the quick way!', def:'Pip',      pal:'pig',  c:0},
+  {key:'pig2',       label:'Little Pig 2',     desc:'Builds with sticks. Loves to play.',                    def:'Penny',    pal:'pig',  c:1},
+  {key:'pig3',       label:'Little Pig 3',     desc:'Builds with bricks. Hard-working and clever.',          def:'Percy',    pal:'pig',  c:2},
+  {key:'mama',       label:'Mama Pig',         desc:'Kind and wise. Sends her pigs out into the world.',     def:'Mama Pig', pal:'pig',  c:1},
+  {key:'wolf',       label:'The Big Bad Wolf', desc:'The villain! Huffs, puffs, and plays sneaky tricks.',   def:'The Big Bad Wolf'},
+  {key:'farmer',     label:'The Farmer',       desc:'Sells straw from a cart.',                              def:'Farmer Fran', pal:'skin', c:1},
+  {key:'woodcutter', label:'The Woodcutter',   desc:'Sells sticks from the forest.',                         def:'Mr Oak',   pal:'skin', c:3},
+  {key:'builder',    label:'The Builder',      desc:'Sells bricks. Knows all about strong houses.',          def:'Builder Bongi', pal:'skin', c:2},
+];
+let names = {}, skins = {};
+function load(){
+  ROLES.forEach(r=>{names[r.key]=r.def; skins[r.key]=r.c||0});
+  try{
+    const saved = JSON.parse(localStorage.getItem('pigs-cast')||'null');
+    if(saved){ Object.assign(names, saved.names||{}); Object.assign(skins, saved.skins||{}); }
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem('pigs-cast', JSON.stringify({names,skins})) }catch(e){} }
+const colOf = key => { const r = ROLES.find(r=>r.key===key); return PALS[r.pal][skins[key]] || PALS[r.pal][0]; };
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fill = t => t.replace(/\{(\w+)\}/g, (_,k)=> names[k] ?? k);
+const labelOf = who => who==='n' ? 'Story' : who==='hint' ? 'Hmm…' : who==='disguise' ? names.mama+'?' : (names[who] || who);
+const scriptLabel = who => who==='disguise' ? `${names.wolf} (pretending to be ${names.mama})` : labelOf(who);
+
+/* ---------- The story (the classic folk tale, retold) ----------
+   Each line: [speaker, text, (optional) new cast list, (optional) new background]
+   Choices: {t:text, go:sceneId} or {t:text, wrong:hint} */
+const SC = {
+  intro:{ ch:'Chapter 1 · Time to Go', bg:'home', cast:['pig1','pig2','mama','pig3'], lines:[
+    ['n',"Once upon a time, there were three little pigs called {pig1}, {pig2} and {pig3}. They lived on a farm with their mother, {mama}."],
+    ['mama',"My little pigs, you are all grown up now. It is time for each of you to build a house of your own."],
+    ['pig1',"A house of my very own? Hooray!"],
+    ['pig2',"I'm going to have the best house ever!"],
+    ['mama',"But be careful. The Big Bad Wolf lives in the forest. Whatever you do, build your house nice and strong."],
+    ['pig3',"Don't worry, {mama}. We'll be careful."],
+    ['mama',"Before you go, tell me. What kind of house must you build?"],
+  ], choices:[
+    {t:"A pretty house", wrong:"Pretty is nice, but that's not what {mama} said. Listen again: nice and…"},
+    {t:"A STRONG house", go:'road'},
+    {t:"A quick house", wrong:"Quick? {mama} said nothing about quick! She said nice and…"},
+  ]},
+  road:{ ch:'Chapter 2 · Down the Road', bg:'road', cast:['pig1','pig2','pig3','farmer'], lines:[
+    ['n',"The three little pigs wave goodbye and set off down the road. Soon they meet {farmer}, with a cart full of straw."],
+    ['farmer',"Good morning, little pigs! Would anybody like some straw?"],
+    ['pig1',"Straw! It's light, it's easy, and it's quick. I'll build my house with straw!", ['pig1','farmer']],
+    ['farmer',"Straw is very quick… but it isn't very strong."],
+    ['pig1',"Pfft! I want to finish early so I can play!"],
+    ['n',"A little further on, they meet {woodcutter}, carrying a big bundle of sticks.", ['pig2','pig3','woodcutter']],
+    ['woodcutter',"Hello there! Fresh sticks from the forest. Who wants some?"],
+    ['pig2',"Sticks are stronger than straw, and they're still quick! I'll build my house with sticks!", ['pig2','woodcutter']],
+    ['n',"Last of all, {pig3} meets {builder}, next to a big pile of red bricks.", ['pig3','builder']],
+    ['builder',"Bricks are heavy, and building with them takes a long time. But nothing is stronger than bricks!"],
+    ['n',"What should {pig3} choose?"],
+  ], choices:[
+    {t:"Straw, so I can play sooner", wrong:"Remember what {mama} said! Is straw strong?"},
+    {t:"Sticks, like {pig2}", wrong:"Sticks are better than straw… but are they the STRONGEST?"},
+    {t:"Bricks, because they're strong", go:'building'},
+  ]},
+  building:{ ch:'Chapter 3 · Building Day', bg:'building', cast:['pig1','pig2','pig3'], lines:[
+    ['n',"{pig1} builds a little straw house. It takes just one hour!"],
+    ['pig1',"Done! Now I can play all day long. La la la!"],
+    ['n',"{pig2} builds a little stick house. It takes one whole day."],
+    ['pig2',"Done! Hey {pig3}, are you STILL working? Come and play!"],
+    ['pig3',"Not yet. Brick by brick, a house gets strong. I'll play when I'm finished."],
+    ['n',"{pig3} works for a whole week, lifting brick after brick, until at last the brick house is done."],
+    ['pig1',"Ha ha! All that work for a boring old brick house!"],
+  ], choices:[{t:"Meanwhile, in the dark forest…", go:'forest'}]},
+  forest:{ ch:'Chapter 4 · The Big Bad Wolf', bg:'forest', cast:['wolf'], lines:[
+    ['n',"Deep in the dark forest, somebody is very, very hungry."],
+    ['wolf',"Sniff, sniff. I smell… PIGS! Lovely, plump little pigs!"],
+    ['wolf',"Hee hee hee! I think I'll pay them a little visit."],
+  ], choices:[{t:"Follow the wolf…", go:'straw'}]},
+  straw:{ ch:'Chapter 5 · The Straw House', bg:'straw', cast:['pig1','wolf'], lines:[
+    ['n',"Knock, knock, knock! The wolf knocks on the door of the straw house."],
+    ['wolf',"Little pig, little pig, let me come in!"],
+    ['pig1',"No, no! Not by the hair on my chinny-chin-chin!"],
+    ['wolf',"Then I'll huff, and I'll puff, and I'll BLOW your house in!"],
+    ['n',"So he huffed… and he puffed… and WHOOSH! The straw house blows away!", null, 'strawDown'],
+    ['pig1',"Help! My house! What do I do now?"],
+  ], choices:[
+    {t:"Hide under the straw", wrong:"The wolf would find you in a second! Run somewhere safer."},
+    {t:"Run to {pig2}'s stick house", go:'sticks'},
+  ]},
+  sticks:{ ch:'Chapter 6 · The Stick House', bg:'sticks', cast:['pig1','pig2','wolf'], lines:[
+    ['n',"{pig1} runs as fast as little legs can go, all the way to the stick house. SLAM! The door shuts just in time."],
+    ['wolf',"Little pigs, little pigs, let me come in!"],
+    ['pig2',"No, no! Not by the hair on our chinny-chin-chins!"],
+    ['wolf',"Then I'll huff, and I'll puff, and I'll BLOW your house in!"],
+    ['n',"So he huffed… and he puffed… and WHOOSH! The stick house falls down with a CRASH!", null, 'sticksDown'],
+    ['pig2',"Oh no! Where can we go now?"],
+  ], choices:[
+    {t:"Climb up a tree", wrong:"A wolf can wait under a tree for a very long time! Is there a stronger house nearby?"},
+    {t:"Run to {pig3}'s brick house", go:'bricks'},
+  ]},
+  bricks:{ ch:'Chapter 7 · The Brick House', bg:'bricks', cast:['pig1','pig2','pig3'], lines:[
+    ['n',"{pig1} and {pig2} bang on the door of the brick house. {pig3} lets them in, just in time!"],
+    ['pig3',"Don't worry. My house is strong. You are safe in here."],
+    ['n',"Here comes the wolf, licking his lips.", ['pig1','pig2','pig3','wolf']],
+    ['wolf',"Little pigs, little pigs, let me come in!"],
+    ['pig3',"No, no! Not by the hair on our chinny-chin-chins!"],
+    ['wolf',"Then I'll huff, and I'll puff, and I'll BLOW your house in!"],
+    ['n',"So he huffed and he puffed. And he HUFFED and he PUFFED. But the brick house does not move one little bit!"],
+    ['wolf',"Puff… pant… wheeze… This house is too strong!"],
+  ], choices:[{t:"But the wolf has a sneaky idea…", go:'trick'}]},
+  trick:{ ch:'Chapter 8 · A Sneaky Trick', bg:'bricksNight', cast:['wolf:mama'], lines:[
+    ['n',"That evening, there is a gentle knock at the door. Tap, tap, tap."],
+    ['disguise',"(in a high voice) Yoo-hoo! It's me, {mama}! Open the door, my darlings!"],
+    ['pig1',"It's {mama}! Let's open the door!", ['pig1','pig2','pig3','wolf:mama']],
+    ['n',"What should the pigs do?"],
+  ], choices:[
+    {t:"Open the door straight away", wrong:"Wait! Are you sure it's really {mama}? Check first!"},
+    {t:"Peep through the window first", go:'peep'},
+  ]},
+  peep:{ ch:'Chapter 8 · A Sneaky Trick', bg:'bricksNight', cast:['pig3','wolf:mama'], lines:[
+    ['n',"{pig3} peeps through the window. There is a flowery hat and a pink shawl… and sticking out at the back, a big, bushy, grey TAIL!"],
+    ['pig3',"That's not {mama}! {mama} has a curly little tail. That's the WOLF!"],
+    ['wolf',"Grrr! Tricked by a pig! Right. If I can't come in the door, I'll come down the CHIMNEY!", ['pig3','wolf']],
+    ['n',"The wolf starts to climb up onto the roof. Scramble, scramble!"],
+  ], choices:[{t:"Quick! Make a plan!", go:'plan'}]},
+  plan:{ ch:'Chapter 9 · Down the Chimney', bg:'inside', cast:['pig1','pig2','pig3'], lines:[
+    ['pig2',"He's on the roof! What do we do?"],
+    ['pig3',"We need a big surprise waiting for him at the bottom of the chimney."],
+    ['n',"What should they put at the bottom of the chimney?"],
+  ], choices:[
+    {t:"Hide in the cupboard", wrong:"Hiding won't stop him. He would sniff you out! What could go at the bottom of the chimney?"},
+    {t:"Open the front door", wrong:"Never open the door to a wolf! Try again."},
+    {t:"A big pot of hot water on the fire", go:'splash'},
+  ]},
+  splash:{ ch:'Chapter 9 · Down the Chimney', bg:'inside', cast:['pig1','pig2','pig3'], lines:[
+    ['n',"{pig3} puts the big pot on the fire. The water bubbles and steams."],
+    ['n',"Then… scrabble, scrabble, scrabble… down the chimney comes the wolf and SPLASH! He lands right in the hot water!", ['pig1','pig2','pig3','wolf']],
+    ['wolf',"OWWW! OUCH! HOT, HOT, HOT! My tail! My bottom!"],
+    ['n',"The wolf shoots back up the chimney like a rocket, runs away over the hills, and is never seen again.", ['pig1','pig2','pig3']],
+    ['pig1',"Hooray! {pig3}, you saved us!"],
+  ], choices:[{t:"The next morning…", go:'ending'}]},
+  ending:{ ch:'Chapter 10 · Happily Ever After', bg:'end', cast:['pig1','mama','pig2','pig3'], lines:[
+    ['mama',"My clever little pigs! I am so proud of you."],
+    ['pig2',"Sorry we laughed at your brick house, {pig3}."],
+    ['pig1',"From now on, I'll take my time and do things properly."],
+    ['pig3',"Come on, let's build two more brick houses. We'll all help each other!"],
+    ['n',"So with {builder}'s help, they build two more strong brick houses, side by side. And the three little pigs live happily ever after.", ['pig1','pig2','pig3','mama','builder']],
+    ['n',"THE END"],
+  ], choices:[{t:"See who starred in the story ⭐", go:'#credits'}]},
+};
+
+/* =====================================================================
+   3D world (three.js). Units: 1 ≈ 1 metre-ish, floor at y = 0,
+   characters stand along z = 0, camera looks from +z.
+   ===================================================================== */
+const has3D = !!window.THREE && (()=>{ try{ return !!document.createElement('canvas').getContext('webgl') }catch(e){ return false } })();
+let R, scene, camera, hemi, sun, roomGroup, castGroup, roomUpd = [], fx = [], tagEls = [], castFigs = [];
+let roomKey = null, castKey = null, speakerNow = 'n', camFocus = 0;
+const clock = has3D ? new THREE.Clock() : null;
+
+/* Primitive helpers */
+const matCache = {};
+function mat(c, o={}){
+  const k = c + JSON.stringify(o);
+  return matCache[k] || (matCache[k] = new THREE.MeshStandardMaterial(Object.assign({color:c, roughness:.85, flatShading:true}, o)));
+}
+function mesh(geo, c, x=0, y=0, z=0, o){
+  const m = new THREE.Mesh(geo, o && o.own ? new THREE.MeshStandardMaterial(Object.assign({color:c, roughness:.85, flatShading:true}, o.own)) : mat(c, o));
+  m.position.set(x,y,z); m.castShadow = true; m.receiveShadow = true; return m;
+}
+const B = (w,h,d,c,x,y,z,o)=>mesh(new THREE.BoxGeometry(w,h,d),c,x,y,z,o);
+const S = (r,c,x,y,z,o)=>mesh(new THREE.SphereGeometry(r,18,14),c,x,y,z,o);
+const Cy = (rt,rb,h,c,x,y,z,o,seg=20)=>mesh(new THREE.CylinderGeometry(rt,rb,h,seg),c,x,y,z,o);
+const Co = (r,h,c,x,y,z,o,seg=14)=>mesh(new THREE.ConeGeometry(r,h,seg),c,x,y,z,o);
+function grp(...kids){ const g = new THREE.Group(); kids.flat().forEach(k=>k && g.add(k)); return g; }
+function at(obj,x=0,y=0,z=0,ry=0,s=1){ obj.position.set(x,y,z); obj.rotation.y = ry; obj.scale.setScalar(s); return obj; }
+const glow = (c,i=1)=>({emissive:c, emissiveIntensity:i});
+const shade = (c,f)=> '#'+new THREE.Color(c).multiplyScalar(f).getHexString();
+const tint  = (c,f)=> '#'+new THREE.Color(c).lerp(new THREE.Color('#ffffff'), f).getHexString();
+// repeatable "random" numbers, so scenery looks the same every time
+let seed = 1; const rnd = (a=0,b=1)=>{ seed = (seed*16807) % 2147483647; return a + (seed/2147483647)*(b-a); };
+
+function textTex(lines, {w=512,h=256,bg='#fffbe6',border='#5c3720'}={}){
+  const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+  const g = cv.getContext('2d');
+  if(bg){ g.fillStyle=bg; g.fillRect(0,0,w,h); }
+  if(border){ g.strokeStyle=border; g.lineWidth=14; g.strokeRect(7,7,w-14,h-14); }
+  g.textAlign='center'; g.textBaseline='middle';
+  const total = lines.reduce((a,l)=>a+l[1]*1.25,0); let y = (h-total)/2;
+  lines.forEach(([t,size,color,font])=>{ g.font = `bold ${size}px ${font||'Andika, sans-serif'}`; g.fillStyle=color; y += size*.625; g.fillText(t,w/2,y); y += size*.625; });
+  const tex = new THREE.CanvasTexture(cv); tex.anisotropy = 4; return tex;
+}
+function sign(tex, w, h, x, y, z, ry=0, o={}){
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshStandardMaterial(Object.assign({map:tex, roughness:.9}, o)));
+  m.position.set(x,y,z); m.rotation.y = ry; return m;
+}
+function brickTex(rep){
+  const cv = document.createElement('canvas'); cv.width=128; cv.height=64; const g = cv.getContext('2d');
+  g.fillStyle='#d8cbb8'; g.fillRect(0,0,128,64);
+  const cols = ['#b5482f','#a63f2a','#c0553a','#9c3a26'];
+  for(let r=0;r<4;r++) for(let c=-1;c<4;c++){ g.fillStyle = cols[(r*5+c+8)%4]; g.fillRect(c*32+(r%2)*16+2, r*16+2, 28, 12); }
+  const t = new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(rep[0],rep[1]); return t;
+}
+const brickMat = rep => new THREE.MeshStandardMaterial({map:brickTex(rep), roughness:.9});
+
+/* ---------- Character builders (facing +z) ---------- */
+function face(g, y, r, {eye='#222', mouth='smile', z=.9}={}){
+  const ex = r*.36, ez = r*z;
+  g.add(S(r*.13, eye, -ex, y+r*.12, ez), S(r*.13, eye, ex, y+r*.12, ez));
+  if(mouth==='flat'){ g.add(B(r*.45, r*.07, r*.08, '#6b2f24', 0, y-r*.38, r*.93)); return; }
+  const arc = new THREE.Mesh(new THREE.TorusGeometry(mouth==='grin'?r*.32:r*.24, r*.05, 6, 16, Math.PI), mat('#6b2f24'));
+  arc.rotation.z = Math.PI; arc.position.set(0, y-r*.18, r*.9); arc.rotation.x = -.35; g.add(arc);
+}
+function hairCap(r, color, y, z=0, tilt=-.35){
+  const m = mesh(new THREE.SphereGeometry(r, 18, 12, 0, Math.PI*2, 0, Math.PI*.5), color, 0, y, z);
+  m.rotation.x = tilt; return m;
+}
+function strawHat(y, r=.55){ return grp(Cy(r,r,.04,'#e8c65a',0,y,0,{},20), Cy(r*.55,r*.62,.26,'#e8c65a',0,y+.14,0), Cy(r*.63,r*.63,.07,'#c0392b',0,y+.06,0)); }
+function hardHat(y, r=.44){ return grp(hairCap(r,'#f1c40f',y,0,0), Cy(r+.08,r+.08,.04,'#e0b000',0,y+.02,0), B(.07,.07,r*1.9,'#e0b000',0,y+r-.02,0)); }
+
+// A storybook pig, standing up on two trotters
+function pig(col, {outfit='#f1c40f', hat=null, dress=null, apron=false}={}){
+  const g = new THREE.Group(), dk = shade(col,.72), lt = tint(col,.35);
+  [-1,1].forEach(s=> g.add(Cy(.12,.13,.5,col,s*.17,.27,0), Cy(.13,.13,.1,'#5a3a3a',s*.17,.05,.02)));
+  if(dress){ g.add(Cy(.3,.56,.9,dress,0,.75,0)); if(apron) g.add(B(.48,.6,.04,'#ffffff',0,.82,.44)); }
+  else g.add(Cy(.4,.37,.5,outfit,0,.7,0));
+  const body = S(.46,col,0,1.05,0); body.scale.set(1,1.05,.85); g.add(body);
+  if(!dress) g.add(B(.48,.34,.1,outfit,0,1.0,.36), B(.07,.3,.06,outfit,-.17,1.2,.33), B(.07,.3,.06,outfit,.17,1.2,.33), S(.04,'#ffe9a0',-.17,1.12,.42), S(.04,'#ffe9a0',.17,1.12,.42));
+  else g.add(Cy(.47,.5,.3,dress,0,1.32,0));
+  [-1,1].forEach(s=>{ const a = Cy(.08,.09,.5,col,s*.49,1.0,0); a.rotation.z = s*.35; g.add(a, S(.09,dk,s*.58,.76,0)); });
+  const tail = new THREE.Mesh(new THREE.TorusGeometry(.08,.028,6,14,Math.PI*1.7), mat(col)); tail.position.set(0,.82,-.42); g.add(tail);
+  g.add(S(.4,col,0,1.72,0));
+  const snout = Cy(.15,.16,.16,lt,0,1.64,.39); snout.rotation.x = Math.PI/2; g.add(snout);
+  g.add(S(.035,'#7a3a4a',-.055,1.64,.47), S(.035,'#7a3a4a',.055,1.64,.47));
+  g.add(S(.055,'#222',-.15,1.84,.34), S(.055,'#222',.15,1.84,.34), S(.018,'#fff',-.13,1.86,.39), S(.018,'#fff',.17,1.86,.39));
+  g.add(S(.06,'#ff8fa8',-.26,1.65,.29), S(.06,'#ff8fa8',.26,1.65,.29));
+  const m = new THREE.Mesh(new THREE.TorusGeometry(.09,.02,6,14,Math.PI), mat('#7a3a4a')); m.rotation.z = Math.PI; m.position.set(0,1.5,.36); m.rotation.x = -.3; g.add(m);
+  [-1,1].forEach(s=>{ const e = Co(.13,.3,col,s*.26,2.06,0); e.rotation.z = -s*.5; e.rotation.x = .25; g.add(e); });
+  if(hat==='straw') g.add(strawHat(2.04));
+  if(hat==='cap') g.add(hairCap(.42,'#2e9e5b',1.86,0,-.15), B(.42,.04,.3,'#257d48',0,1.9,.42));
+  if(hat==='hard') g.add(hardHat(1.86));
+  if(hat==='bonnet') g.add(hairCap(.44,'#e7a6c8',1.8,-.04,-.55), S(.08,'#ff6fa8',.26,2.12,.18), S(.04,'#ffd34d',.28,2.13,.25), S(.07,'#ffffff',-.24,2.14,.16));
+  return g;
+}
+
+function wolf(disguise=false){
+  const g = new THREE.Group(), fur='#7d828f', lt='#c9ccd4', dk='#4a4e5a', pants='#5a4a6a';
+  [-1,1].forEach(s=> g.add(Cy(.12,.14,.8, disguise?fur:pants, s*.2,.42,0), B(.24,.1,.42,dk,s*.2,.05,.1)));
+  const body = S(.46,fur,0,1.3,0); body.scale.set(1,1.25,.85); g.add(body);
+  const belly = S(.32,lt,0,1.25,.16); belly.scale.set(1,1.25,.7); g.add(belly);
+  if(!disguise) g.add(Cy(.42,.4,.36,pants,0,.86,0), B(.14,.14,.03,'#c97b2f',.2,.86,.4));
+  [-1,1].forEach(s=>{ const a = Cy(.09,.11,.72,fur,s*.53,1.28,0); a.rotation.z = s*.3; g.add(a, S(.11,lt,s*.64,.94,.02)); });
+  const tail = Co(.18,1,fur,.78,.75,-.25); tail.rotation.z = -1.9; g.add(tail, S(.12,'#eeeeee',1.24,.6,-.25));
+  if(disguise){
+    g.add(Cy(.42,.78,1.2,'#9b59b6',0,.62,0), Cy(.5,.64,.46,'#e7a6c8',0,1.62,0));
+    for(let i=0;i<6;i++){ const a = i/6*Math.PI*2; g.add(S(.05,'#ffffff',Math.sin(a)*.6,.4,Math.cos(a)*.6)); }
+  }
+  g.add(S(.38,fur,0,2.05,0));
+  const snout = Co(.2,.6,fur,0,1.97,.5); snout.rotation.x = Math.PI/2; g.add(snout);
+  g.add(S(.075,'#111',0,1.97,.8), B(.22,.08,.34,lt,0,1.86,.42));
+  [-.06,.06].forEach(x=>{ const t = Co(.025,.09,'#ffffff',x,1.86,.6); t.rotation.x = Math.PI; g.add(t); });
+  [-1,1].forEach(s=>{
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(.07,12,10), wolfEye).translateX(s*.14).translateY(2.15).translateZ(.3));
+    g.add(S(.028,'#111',s*.14,2.15,.365));
+    const brow = B(.15,.035,.04,dk,s*.14,2.24,.32); brow.rotation.z = -s*.35; g.add(brow);
+    const ear = Co(.12,.36,fur,s*.22,2.42,-.02); ear.rotation.z = -s*.2; g.add(ear);
+  });
+  if(disguise){
+    g.add(hairCap(.44,'#ffd6e8',2.1,-.05,-.45));
+    const brim = new THREE.Mesh(new THREE.TorusGeometry(.42,.05,8,24), mat('#ffd6e8')); brim.position.set(0,2.15,.05); brim.rotation.x = -.35; g.add(brim);
+    g.add(S(.09,'#ff6fa8',.3,2.42,.12), S(.045,'#ffd34d',.32,2.43,.2), S(.08,'#ffffff',-.26,2.44,.1));
+  }
+  return g;
+}
+const wolfEye = has3D ? new THREE.MeshStandardMaterial({color:'#ffd23a', emissive:'#ffb000', emissiveIntensity:.8}) : null;
+
+// A grown-up person (farmer, woodcutter, builder)
+function person(skin, {shirt, pants='#3b4a6b', hat, beard, bib, stripes, carry}={}){
+  const g = new THREE.Group();
+  g.add(B(.22,.72,.24,pants,-.14,.38,0), B(.22,.72,.24,pants,.14,.38,0));
+  g.add(B(.26,.12,.34,'#3a2a1a',-.14,.06,.04), B(.26,.12,.34,'#3a2a1a',.14,.06,.04));
+  g.add(B(.62,.78,.38,shirt,0,1.12,0));
+  if(bib) g.add(B(.42,.42,.04,pants,0,1.0,.2), B(.07,.36,.04,pants,-.18,1.3,.2), B(.07,.36,.04,pants,.18,1.3,.2));
+  if(stripes) g.add(B(.63,.06,.39,'#f5f5a0',0,.98,0), B(.63,.06,.39,'#f5f5a0',0,1.22,0));
+  [-1,1].forEach(s=>{ const a = B(.17,.62,.2,shirt,s*.42,1.12,0); a.rotation.z = s*.08; g.add(a, S(.1,skin,s*.46,.76,0)); });
+  g.add(Cy(.1,.1,.12,skin,0,1.56,0), S(.36,skin,0,1.86,0));
+  if(beard){ const b = S(.3,beard,0,1.7,.12); b.scale.set(1.05,.85,.9); g.add(b, hairCap(.39,beard,1.88,-.02)); }
+  else g.add(hairCap(.39,'#3a2a1a',1.88,-.02), S(.06,'#f59a9a',-.21,1.78,.29), S(.06,'#f59a9a',.21,1.78,.29));
+  face(g, 1.86, .36, {mouth: beard ? 'flat' : 'smile'});
+  if(hat==='straw') g.add(strawHat(2.16, .6));
+  if(hat==='beanie') g.add(hairCap(.4,'#2e7d32',1.92,-.02,-.2), S(.09,'#e8f0e8',0,2.32,-.05));
+  if(hat==='hard') g.add(hardHat(1.92, .42));
+  if(carry==='brick'){ const b = new THREE.Mesh(new THREE.BoxGeometry(.34,.16,.18), brickMat([.6,.5])); b.position.set(.48,.62,.14); b.castShadow = true; g.add(b); }
+  if(carry==='sticks') for(let i=0;i<5;i++){ const st = Cy(.04,.04,1.3,['#a0703f','#8a5d33','#b58250'][i%3],.35+i*.05,1.55,-.28-i*.03,{},6); st.rotation.z = -1.1; g.add(st); }
+  if(carry==='straw'){ const h = B(.5,.3,.3,'#e5c158',-.5,.75,.1); g.add(h); }
+  return at(g,0,0,0,0,1.12);
+}
+
+const LOOK = {
+  pig1:  ()=>at(pig(colOf('pig1'), {outfit:'#f1c40f', hat:'straw'}),0,0,0,0,.92),
+  pig2:  ()=>at(pig(colOf('pig2'), {outfit:'#3fa7d6', hat:'cap'}),0,0,0,0,.92),
+  pig3:  ()=>at(pig(colOf('pig3'), {outfit:'#e85d4a', hat:'hard'}),0,0,0,0,.92),
+  mama:  ()=>at(pig(colOf('mama'), {dress:'#9b59b6', apron:true, hat:'bonnet'}),0,0,0,0,1.08),
+  wolf:  ()=>wolf(false),
+  'wolf:mama': ()=>wolf(true),
+  farmer:     ()=>person(colOf('farmer'),     {shirt:'#d9534f', pants:'#3b5998', bib:true, hat:'straw', carry:'straw'}),
+  woodcutter: ()=>person(colOf('woodcutter'), {shirt:'#b03a2e', pants:'#4a3a2a', beard:'#5a3a1a', hat:'beanie', carry:'sticks'}),
+  builder:    ()=>person(colOf('builder'),    {shirt:'#ff8c1a', pants:'#34495e', stripes:true, hat:'hard', carry:'brick'}),
+};
+const roleOf = look => look==='wolf:mama' ? 'disguise' : look.split(':')[0];
+const castName = look => look==='wolf:mama' ? names.mama+'?' : names[look.split(':')[0]];
+
+/* ---------- Scenery ---------- */
+function tree(x,z,s=1,night=false){
+  return at(grp(Cy(.15,.22,1.5,'#7a5230',0,.75,0), S(.95,night?'#24502a':'#3c8d40',0,2,0), S(.7,night?'#2c6032':'#4caf50',.45,2.5,.15), S(.6,night?'#24502a':'#43a047',-.4,2.4,-.1)),x,0,z,0,s);
+}
+const DAY   = {sky:'#9fd8ff', hemi:['#ffffff','#5a8a3a',.75], sun:['#fff3d6',.8], fog:['#cfeaff',30,80]};
+const NIGHT = {sky:'#141a3a', hemi:['#7a88c8','#1a2a1a',.42], sun:['#a8b8ff',.35], fog:['#141a3a',18,50]};
+function meadow(night=false){
+  seed = 7;
+  const g = new THREE.Group();
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(90,50), mat(night?'#3d6b35':'#7cc46a')); ground.rotation.x = -Math.PI/2; ground.position.z = -5; ground.receiveShadow = true; g.add(ground);
+  [[-20,-30,15],[0,-34,19],[22,-29,14],[-38,-36,16],[40,-36,16]].forEach(([x,z,r])=>{ const h = S(r, night?'#2f5a2a':'#68b35a',x,0,z); h.scale.y = .32; h.castShadow = false; g.add(h); });
+  [[-11,-8,1.3],[-8.5,-11,1],[10.5,-8,1.2],[13,-11.5,1.4],[-15,-15,1.5],[16,-16,1.3],[-4,-17,1.1],[5,-18,1.2]].forEach(([x,z,s])=>g.add(tree(x,z,s,night)));
+  const fl = ['#ff6fa8','#ffd34d','#ffffff','#b28dff'];
+  for(let i=0;i<40;i++) g.add(S(.07, night?'#8a9a8a':fl[i%4], rnd(-12,12), .05, rnd(-2,4.5)));
+  if(night){
+    g.add(S(1.2,'#fff8d0',10,10,-30,glow('#fff3b0',1)));
+    const geo = new THREE.BufferGeometry(), n = 260, p = new Float32Array(n*3);
+    for(let i=0;i<n;i++) p.set([rnd(-60,60), rnd(6,30), rnd(-40,-32)], i*3);
+    geo.setAttribute('position', new THREE.BufferAttribute(p,3));
+    g.add(new THREE.Points(geo, new THREE.PointsMaterial({color:'#ffffff', size:.18})));
+  } else {
+    g.add(S(1.6,'#ffd34d',-12,10,-30,glow('#ffc400',1)));
+    const clouds = [[-6,8,-22],[6,9.5,-24],[16,7.5,-20]].map(([x,y,z])=>grp(S(1,'#ffffff',x,y,z), S(1.3,'#ffffff',x+1.2,y+.3,z), S(.9,'#ffffff',x+2.4,y,z)));
+    clouds.forEach(c=>{ c.traverse(o=>o.castShadow=false); g.add(c); });
+    roomUpd.push(t=>clouds.forEach((c,i)=>{ c.position.x = Math.sin(t*.05+i*2)*3; }));
+  }
+  return g;
+}
+function strawHouse(){
+  const g = grp(B(3.2,2.3,2.6,'#e5c158',0,1.15,0));
+  for(let x=-1.5;x<=1.5;x+=.25) g.add(B(.06,2.3,.02,'#c9a33d',x,1.15,1.31));
+  const roof = Co(2.5,1.9,'#d4ad45',0,3.25,0,{},4); roof.rotation.y = Math.PI/4; roof.scale.z = .9; g.add(roof);
+  g.add(Co(.25,.5,'#e5c158',0,4.25,0,{},6));
+  g.add(B(.8,1.4,.06,'#8a5a2b',0,.7,1.32), B(.6,.5,.06,'#3a2a1a',1.05,1.5,1.32), B(.6,.5,.06,'#3a2a1a',-1.05,1.5,1.32));
+  return g;
+}
+function strawPile(){
+  seed = 11; const g = new THREE.Group();
+  const mound = S(1.3,'#d4ad45',0,0,0); mound.scale.y = .35; g.add(mound);
+  for(let i=0;i<46;i++){ const s = B(rnd(.5,1.2),.06,.14,i%2?'#e5c158':'#c9a33d',rnd(-2.6,2.6),rnd(.03,.4),rnd(-1.6,1.8)); s.rotation.set(rnd(-.3,.3),rnd(0,3),rnd(-.2,.2)); g.add(s); }
+  g.add(at(B(.8,1.4,.06,'#8a5a2b',0,0,0),1.6,.05,1.4,.5).rotateX(-Math.PI/2));
+  return g;
+}
+const STICK = ['#a0703f','#8a5d33','#b58250'];
+function stickHouse(){
+  seed = 3; const g = grp(B(3.2,2.3,2.6,'#6b4a2a',0,1.15,0));
+  for(let x=-1.55;x<=1.56;x+=.2){ const h = 2.3+rnd(0,.25); g.add(Cy(.075,.085,h,STICK[Math.round(rnd(0,2))],x,h/2,1.34,{},6)); }
+  [-1,1].forEach(s=>{ for(let z=-1.2;z<=1.2;z+=.3) g.add(Cy(.07,.08,2.35,STICK[Math.round(rnd(0,2))],s*1.64,1.17,z,{},6)); });
+  const f = B(3.7,.14,1.75,'#7a5230',0,2.76,.68); f.rotation.x = .6;
+  const b = B(3.7,.14,1.75,'#6b4a2a',0,2.76,-.68); b.rotation.x = -.6; g.add(f,b);
+  for(let x=-1.7;x<=1.7;x+=.3){ const st = Cy(.04,.04,1.8,STICK[Math.round(rnd(0,2))],x,2.84,.74,{},5); st.rotation.x = Math.PI/2+.6; g.add(st); }
+  g.add(B(.8,1.4,.08,'#4a3018',0,.7,1.42), B(.6,.5,.06,'#2a1a10',1.0,1.55,1.42));
+  return g;
+}
+function stickPile(){
+  seed = 5; const g = new THREE.Group();
+  for(let i=0;i<55;i++){ const st = Cy(.06,.07,rnd(1,2.4),STICK[i%3],rnd(-2.6,2.6),rnd(.06,.5),rnd(-1.6,1.8),{},6); st.rotation.set(rnd(-.3,.3),rnd(0,3),Math.PI/2+rnd(-.3,.3)); g.add(st); }
+  const r = B(3.4,.14,1.7,'#7a5230',.3,.3,-.3); r.rotation.set(.15,.3,.1); g.add(r);
+  return g;
+}
+function brickHouse(night=false){
+  const walls = new THREE.Mesh(new THREE.BoxGeometry(3.4,2.5,2.8), brickMat([3,2])); walls.position.y = 1.25; walls.castShadow = walls.receiveShadow = true;
+  const g = grp(walls);
+  const f = B(3.9,.16,1.9,'#b03a2e',0,2.98,.72); f.rotation.x = .62;
+  const b = B(3.9,.16,1.9,'#9a3226',0,2.98,-.72); b.rotation.x = -.62; g.add(f,b);
+  const chim = new THREE.Mesh(new THREE.BoxGeometry(.55,1.4,.55), brickMat([.6,1])); chim.position.set(1.05,3.4,-.4); chim.castShadow = true; g.add(chim);
+  g.add(B(.85,1.55,.08,'#2e5e8e',0,.78,1.43), S(.05,'#e0b84a',.28,.8,1.49,{metalness:.7,roughness:.3}));
+  const wc = night?'#ffd27a':'#9fd7ff';
+  [-1,1].forEach(s=>{ g.add(B(.82,.72,.06,'#ffffff',s*1.08,1.5,1.42), B(.7,.6,.06,wc,s*1.08,1.5,1.45,{own:glow(wc,night?1:.25)}), B(.06,.6,.07,'#ffffff',s*1.08,1.5,1.47)); });
+  if(night){ const p = new THREE.PointLight('#ffcf66', .9, 7); p.position.set(0,1.5,2.4); g.add(p); }
+  g.add(steam(1.05,4.1,-.4,'#dddddd',6));
+  return g;
+}
+function cottage(){
+  const g = grp(B(3,2.2,2.4,'#f4ead8',0,1.1,0));
+  const roof = Co(2.4,1.6,'#a0703f',0,3,0,{},4); roof.rotation.y = Math.PI/4; g.add(roof);
+  g.add(B(.7,1.3,.06,'#2e9e5b',0,.65,1.22), B(.6,.5,.06,'#9fd7ff',.9,1.4,1.22), B(.6,.5,.06,'#9fd7ff',-.9,1.4,1.22));
+  [-1.1,-.7,.7,1.1].forEach(x=>g.add(S(.12,['#ff6fa8','#ffd34d'][Math.abs(Math.round(x*10))%2],x,.15,1.4)));
+  return g;
+}
+function steam(x,y,z,color='#eef3f5',count=8){
+  const g = new THREE.Group(), puffs = [];
+  for(let i=0;i<count;i++){ const m = new THREE.Mesh(new THREE.SphereGeometry(.22,10,8), new THREE.MeshStandardMaterial({color, transparent:true, opacity:.5})); m.userData.off = i/count; g.add(m); puffs.push(m); }
+  roomUpd.push(t=>puffs.forEach(m=>{ const k=(t*.35+m.userData.off)%1; m.position.set(x+Math.sin(k*6+m.userData.off*9)*.25, y+k*2.2, z); m.scale.setScalar(.6+k*1.4); m.material.opacity=.55*(1-k); }));
+  return g;
+}
+function signpost(text, x, z){
+  return grp(Cy(.06,.06,1.8,'#6b4226',x,.9,z), sign(textTex([[text,64,'#5c3720']],{w:256,h:110}),1.2,.52,x,1.75,z+.07));
+}
+function floorAndWall(floorC, wallMat){
+  const fl = new THREE.Mesh(new THREE.PlaneGeometry(40,24), mat(floorC)); fl.rotation.x = -Math.PI/2; fl.receiveShadow = true;
+  const wl = new THREE.Mesh(new THREE.PlaneGeometry(40,14), wallMat); wl.position.set(0,7,-5); wl.receiveShadow = true;
+  return [fl, wl];
+}
+
+const ROOMS = {
+  home(){
+    const g = grp(meadow(), at(cottage(),-5.6,0,-5,.3));
+    g.add(Cy(.05,.05,2,'#6b4226',2.5,1,-4), Cy(.05,.05,2,'#6b4226',7,1,-4));
+    const line = Cy(.01,.01,4.5,'#ffffff',4.75,1.95,-4); line.rotation.z = Math.PI/2; g.add(line);
+    ['#e85d4a','#3fa7d6','#f1c40f','#ff9cbc'].forEach((c,i)=>g.add(B(.5,.6,.03,c,3.3+i*1.1,1.6,-4)));
+    return {g, ...DAY};
+  },
+  road(){
+    const g = grp(meadow());
+    const road = new THREE.Mesh(new THREE.PlaneGeometry(60,3.4), mat('#c9a46a')); road.rotation.x = -Math.PI/2; road.position.set(0,.01,-1.6); road.receiveShadow = true; g.add(road);
+    g.add(B(1.2,.7,.8,'#e5c158',-7,.35,-4.2), B(1.2,.7,.8,'#d9b44a',-5.7,.35,-4.4), B(1.2,.7,.8,'#e5c158',-6.4,1.05,-4.3), signpost('STRAW',-8.3,-3.8));
+    for(let i=0;i<3;i++){ const b = Cy(.38,.38,1.5,STICK[i],-.6+i*.75,.38,-4.4,{},10); b.rotation.x = Math.PI/2; g.add(b); }
+    { const b = Cy(.38,.38,1.5,STICK[1],.1,1.05,-4.4,{},10); b.rotation.x = Math.PI/2; g.add(b, signpost('STICKS',1.6,-3.8)); }
+    [[6.3,.5,1.6,1],[6.3,1.25,1.2,.5]].forEach(([x,y,w,h])=>{ const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,1), brickMat([w,h*2])); m.position.set(x,y,-4.4); m.castShadow = m.receiveShadow = true; g.add(m); });
+    g.add(signpost('BRICKS',8,-3.8));
+    return {g, ...DAY};
+  },
+  building(){ return {g: grp(meadow(), at(strawHouse(),-6.8,0,-5.8,.25,.8), at(stickHouse(),0,0,-6.8,0,.8), at(brickHouse(),6.8,0,-5.8,-.25,.8)), ...DAY}; },
+  forest(){
+    const g = grp(meadow(true));
+    seed = 21;
+    for(let i=0;i<26;i++){ const x = rnd(-14,14), z = rnd(-12,-3); if(Math.abs(x)<2.5 && z>-6) continue; g.add(tree(x,z,rnd(1,1.7),true)); }
+    const eyes = [];
+    [[-6,1.2,-6],[7,1,-7],[-9,1.4,-9]].forEach(([x,y,z])=>{ const m = new THREE.MeshStandardMaterial({color:'#ffd23a', emissive:'#ffb000', emissiveIntensity:1}); eyes.push(m);
+      g.add(new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),m).translateX(x-.12).translateY(y).translateZ(z), new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),m).translateX(x+.12).translateY(y).translateZ(z)); });
+    roomUpd.push(t=>eyes.forEach((m,i)=>{ m.emissiveIntensity = ((t+i*1.7)%4)>3.8 ? 0 : 1; }));
+    return {g, ...NIGHT};
+  },
+  straw(){ return {g: grp(meadow(), at(strawHouse(),0,0,-4.8)), ...DAY}; },
+  strawDown(){
+    const g = grp(meadow(), at(strawPile(),0,0,-4.8));
+    seed = 31; const bits = [];
+    for(let i=0;i<14;i++){ const b = B(.4,.04,.08,'#e5c158',0,0,0); b.userData = {x:rnd(-6,6), y:rnd(1,5), ph:rnd(0,6)}; bits.push(b); g.add(b); }
+    roomUpd.push(t=>bits.forEach(b=>{ const u = b.userData; b.position.set(u.x+Math.sin(t*.7+u.ph)*1.2, u.y+Math.sin(t*1.3+u.ph)*.4, -3+Math.cos(t*.5+u.ph)); b.rotation.set(t+u.ph, t*.7, u.ph); }));
+    return {g, ...DAY};
+  },
+  sticks(){ return {g: grp(meadow(), at(stickHouse(),0,0,-4.8), at(strawPile(),-10,0,-8,0,.6)), ...DAY}; },
+  sticksDown(){ return {g: grp(meadow(), at(stickPile(),0,0,-4.8), at(strawPile(),-10,0,-8,0,.6)), ...DAY}; },
+  bricks(night){ return {g: grp(meadow(night), at(brickHouse(night),0,0,-4.8), at(strawPile(),-10,0,-8,0,.6), at(stickPile(),10,0,-8,0,.6)), ...(night?NIGHT:DAY)}; },
+  bricksNight(){ return ROOMS.bricks(true); },
+  inside(){
+    const g = grp(floorAndWall('#8a6a4a', brickMat([12,4])));
+    for(let i=-20;i<=20;i++) g.add(B(.03,.01,24,'#6a4a2e',i*.5,.005,0));
+    // fireplace with the big pot
+    g.add(B(2.6,5.2,1,'#8a8178',3.6,2.6,-4.5), B(3,.25,1.25,'#6e655d',3.6,2.2,-4.35), B(1.9,1.7,.2,'#1a100a',3.6,.85,-3.95));
+    const flames = [Co(.3,.8,'#f39c12',3.35,.4,-4.2,{own:glow('#ff7b00',1.4)}), Co(.28,.95,'#ffb92e',3.85,.48,-4.2,{own:glow('#ffa000',1.4)}), Co(.2,.6,'#ffe066',3.6,.32,-4.1,{own:glow('#ffd000',1.6)})];
+    g.add(...flames);
+    g.add(Cy(.62,.5,.75,'#2a2a2a',3.6,1.05,-4.0,{metalness:.5,roughness:.4}), Cy(.58,.58,.03,'#9fd7ff',3.6,1.42,-4.0,{own:glow('#5fa7d0',.4)}));
+    g.add(steam(3.6,1.5,-4.0));
+    const fire = new THREE.PointLight('#ff9a3c', 1.3, 12); fire.position.set(3.6,1,-3); g.add(fire);
+    roomUpd.push(t=>{ flames.forEach((f,i)=>{ f.scale.y = 1+Math.sin(t*9+i*2)*.15; }); fire.intensity = 1.2+Math.sin(t*11)*.25; });
+    // window with the moon, table, picture
+    g.add(B(2.4,1.9,.12,'#ffffff',-1.5,3,-4.93), B(2.1,1.6,.05,'#1b2550',-1.5,3,-4.86,{own:glow('#0b1030',.8)}), S(.25,'#fff8d0',-1,3.4,-4.82,glow('#fff3b0',1)), B(.08,1.6,.07,'#ffffff',-1.5,3,-4.82));
+    g.add(B(2,.1,1.1,'#8a5a2b',-5.2,.92,-3.4), ...[[-6,-3.8],[-4.4,-3.8],[-6,-3],[-4.4,-3]].map(([x,z])=>B(.1,.9,.1,'#6b4226',x,.45,z)));
+    g.add(B(2,1,.08,'#6b4226',-5.2,3,-4.92), sign(textTex([['Home Sweet Home',54,'#b03a68']],{w:512,h:220,bg:'#fff4e0',border:null}),1.8,.8,-5.2,3,-4.87));
+    const rug = Cy(2.6,2.6,.03,'#c0587e',0,.02,.8,{},32); rug.scale.z = .45; g.add(rug);
+    return {g, sky:'#3a2a20', hemi:['#ffe4c0','#4a2a14',.55], sun:['#ffd9a8',.45]};
+  },
+  end(){
+    const g = grp(meadow(), at(brickHouse(),-6.6,0,-6,.25,.75), at(brickHouse(),0,0,-7,0,.75), at(brickHouse(),6.6,0,-6,-.25,.75));
+    g.add(Cy(.06,.06,4,'#6b4226',-9,2,-2.5), Cy(.06,.06,4,'#6b4226',9,2,-2.5));
+    const flags = ['#e85d4a','#ffd34d','#3fa7d6','#2e9e5b','#ff9cbc'];
+    for(let i=0;i<24;i++){ const x = -8.6+i*.75, y = 3.8-Math.sin(i/23*Math.PI)*.5; const f = Co(.17,.34,flags[i%5],x,y,-2.5,{},3); f.rotation.x = Math.PI; g.add(f); }
+    return {g, ...DAY};
+  },
+};
+
+/* ---------- Scene management ---------- */
+function disposeGroup(g){ if(!g) return; scene.remove(g); g.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material && !Object.values(matCache).includes(o.material) && o.material!==wolfEye){ if(o.material.map) o.material.map.dispose(); o.material.dispose(); } }); }
+
+function setRoom(key){
+  if(!R || key===roomKey) return;
+  roomKey = key; roomUpd = [];
+  fx.forEach(f=>f(99)); fx = [];
+  disposeGroup(roomGroup);
+  const r = ROOMS[key]();
+  roomGroup = r.g; scene.add(roomGroup);
+  scene.background = new THREE.Color(r.sky);
+  scene.fog = r.fog ? new THREE.Fog(r.fog[0], r.fog[1], r.fog[2]) : null;
+  hemi.color.set(r.hemi[0]); hemi.groundColor.set(r.hemi[1]); hemi.intensity = r.hemi[2];
+  sun.color.set(r.sun[0]); sun.intensity = r.sun[1];
+  camera.userData.baseY = (r.cam && r.cam.y) || 2.7;
+}
+
+function setCast(list){
+  const key = list.join('|') + JSON.stringify(skins);
+  if(key===castKey){ updateTags(); return; }
+  castKey = key;
+  if(R){ disposeGroup(castGroup); castGroup = new THREE.Group(); scene.add(castGroup); }
+  const total = list.length, slot = Math.min(3, 11.5/Math.max(total,1));
+  castFigs = list.map((look,i)=>{
+    const x = (i-(total-1)/2)*slot;
+    const fig = { look, role: roleOf(look), x, z: 0, slotW: slot };
+    if(R){ fig.obj = LOOK[look](); const holder = new THREE.Group(); holder.add(fig.obj); holder.position.set(x,0,fig.z);
+      holder.traverse(o=>{ if(o.isMesh) o.castShadow = true; });
+      castGroup.add(holder); fig.holder = holder; fig.baseScale = fig.obj.scale.x; }
+    return fig;
+  });
+  $('tags').innerHTML = castFigs.map(f=>`<span class="tag">${esc(castName(f.look))}</span>`).join('');
+  tagEls = [...$('tags').children];
+  updateTags();
+}
+function updateTags(){
+  castFigs.forEach((f,i)=>{
+    const on = f.role===speakerNow; tagEls[i] && tagEls[i].classList.toggle('on', on);
+    f.talk = on;
+  });
+  const sp = castFigs.find(f=>f.talk); camFocus = sp ? sp.x*.3 : 0;
+  if(!R) tagEls.forEach((el,i)=>{ el.style.left = (50 + castFigs[i].x*6.5)+'%'; el.style.top = '82%'; });
+}
+
+// A burst of puffs: flying straw, sticks or steam depending on the moment
+function puff(color, spots, {n=14, y=.9, spread=2.2}={}){
+  if(!R) return;
+  (spots || castFigs).forEach(f=>{
+    for(let i=0;i<n;i++){
+      const m = new THREE.Mesh(new THREE.SphereGeometry(.25,10,8), new THREE.MeshStandardMaterial({color, transparent:true, opacity:.85, emissive:color, emissiveIntensity:.25}));
+      const v = new THREE.Vector3((Math.random()-.5)*spread, Math.random()*1.8+.4, (Math.random()-.5)*1.5+.6);
+      m.position.set(f.x, y, f.z); scene.add(m);
+      let life = 0;
+      fx.push(dt=>{ life += dt; m.position.addScaledVector(v, dt); v.multiplyScalar(.96); m.scale.setScalar(1+life*3); m.material.opacity = .85*(1-life/1.4);
+        if(life>1.4){ scene.remove(m); m.geometry.dispose(); m.material.dispose(); return false; } return true; });
+    }
+  });
+}
+
+function initGL(){
+  const stage = $('stage');
+  if(!has3D){ stage.insertAdjacentHTML('beforeend','<div class="nogl">The 3D view needs an internet connection (to load three.js) and a browser with WebGL.<br>Try the 2D version instead: <a href="2d.html">2d.html</a></div>'); return; }
+  R = new THREE.WebGLRenderer({antialias:true});
+  R.setPixelRatio(Math.min(devicePixelRatio,2));
+  R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.prepend(R.domElement);
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(42, 16/9, .1, 140);
+  camera.position.set(0,2.7,9); camera.userData.baseY = 2.7;
+  hemi = new THREE.HemisphereLight('#ffffff','#444444',.6); scene.add(hemi);
+  sun = new THREE.DirectionalLight('#ffffff',.6); sun.position.set(4,9,7); sun.castShadow = true;
+  sun.shadow.mapSize.set(1024,1024); Object.assign(sun.shadow.camera,{left:-11,right:11,top:9,bottom:-5,near:1,far:32});
+  scene.add(sun);
+  const fit = ()=>{ const w = stage.clientWidth, h = stage.clientHeight; R.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix(); };
+  new ResizeObserver(fit).observe(stage); fit();
+  R.setAnimationLoop(frame);
+}
+
+const v3 = has3D ? new THREE.Vector3() : null;
+function frame(){
+  const raw = clock.getDelta(), dt = Math.min(raw, .05), t = clock.elapsedTime;
+  roomUpd.forEach(f=>f(t,dt));
+  fx = fx.filter(f=>f(Math.min(raw, .5)));
+  wolfEye.emissiveIntensity = .6 + Math.abs(Math.sin(t*2))*.6;
+  camera.position.x += ((camFocus + Math.sin(t*.25)*.5) - camera.position.x)*.03;
+  camera.position.y += ((camera.userData.baseY + Math.sin(t*.4)*.08) - camera.position.y)*.05;
+  camera.lookAt(camera.position.x*.5, 1.5, 0);
+  const W = R.domElement.clientWidth, H = R.domElement.clientHeight;
+  castFigs.forEach((f,i)=>{
+    if(!f.holder) return;
+    const o = f.obj;
+    o.position.y = f.talk ? Math.abs(Math.sin(t*7))*.12 : 0;
+    o.scale.y = f.baseScale*(1+Math.sin(t*2+i)*.012);
+    f.holder.rotation.y = Math.atan2(camera.position.x - f.x, 9)*.8 + (f.talk ? Math.sin(t*3)*.08 : 0);
+    v3.set(f.x, 0, f.z).project(camera);
+    const el = tagEls[i]; if(el){ el.style.left = ((v3.x+1)/2*W)+'px'; el.style.top = Math.min(H-28, (1-v3.y)/2*H)+'px';
+      el.style.maxWidth = Math.max(44, W*f.slotW/13 - 4)+'px'; }
+  });
+  R.render(scene, camera);
+}
+
+/* ---------- Story engine ---------- */
+const $ = id => document.getElementById(id);
+let cur, idx, autoRead = false;
+
+function go(id){
+  if(id==='#credits') return showCredits();
+  cur = SC[id]; curKey = id; idx = 0;
+  setRoom(cur.bg);
+  $('chapter').textContent = cur.ch;
+  showLine(cur.cast);
+}
+function setBox(who, text){
+  $('speakerRow').className = 'speaker' + (who==='n'?' narr':who==='hint'?' hint':'');
+  $('speaker').textContent = labelOf(who);
+  const t = $('text'); t.textContent = text;
+  t.style.animation='none'; void t.offsetWidth; t.style.animation='';
+  if(autoRead) speak();
+}
+function showLine(startCast){
+  const [who, text, cast, bg] = cur.lines[idx];
+  lineId = curKey + '-' + (idx+1);
+  speakerNow = who;
+  if(bg) setRoom(bg);
+  if(cast || startCast) setCast(cast || startCast); else updateTags();
+  if(/WHOOSH/.test(text)) puff(roomKey==='sticksDown' ? '#a0703f' : '#f1d36b', [{x:0, z:-3.4}], {n:30, y:1.4, spread:5});
+  if(/SPLASH/.test(text)) puff('#e8f4ff', [{x:3.6, z:-3.6}], {n:24, y:1.4, spread:2.5});
+  setBox(who, fill(text));
+  const last = idx === cur.lines.length-1;
+  $('nextBtn').style.display = last ? 'none' : '';
+  $('choices').innerHTML = '';
+  if(last) cur.choices.forEach((c,ci)=>{
+    const b = document.createElement('button');
+    b.className = 'choice'; b.textContent = fill(c.t);
+    b.onclick = ()=>{
+      if(c.wrong){ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); lineId = curKey + '-hint-' + (ci+1); setBox('hint', fill(c.wrong)); }
+      else go(c.go);
+    };
+    $('choices').appendChild(b);
+  });
+}
+function next(){ if(idx < cur.lines.length-1){ idx++; showLine(); } }
+// Friendly female narrator: try the nicest-sounding voices first, then any English female voice
+const VOICE_PREFS = [/sonia.*natural/i, /libby.*natural/i, /aria.*natural/i, /jenny.*natural/i, /natural.*(female|woman)/i,
+  /google uk english female/i, /hazel/i, /susan/i, /zira/i, /samantha/i, /karen/i, /serena/i, /female/i];
+let narratorVoice;
+function pickVoice(){
+  if(narratorVoice) return narratorVoice;
+  const vs = speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
+  for(const re of VOICE_PREFS){ const v = vs.find(v=>re.test(v.name)); if(v) return narratorVoice = v; }
+  return null;
+}
+let lineId = '', curKey = '', voiceAudio = null;
+function stopVoice(){
+  if(voiceAudio){ voiceAudio.pause(); voiceAudio = null; }
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+}
+// A recorded file (voice/<line id>.mp3) wins; any line without one is read by the computer voice
+function speak(){
+  stopVoice();
+  if(!lineId) return tts();
+  const a = voiceAudio = new Audio('voice/' + lineId + '.mp3');
+  let fell = false;
+  const fallback = ()=>{ if(!fell && voiceAudio===a){ fell = true; voiceAudio = null; tts(); } };
+  a.onerror = fallback; a.play().catch(fallback);
+}
+function tts(){
+  if(!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance($('text').textContent.replace(/\([^)]*\)\s*/g,''));
+  const v = pickVoice(); if(v){ u.voice = v; u.lang = v.lang; }
+  u.pitch = 1.1; u.rate = .9; speechSynthesis.speak(u);
+}
+
+const LINEUP = ROLES.map(r=>r.key);
+function show(which){
+  ['setup','game','credits','script'].forEach(s=> $(s).style.display = s===which ? '' : 'none');
+  $('stage').style.display = which==='script' ? 'none' : '';
+}
+function showLineup(room, title){ setRoom(room); $('chapter').textContent = title; speakerNow = 'n'; castKey = null; setCast(LINEUP); }
+function showCredits(){
+  stopVoice();
+  $('castTable').innerHTML = ROLES.map(r=>`<tr><td>${esc(r.label)}</td><td>${esc(names[r.key])}</td></tr>`).join('');
+  showLineup('end', 'The End · Starring…');
+  show('credits');
+}
+
+/* ---------- Recording script (one row per voice file) ---------- */
+function buildScript(){
+  const row = (id, who, raw) => `<tr><td class="id">${id}.mp3</td><td class="who">${esc(who)}</td><td>${raw.includes('{')?'<span class="star">★</span> ':''}${esc(fill(raw))}</td></tr>`;
+  let rows = '', count = 0;
+  for(const [key, s] of Object.entries(SC)){
+    rows += `<h3>${esc(s.ch)} <small>· ${key}</small></h3><table>`;
+    s.lines.forEach((L,i)=>{ rows += row(`${key}-${i+1}`, scriptLabel(L[0]), L[1]); count++; });
+    s.choices.forEach((c,i)=>{ if(c.wrong){ rows += row(`${key}-hint-${i+1}`, 'Hint', c.wrong); count++; } });
+    rows += '</table>';
+  }
+  $('scriptBody').innerHTML = `
+    <h2 style="margin:.6em 0 .2em">🎙 Recording script — The Three Little Pigs</h2>
+    <p>There are <b>${count} lines</b>. Record each one as its own MP3 file, named exactly as shown in the first column (for example <b>intro-1.mp3</b>).
+       Put all the files in a folder called <b>voice</b> next to the game. The game plays a recording whenever it finds one, and uses the computer voice for any line that is missing.</p>
+    <p><span class="star">★</span> = this line says a character's name. The names shown are the ones typed in right now, so re-record these lines if the names change.</p>
+    <p>Tips: record somewhere quiet, keep the phone or microphone the same distance away each time, leave a short pause at the start and end, and read slowly and clearly with lots of expression. The wolf gets to do a big, growly voice!</p>
+    ${rows}`;
+}
+$('scriptBtn').onclick = ()=>{ buildScript(); show('script'); scrollTo(0,0); };
+$('scriptBack').onclick = ()=> show('setup');
+$('printBtn').onclick = ()=> print();
+
+/* ---------- Setup screen ---------- */
+function buildSetup(){
+  $('roles').innerHTML = ROLES.map(r=>`
+    <div class="role">
+      <label for="in-${r.key}">${esc(r.label)}</label>
+      <small>${esc(r.desc)}</small>
+      <input id="in-${r.key}" maxlength="24" value="${esc(names[r.key])}" autocomplete="off">
+      ${!r.pal?'':`<div class="skins" role="group" aria-label="${r.pal==='pig'?'Pig colour':'Skin tone'}">${PALS[r.pal].map((c,i)=>`<button style="background:${c}" data-role="${r.key}" data-skin="${i}" aria-label="${r.pal==='pig'?'Pig colour':'Skin tone'} ${i+1}" aria-pressed="${skins[r.key]===i}"></button>`).join('')}</div>`}
+    </div>`).join('');
+  ROLES.forEach((r,i)=> $('in-'+r.key).addEventListener('input', e=>{
+    names[r.key] = e.target.value.trim() || r.def; save();
+    if(tagEls[i]) tagEls[i].textContent = names[r.key];
+  }));
+  ROLES.forEach((r,i)=> $('in-'+r.key).addEventListener('focus', ()=>{ speakerNow = LINEUP[i]; updateTags(); }));
+  document.querySelectorAll('.skins button').forEach(b=> b.onclick = ()=>{
+    const k=b.dataset.role; skins[k]=+b.dataset.skin; save();
+    b.parentNode.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+    speakerNow = k; setCast(LINEUP);
+  });
+}
+
+$('startBtn').onclick = ()=>{ show('game'); go('intro'); };
+$('resetBtn').onclick = ()=>{ try{localStorage.removeItem('pigs-cast')}catch(e){} load(); buildSetup(); castKey=null; setCast(LINEUP); };
+$('againBtn').onclick = ()=>{ show('game'); go('intro'); };
+$('namesBtn').onclick = ()=>{ buildSetup(); show('setup'); showLineup('home','Meet the cast'); };
+$('nextBtn').onclick = next;
+$('text').onclick = next;
+$('readBtn').onclick = speak;
+$('autoBtn').onclick = e=>{ autoRead=!autoRead; e.target.setAttribute('aria-pressed', autoRead); if(autoRead) speak(); else stopVoice(); };
+document.addEventListener('keydown', e=>{
+  if($('game').style.display==='none' || e.target.tagName==='BUTTON' || e.target.tagName==='INPUT') return;
+  if(e.key===' '||e.key==='Enter'||e.key==='ArrowRight'){ e.preventDefault(); next(); }
+});
+
+load(); initGL(); buildSetup(); show('setup'); showLineup('home','Meet the cast');
+</script>
+</body>
+</html>
