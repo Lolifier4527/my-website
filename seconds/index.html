@@ -11,79 +11,78 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Young+Serif&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1E2A44; --blush:#FFE3EA; --rose:#E8436F; --berry:#9E1F4A;
-    --sea:#123B57; --sea-2:#1B5577; --foam:#D7F4EA; --teal:#0F8B7E;
-    --lilac:#B7A6F0; --pink:#FF5C8D; --aqua:#2FD3C2; --sun:#FFC94D;
-    --apricot:#FFD6B0; --coral:#F2704E; --white:#FFFFFF;
+    --navy:#0B1F4B; --navy-2:#15306A; --royal:#1F4FB5; --mid:#3A74D6; --corn:#5B95E8;
+    --sky:#9CC8F7; --ice:#DCEBFB; --pale:#EEF5FD; --white:#FFFFFF;
+    --before:#7C93C4; --us:#7FDBFF; --ahead:#2E6BE6; --ink:#0B1F4B;
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
-  body{margin:0; background:var(--blush); color:var(--ink);
+  body{margin:0; background:var(--pale); color:var(--ink);
     font-family:"Newsreader",Georgia,serif; font-size:1.1875rem; line-height:1.65;
     font-variant-numeric:oldstyle-nums proportional-nums}
   .band{padding:clamp(3.5rem,10vw,6.5rem) 1.5rem}
   .in{max-width:38rem; margin:0 auto}
   h1,h2{font-family:"Young Serif",Georgia,serif; font-weight:400; line-height:1.1; margin:0}
   h2{font-size:clamp(1.9rem,6vw,2.4rem); margin-bottom:1.5rem}
-  :focus-visible{outline:3px solid var(--sun); outline-offset:3px; border-radius:4px}
+  :focus-visible{outline:3px solid var(--us); outline-offset:3px; border-radius:4px}
   .wave{display:block; width:100%; height:48px; margin-top:-1px}
 
-  .letter{background:var(--blush)}
-  .letter h1{font-size:clamp(2.8rem,10vw,4.6rem); color:var(--berry); letter-spacing:-.01em}
+  .letter{background:var(--pale)}
+  .letter h1{font-size:clamp(2.8rem,10vw,4.6rem); color:var(--navy); letter-spacing:-.01em}
   .aka{margin:.6rem 0 2.5rem; display:flex; flex-wrap:wrap; gap:.5rem}
-  .aka span{background:var(--white); color:var(--rose); border-radius:999px; padding:.15rem .85rem;
-    font-style:italic; font-size:1rem; box-shadow:0 0 0 1.5px #F8B9CA inset}
+  .aka span{background:var(--white); color:var(--royal); border-radius:999px; padding:.15rem .85rem;
+    font-style:italic; font-size:1rem; box-shadow:0 0 0 1.5px var(--sky) inset}
   .letter p{margin:0 0 1.2rem}
   .closing{margin:2.5rem 0 0 !important; padding:1.4rem 1.6rem; border-radius:20px;
-    background:var(--rose); color:var(--white); font-family:"Young Serif",Georgia,serif;
+    background:var(--navy); color:var(--white); font-family:"Young Serif",Georgia,serif;
     font-size:clamp(1.4rem,4.6vw,1.85rem); line-height:1.3; transform:rotate(-1deg)}
 
-  .time{background:var(--sea); color:#E6F2F8}
+  .time{background:var(--navy); color:#E3EDFB}
   .time h2{color:var(--white)}
-  .bar{display:flex; height:3.5rem; border-radius:14px; overflow:hidden; background:var(--sea-2); margin:0 0 1.5rem}
+  .bar{display:flex; height:3.5rem; border-radius:14px; overflow:hidden; background:var(--navy-2); margin:0 0 1.5rem}
   .seg{height:100%; transition:flex-grow 1.6s cubic-bezier(.2,.7,.2,1)}
-  .seg+.seg{border-left:3px solid var(--sea)}
-  .seg.before{background:var(--lilac)} .seg.us{background:var(--pink); min-width:8px} .seg.ahead{background:var(--aqua)}
+  .seg+.seg{border-left:3px solid var(--navy)}
+  .seg.before{background:var(--before)} .seg.us{background:var(--us); min-width:8px} .seg.ahead{background:var(--ahead)}
   .bar.start .seg{flex-grow:0 !important}
   .rows{list-style:none; margin:0; padding:0; display:grid; gap:.6rem}
   .rows li{display:grid; grid-template-columns:.9rem 1fr auto; gap:.8rem; align-items:baseline;
-    padding:.85rem 1rem; border-radius:14px; background:var(--sea-2)}
+    padding:.85rem 1rem; border-radius:14px; background:var(--navy-2)}
   .sw{width:.9rem; height:.9rem; border-radius:4px; align-self:center}
   .rows .when{font-size:1.02rem}
-  .rows .when small{display:block; color:#A9C6D6; font-size:.9rem}
+  .rows .when small{display:block; color:#9DB4DC; font-size:.9rem}
   .num{font-variant-numeric:lining-nums tabular-nums; font-size:1.1rem; text-align:right; white-space:nowrap}
-  .num.past{color:var(--lilac)} .num.live{color:var(--pink)} .num.down{color:var(--aqua)}
+  .num.past{color:#B3C4E6} .num.live{color:var(--us)} .num.down{color:#8DB4FF}
 
-  .plan{background:var(--foam)}
-  .plan h2{color:var(--teal)}
+  .plan{background:var(--ice)}
+  .plan h2{color:var(--navy)}
   .list{list-style:none; margin:0; padding:0}
   .list li{display:grid; grid-template-columns:1.7rem 1fr; gap:.85rem; padding:.6rem 0; align-items:start;
-    border-bottom:1.5px dotted #9FDCC8}
+    border-bottom:1.5px dotted var(--sky)}
   .list li:last-child{border-bottom:0}
-  .box{width:1.45rem; height:1.45rem; margin-top:.18rem; border-radius:7px; border:2px solid var(--teal);
+  .box{width:1.45rem; height:1.45rem; margin-top:.18rem; border-radius:7px; border:2px solid var(--mid);
     background:var(--white); display:grid; place-items:center}
-  .done .box{background:var(--rose); border-color:var(--rose)}
+  .done .box{background:var(--navy); border-color:var(--navy)}
   .done .box svg{width:.9rem; height:.9rem}
-  .done .txt{color:var(--berry)}
-  .maybe .box{border-style:dashed; border-color:#E0A800; background:#FFF6D6}
+  .done .txt{color:var(--navy)}
+  .maybe .box{border-style:dashed; border-color:var(--corn); background:var(--pale)}
   .tag{display:inline-block; margin-left:.45rem; padding:0 .6rem; border-radius:999px; font-size:.8rem;
-    font-style:italic; background:var(--sun); color:#6B4A00; vertical-align:.12em}
+    font-style:italic; background:var(--sky); color:var(--navy); vertical-align:.12em}
   .progress{margin:-.75rem 0 1.25rem; font-size:1.05rem}
-  .progress b{font-weight:500; color:var(--rose)}
+  .progress b{font-weight:500; color:var(--royal)}
 
-  .count-band{background:var(--apricot)}
-  .count-band h2{color:#B23A1C}
+  .count-band{background:var(--sky)}
+  .count-band h2{color:var(--navy)}
   .life{margin:-.75rem 0 2rem; font-size:1.15rem}
   .count{display:grid; grid-template-columns:repeat(5,1fr); gap:.5rem; margin:0 0 1.5rem; text-align:center}
   .unit{border-radius:16px; padding:1rem .25rem .8rem; color:var(--white)}
-  .unit:nth-child(1){background:var(--coral)} .unit:nth-child(2){background:var(--rose)}
-  .unit:nth-child(3){background:#B3479F} .unit:nth-child(4){background:var(--teal)} .unit:nth-child(5){background:var(--sea-2)}
+  .unit:nth-child(1){background:var(--navy)} .unit:nth-child(2){background:var(--navy-2)}
+  .unit:nth-child(3){background:var(--royal)} .unit:nth-child(4){background:var(--mid)} .unit:nth-child(5){background:var(--corn)}
   .unit b{display:block; font-family:"Young Serif",Georgia,serif; font-weight:400;
     font-size:clamp(1.5rem,6.5vw,2.6rem); line-height:1; font-variant-numeric:lining-nums tabular-nums}
   .unit span{display:block; margin-top:.45rem; font-size:.85rem; opacity:.9}
   .total{margin:0; font-size:1.05rem}
-  .total b{font-weight:500; color:#B23A1C; font-variant-numeric:lining-nums tabular-nums}
-  footer{background:var(--sea); color:#E6F2F8; text-align:center; font-style:italic; padding:2.5rem 1.5rem 3rem}
+  .total b{font-weight:500; color:var(--navy); font-variant-numeric:lining-nums tabular-nums}
+  footer{background:var(--navy); color:#E3EDFB; text-align:center; font-style:italic; padding:2.5rem 1.5rem 3rem}
 
   @media (max-width:30rem){
     body{font-size:1.1rem}
@@ -105,7 +104,7 @@
     <p class="closing">Vir jou is ek bereid om te wag… Ek het reeds so baie tyd gemors sonder jou.</p>
   </div></section>
 
-  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--blush)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#123B57"/></svg>
+  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--pale)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#0B1F4B"/></svg>
   <section class="band time" aria-labelledby="sek"><div class="in">
     <h2 id="sek">In sekondes</h2>
     <div class="bar start" id="bar" role="img" aria-label="Tydlyn in sekondes van 20 Junie 1995 tot 20 Junie 2059">
@@ -114,26 +113,26 @@
       <div class="seg ahead" id="s3"></div>
     </div>
     <ul class="rows">
-      <li><span class="sw" style="background:var(--lilac)"></span>
+      <li><span class="sw" style="background:var(--before)"></span>
         <span class="when">20 Junie 1995 tot 21 September 2026</span>
         <span class="num past" id="n1">986 342 400</span></li>
-      <li><span class="sw" style="background:var(--pink)"></span>
+      <li><span class="sw" style="background:var(--us)"></span>
         <span class="when">21 September 2026 tot nou<small>Tel op</small></span>
         <span class="num live" id="n2">–</span></li>
-      <li><span class="sw" style="background:var(--aqua)"></span>
+      <li><span class="sw" style="background:var(--ahead)"></span>
         <span class="when">Nou tot 20 Junie 2059<small>Tel af</small></span>
         <span class="num down" id="n3">–</span></li>
     </ul>
   </div></section>
 
-  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--sea)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#D7F4EA"/></svg>
+  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--navy)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#DCEBFB"/></svg>
   <section class="band plan" aria-labelledby="lys"><div class="in">
     <h2 id="lys">Die plan</h2>
     <p class="progress" id="progress"></p>
     <ul class="list" id="list"></ul>
   </div></section>
 
-  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--foam)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#FFD6B0"/></svg>
+  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--ice)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#9CC8F7"/></svg>
   <section class="band count-band" aria-labelledby="tot"><div class="in">
     <h2 id="tot">Tot 20 Junie 2059</h2>
     <p class="life">Die algemene lewens verwagting is 64</p>
@@ -147,7 +146,7 @@
     <p class="total">Of net <b id="ctotal">–</b> sekondes.</p>
   </div></section>
 
-  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--apricot)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#123B57"/></svg>
+  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--sky)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#0B1F4B"/></svg>
   <footer>Elke sekonde tel.</footer>
 </main>
 
