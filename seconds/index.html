@@ -11,73 +11,85 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Young+Serif&display=swap" rel="stylesheet">
 <style>
   :root{
-    --mist:#EAF1F2; --paper:#F6FAFA; --ink:#1C3144; --ink-soft:#4D6273;
-    --before:#AEBBC1; --us:#D9657A; --ahead:#3E7C8C; --line:#C9D6DA;
+    --ink:#1E2A44; --blush:#FFE3EA; --rose:#E8436F; --berry:#9E1F4A;
+    --sea:#123B57; --sea-2:#1B5577; --foam:#D7F4EA; --teal:#0F8B7E;
+    --lilac:#B7A6F0; --pink:#FF5C8D; --aqua:#2FD3C2; --sun:#FFC94D;
+    --apricot:#FFD6B0; --coral:#F2704E; --white:#FFFFFF;
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
-  body{margin:0; background:var(--mist); color:var(--ink);
+  body{margin:0; background:var(--blush); color:var(--ink);
     font-family:"Newsreader",Georgia,serif; font-size:1.1875rem; line-height:1.65;
     font-variant-numeric:oldstyle-nums proportional-nums}
-  main{max-width:38rem; margin:0 auto; padding:clamp(3rem,10vw,7rem) 1.5rem 5rem}
+  .band{padding:clamp(3.5rem,10vw,6.5rem) 1.5rem}
+  .in{max-width:38rem; margin:0 auto}
   h1,h2{font-family:"Young Serif",Georgia,serif; font-weight:400; line-height:1.1; margin:0}
-  h2{font-size:1.75rem; margin-bottom:.4rem}
-  .lede{color:var(--ink-soft); margin:0 0 2rem; font-size:1.05rem}
-  section+section{margin-top:clamp(4.5rem,12vw,7rem)}
-  :focus-visible{outline:3px solid var(--ahead); outline-offset:3px; border-radius:4px}
+  h2{font-size:clamp(1.9rem,6vw,2.4rem); margin-bottom:1.5rem}
+  :focus-visible{outline:3px solid var(--sun); outline-offset:3px; border-radius:4px}
+  .wave{display:block; width:100%; height:48px; margin-top:-1px}
 
-  .letter h1{font-size:clamp(2.6rem,9vw,4.2rem); letter-spacing:-.01em}
-  .aka{margin:.6rem 0 2.5rem; color:var(--ink-soft); font-style:italic; font-size:1.05rem; line-height:1.5}
-  .aka span{display:block}
+  .letter{background:var(--blush)}
+  .letter h1{font-size:clamp(2.8rem,10vw,4.6rem); color:var(--berry); letter-spacing:-.01em}
+  .aka{margin:.6rem 0 2.5rem; display:flex; flex-wrap:wrap; gap:.5rem}
+  .aka span{background:var(--white); color:var(--rose); border-radius:999px; padding:.15rem .85rem;
+    font-style:italic; font-size:1rem; box-shadow:0 0 0 1.5px #F8B9CA inset}
   .letter p{margin:0 0 1.2rem}
-  .closing{margin-top:2.25rem !important; font-family:"Young Serif",Georgia,serif;
-    font-size:clamp(1.45rem,4.6vw,1.9rem); line-height:1.3; color:var(--ink)}
-  .closing em{font-style:normal; color:var(--us)}
+  .closing{margin:2.5rem 0 0 !important; padding:1.4rem 1.6rem; border-radius:20px;
+    background:var(--rose); color:var(--white); font-family:"Young Serif",Georgia,serif;
+    font-size:clamp(1.4rem,4.6vw,1.85rem); line-height:1.3; transform:rotate(-1deg)}
 
-  .bar{display:flex; height:3.25rem; border-radius:10px; overflow:hidden; background:var(--line); margin:0 0 1.25rem}
+  .time{background:var(--sea); color:#E6F2F8}
+  .time h2{color:var(--white)}
+  .bar{display:flex; height:3.5rem; border-radius:14px; overflow:hidden; background:var(--sea-2); margin:0 0 1.5rem}
   .seg{height:100%; transition:flex-grow 1.6s cubic-bezier(.2,.7,.2,1)}
-  .seg+.seg{border-left:2px solid var(--mist)}
-  .seg.before{background:var(--before)} .seg.us{background:var(--us); min-width:6px} .seg.ahead{background:var(--ahead)}
+  .seg+.seg{border-left:3px solid var(--sea)}
+  .seg.before{background:var(--lilac)} .seg.us{background:var(--pink); min-width:8px} .seg.ahead{background:var(--aqua)}
   .bar.start .seg{flex-grow:0 !important}
-  .rows{list-style:none; margin:0; padding:0}
-  .rows li{display:grid; grid-template-columns:.85rem 1fr auto; gap:.75rem; align-items:baseline;
-    padding:.7rem 0; border-top:1px solid var(--line)}
-  .rows li:last-child{border-bottom:1px solid var(--line)}
-  .sw{width:.85rem; height:.85rem; border-radius:3px; align-self:center}
+  .rows{list-style:none; margin:0; padding:0; display:grid; gap:.6rem}
+  .rows li{display:grid; grid-template-columns:.9rem 1fr auto; gap:.8rem; align-items:baseline;
+    padding:.85rem 1rem; border-radius:14px; background:var(--sea-2)}
+  .sw{width:.9rem; height:.9rem; border-radius:4px; align-self:center}
   .rows .when{font-size:1.02rem}
-  .rows .when small{display:block; color:var(--ink-soft); font-size:.9rem}
-  .num{font-variant-numeric:lining-nums tabular-nums; font-size:1.05rem; text-align:right; white-space:nowrap}
-  .num.live{color:var(--us)}
-  .num.down{color:var(--ahead)}
-  .zoom{margin:1.25rem 0 0; color:var(--ink-soft); font-size:.95rem}
+  .rows .when small{display:block; color:#A9C6D6; font-size:.9rem}
+  .num{font-variant-numeric:lining-nums tabular-nums; font-size:1.1rem; text-align:right; white-space:nowrap}
+  .num.past{color:var(--lilac)} .num.live{color:var(--pink)} .num.down{color:var(--aqua)}
 
+  .plan{background:var(--foam)}
+  .plan h2{color:var(--teal)}
   .list{list-style:none; margin:0; padding:0}
-  .list li{display:grid; grid-template-columns:1.6rem 1fr; gap:.85rem; padding:.55rem 0; align-items:start}
-  .box{width:1.35rem; height:1.35rem; margin-top:.22rem; border-radius:5px; border:1.5px solid var(--ink-soft);
-    display:grid; place-items:center}
-  .done .box{background:var(--us); border-color:var(--us)}
-  .done .box svg{width:.85rem; height:.85rem}
-  .todo .txt,.maybe .txt{color:var(--ink-soft)}
-  .maybe .box{border-style:dashed; border-color:var(--before)}
-  .tag{display:inline-block; margin-left:.4rem; padding:0 .5rem; border-radius:999px; font-size:.8rem;
-    font-style:italic; background:#DCE6E9; color:var(--ink-soft); vertical-align:.12em}
-  .progress{margin:0 0 1.25rem; color:var(--ink-soft); font-size:1rem}
-  .progress b{font-weight:500; color:var(--us)}
+  .list li{display:grid; grid-template-columns:1.7rem 1fr; gap:.85rem; padding:.6rem 0; align-items:start;
+    border-bottom:1.5px dotted #9FDCC8}
+  .list li:last-child{border-bottom:0}
+  .box{width:1.45rem; height:1.45rem; margin-top:.18rem; border-radius:7px; border:2px solid var(--teal);
+    background:var(--white); display:grid; place-items:center}
+  .done .box{background:var(--rose); border-color:var(--rose)}
+  .done .box svg{width:.9rem; height:.9rem}
+  .done .txt{color:var(--berry)}
+  .maybe .box{border-style:dashed; border-color:#E0A800; background:#FFF6D6}
+  .tag{display:inline-block; margin-left:.45rem; padding:0 .6rem; border-radius:999px; font-size:.8rem;
+    font-style:italic; background:var(--sun); color:#6B4A00; vertical-align:.12em}
+  .progress{margin:-.75rem 0 1.25rem; font-size:1.05rem}
+  .progress b{font-weight:500; color:var(--rose)}
 
+  .count-band{background:var(--apricot)}
+  .count-band h2{color:#B23A1C}
+  .life{margin:-.75rem 0 2rem; font-size:1.15rem}
   .count{display:grid; grid-template-columns:repeat(5,1fr); gap:.5rem; margin:0 0 1.5rem; text-align:center}
-  .unit{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:1rem .25rem .75rem}
+  .unit{border-radius:16px; padding:1rem .25rem .8rem; color:var(--white)}
+  .unit:nth-child(1){background:var(--coral)} .unit:nth-child(2){background:var(--rose)}
+  .unit:nth-child(3){background:#B3479F} .unit:nth-child(4){background:var(--teal)} .unit:nth-child(5){background:var(--sea-2)}
   .unit b{display:block; font-family:"Young Serif",Georgia,serif; font-weight:400;
-    font-size:clamp(1.5rem,6.5vw,2.6rem); line-height:1; font-variant-numeric:lining-nums tabular-nums; color:var(--ahead)}
-  .unit span{display:block; margin-top:.45rem; font-size:.85rem; color:var(--ink-soft)}
-  .total{margin:0; color:var(--ink-soft); font-size:1rem}
-  .total b{font-weight:500; color:var(--ink); font-variant-numeric:lining-nums tabular-nums}
-  footer{margin-top:5rem; text-align:center; color:var(--ink-soft); font-style:italic; font-size:1rem}
+    font-size:clamp(1.5rem,6.5vw,2.6rem); line-height:1; font-variant-numeric:lining-nums tabular-nums}
+  .unit span{display:block; margin-top:.45rem; font-size:.85rem; opacity:.9}
+  .total{margin:0; font-size:1.05rem}
+  .total b{font-weight:500; color:#B23A1C; font-variant-numeric:lining-nums tabular-nums}
+  footer{background:var(--sea); color:#E6F2F8; text-align:center; font-style:italic; padding:2.5rem 1.5rem 3rem}
 
   @media (max-width:30rem){
     body{font-size:1.1rem}
-    .rows li{grid-template-columns:.85rem 1fr; }
+    .rows li{grid-template-columns:.9rem 1fr}
     .rows .num{grid-column:2; text-align:left}
-    .count{gap:.35rem} .unit{padding:.8rem 0 .6rem; border-radius:10px} .unit span{font-size:.75rem}
+    .count{gap:.35rem} .unit{padding:.8rem 0 .6rem; border-radius:12px} .unit span{font-size:.72rem}
   }
   @media (prefers-reduced-motion:reduce){ .seg{transition:none} }
 </style>
@@ -85,45 +97,46 @@
 <body>
 <main>
 
-  <section class="letter" aria-labelledby="hi">
+  <section class="band letter" aria-labelledby="hi"><div class="in">
     <h1 id="hi">Liewe Amorette</h1>
     <p class="aka"><span>a.k.a. Seconds</span><span>a.k.a. veronderstel om Juf. Pitchers te wees</span></p>
     <p>Ek wens jy kan jou sien deur my oë, ek wens jy kan voel hoe ek voel elke keer as ek naby jou is, ek wens jy kan in my gedagtes kyk hoe dom my brein is sodra dit kom by jou, dan sou jy dalk verstaan hoekom ek glo in ons toekoms saam.</p>
     <p>Ek gaan nooit jou kan net oortuig nie buiten vir elke dag jou wys en jou by staan en laat lag soos net ek kan.</p>
-    <p class="closing">Vir jou is ek bereid om te wag… Ek het reeds <em>so baie tyd</em> gemors sonder jou.</p>
-  </section>
+    <p class="closing">Vir jou is ek bereid om te wag… Ek het reeds so baie tyd gemors sonder jou.</p>
+  </div></section>
 
-  <section aria-labelledby="sek">
+  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--blush)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#123B57"/></svg>
+  <section class="band time" aria-labelledby="sek"><div class="in">
     <h2 id="sek">In sekondes</h2>
-    <p class="lede">Die balk leef: die pienk deel groei elke sekonde, die blou deel krimp.</p>
     <div class="bar start" id="bar" role="img" aria-label="Tydlyn in sekondes van 20 Junie 1995 tot 20 Junie 2059">
       <div class="seg before" id="s1"></div>
       <div class="seg us" id="s2"></div>
       <div class="seg ahead" id="s3"></div>
     </div>
     <ul class="rows">
-      <li><span class="sw" style="background:var(--before)"></span>
+      <li><span class="sw" style="background:var(--lilac)"></span>
         <span class="when">20 Junie 1995 tot 21 September 2026</span>
-        <span class="num" id="n1">986 342 400</span></li>
-      <li><span class="sw" style="background:var(--us)"></span>
+        <span class="num past" id="n1">986 342 400</span></li>
+      <li><span class="sw" style="background:var(--pink)"></span>
         <span class="when">21 September 2026 tot nou<small>Tel op</small></span>
         <span class="num live" id="n2">–</span></li>
-      <li><span class="sw" style="background:var(--ahead)"></span>
+      <li><span class="sw" style="background:var(--aqua)"></span>
         <span class="when">Nou tot 20 Junie 2059<small>Tel af</small></span>
         <span class="num down" id="n3">–</span></li>
     </ul>
-    <p class="zoom" id="zoom"></p>
-  </section>
+  </div></section>
 
-  <section aria-labelledby="lys">
+  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--sea)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#D7F4EA"/></svg>
+  <section class="band plan" aria-labelledby="lys"><div class="in">
     <h2 id="lys">Die plan</h2>
     <p class="progress" id="progress"></p>
     <ul class="list" id="list"></ul>
-  </section>
+  </div></section>
 
-  <section aria-labelledby="tot">
+  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--foam)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#FFD6B0"/></svg>
+  <section class="band count-band" aria-labelledby="tot"><div class="in">
     <h2 id="tot">Tot 20 Junie 2059</h2>
-    <p class="lede">Hoe lank ons nog het om die lys klaar te maak.</p>
+    <p class="life">Die algemene lewens verwagting is 64</p>
     <div class="count" aria-live="off">
       <div class="unit"><b id="cy">–</b><span>jare</span></div>
       <div class="unit"><b id="cd">–</b><span>dae</span></div>
@@ -132,8 +145,9 @@
       <div class="unit"><b id="cs">–</b><span>sekondes</span></div>
     </div>
     <p class="total">Of net <b id="ctotal">–</b> sekondes.</p>
-  </section>
+  </div></section>
 
+  <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--apricot)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#123B57"/></svg>
   <footer>Elke sekonde tel.</footer>
 </main>
 
@@ -185,8 +199,6 @@
     var a = (MET-START)/1000, b = Math.max(0,(now-MET)/1000), c = Math.max(0,(END-now)/1000);
     $('s1').style.flexGrow = a; $('s2').style.flexGrow = b; $('s3').style.flexGrow = c;
     $('n2').textContent = fmt(b); $('n3').textContent = fmt(c);
-    var pct = b/(a+b+c)*100;
-    $('zoom').textContent = 'Die pienk strepie is nog net '+pct.toFixed(3).replace('.',',')+'% van die balk. Dit gaan groei.';
 
     var d = new Date(now), target = new Date(END), years = target.getFullYear()-d.getFullYear();
     var anchor = new Date(d.getTime()); anchor.setFullYear(d.getFullYear()+years);
