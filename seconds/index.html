@@ -128,7 +128,6 @@
   <svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true" style="background:var(--navy)"><path d="M0 24 C240 0 480 48 720 24 S1200 0 1440 24 V48 H0Z" fill="#DCEBFB"/></svg>
   <section class="band plan" aria-labelledby="lys"><div class="in">
     <h2 id="lys">Die plan</h2>
-    <p class="progress" id="progress"></p>
     <ul class="list" id="list"></ul>
   </div></section>
 
@@ -190,7 +189,6 @@
     list.appendChild(li);
     if(it[1]!=='maybe'){ needed++; if(it[1]==='done') done++; }
   });
-  $('progress').innerHTML = '<b>'+done+'</b> van '+needed+' klaar, plus drie opsionele.';
 
   var bar = $('bar');
   function update(){
